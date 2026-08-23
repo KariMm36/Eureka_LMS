@@ -1,0 +1,635 @@
+{
+  "info": {
+    "name": "Eureka LMS Mobile Backend API",
+    "description": "# Eureka LMS Mobile Backend API Collection\n\nComplete REST API suite for Eureka LMS Mobile App built with **Express.js**, **Prisma ORM**, and **MySQL (XAMPP)**.\n\n### 🔑 Authentication Flow\n1. Run **Register Student** or **Login**.\n2. The collection will **automatically store the JWT token** into the `{{token}}` collection variable.\n3. All subsequent protected endpoints will automatically use `Authorization: Bearer {{token}}`.\n\n### 🌐 Base URL\n- Default: `http://localhost:5000/api/v1`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "description": "### Authentication & Password Management\nHandles student/teacher registration, login, forgot password with 6-digit OTP verification, password reset, and updating current password.",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"أحمد عماد محمد\",\n  \"email\": \"student@eureka.com\",\n  \"phone\": \"01020324779\",\n  \"password\": \"Password@123\",\n  \"confirmPassword\": \"Password@123\",\n  \"role\": \"STUDENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@eureka.com\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password (Request OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@eureka.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@eureka.com\",\n  \"otpCode\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.resetToken) {",
+                  "    pm.collectionVariables.set('resetToken', jsonData.data.resetToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@eureka.com\",\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword@123\",\n  \"confirmPassword\": \"NewPassword@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Update Password (Logged In)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password@123\",\n  \"newPassword\": \"NewPassword@123\",\n  \"confirmPassword\": \"NewPassword@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/update-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "update-password"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Academic Catalogue",
+      "item": [
+        {
+          "name": "Get Stages & Grades",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/academic/stages",
+              "host": ["{{baseUrl}}"],
+              "path": ["academic", "stages"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subjects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/academic/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["academic", "subjects"]
+            }
+          }
+        },
+        {
+          "name": "Get Subject Units & Lessons",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/academic/subjects/SUBJECT_ID/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["academic", "subjects", "SUBJECT_ID", "topics"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson Details (Videos, PDFs & Quiz Links)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/academic/lessons/LESSON_ID",
+              "host": ["{{baseUrl}}"],
+              "path": ["academic", "lessons", "LESSON_ID"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Student Profile & Settings",
+      "item": [
+        {
+          "name": "Complete Onboarding",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stageId\": \"STAGE_ID_HERE\",\n  \"gradeLevelId\": \"GRADE_ID_HERE\",\n  \"selectedSubjectIds\": [\"SUBJECT_ID_1\", \"SUBJECT_ID_2\"],\n  \"parentPhone\": \"01020824778\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/onboarding",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "onboarding"]
+            }
+          }
+        },
+        {
+          "name": "Get Student Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/students/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Settings (Dark Mode / Language / Notifications)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appLanguage\": \"ar\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifySubjects\": true,\n  \"notifyHomework\": true,\n  \"notifyAnnouncements\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "settings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Groups & Enrollment",
+      "item": [
+        {
+          "name": "Search & Browse Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "search"]
+            }
+          }
+        },
+        {
+          "name": "Preview Group by Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/preview/PHY-10-A",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "preview", "PHY-10-A"]
+            }
+          }
+        },
+        {
+          "name": "Join Group by Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupCode\": \"PHY-10-A\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups/join-by-code",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "join-by-code"]
+            }
+          }
+        },
+        {
+          "name": "Join Open Group (Without Code)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/GROUP_ID_HERE/join",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "GROUP_ID_HERE", "join"]
+            }
+          }
+        },
+        {
+          "name": "Get My Enrolled Groups",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/groups/my-groups",
+              "host": ["{{baseUrl}}"],
+              "path": ["groups", "my-groups"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Home Dashboard",
+      "item": [
+        {
+          "name": "Get Home Dashboard Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/home",
+              "host": ["{{baseUrl}}"],
+              "path": ["home"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Homework",
+      "description": "### Student Homework Feed, Taking, Auto-grading & Scorecards",
+      "item": [
+        {
+          "name": "Get All Homework (Feed with Pending/Completed Tabs)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homework?status=pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["homework"],
+              "query": [
+                { "key": "status", "value": "pending", "description": "pending | completed | all" }
+              ]
+            },
+            "description": "Returns all homework across student's enrolled groups with due countdowns."
+          }
+        },
+        {
+          "name": "Get Homework Questions for Taking",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homework/hw-phys-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["homework", "hw-phys-01"]
+            },
+            "description": "Returns homework MCQ choices and Essay prompts without answers."
+          }
+        },
+        {
+          "name": "Submit Homework",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": [\n    { \"questionOrder\": 1, \"selectedOption\": 1, \"timeSpentSeconds\": 15 },\n    { \"questionOrder\": 2, \"selectedOption\": 0, \"timeSpentSeconds\": 20 },\n    { \"questionOrder\": 3, \"essayText\": \"تطبيقات قوانين نيوتن تشمل حركة السيارات واستكشاف الفضاء...\", \"timeSpentSeconds\": 45 }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 26,\n    \"fastestQuestionSec\": 15,\n    \"slowestQuestionSec\": 45\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homework/hw-phys-01/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["homework", "hw-phys-01", "submit"]
+            },
+            "description": "Submits homework answers, auto-grades MCQs, and records time analytics."
+          }
+        },
+        {
+          "name": "Get Homework Result & Review",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homework/hw-phys-01/result",
+              "host": ["{{baseUrl}}"],
+              "path": ["homework", "hw-phys-01", "result"]
+            },
+            "description": "Returns scorecard (e.g. 85/100), percentile rank, and question-by-question review."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Exams & Quizzes",
+      "description": "### Timed Exams, Color Palette Navigation & Auto-grading",
+      "item": [
+        {
+          "name": "Get All Exams (Feed with Available/Upcoming/Completed Tabs)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams?tab=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams"],
+              "query": [
+                { "key": "tab", "value": "all", "description": "all | available | completed | upcoming" }
+              ]
+            },
+            "description": "Returns all exams across student's enrolled groups with live countdown timers."
+          }
+        },
+        {
+          "name": "Get Exam Instructions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams/exam-phys-01/instructions",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "exam-phys-01", "instructions"]
+            },
+            "description": "Returns duration, total questions, passing score, guidelines, and color palette legend."
+          }
+        },
+        {
+          "name": "Start Live Exam Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams/exam-phys-01/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "exam-phys-01", "start"]
+            },
+            "description": "Initializes live exam session and loads questions."
+          }
+        },
+        {
+          "name": "Submit Exam Answers",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": [\n    { \"questionOrder\": 1, \"selectedOption\": 1, \"paletteStatus\": \"ANSWERED\", \"timeSpentSeconds\": 30 },\n    { \"questionOrder\": 2, \"selectedOption\": 1, \"paletteStatus\": \"ANSWERED\", \"timeSpentSeconds\": 25 }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 27.5,\n    \"fastestQuestionSec\": 25,\n    \"slowestQuestionSec\": 30\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exams/exam-phys-01/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "exam-phys-01", "submit"]
+            },
+            "description": "Finishes exam, auto-grades MCQs, and records pass/fail status."
+          }
+        },
+        {
+          "name": "Get Exam Result Report Card",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams/exam-phys-01/result",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "exam-phys-01", "result"]
+            },
+            "description": "Returns passing status, percentage score, answer explanations, and time analytics."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Notifications",
+      "description": "### Notifications Feed, Filtering & Device FCM Push Tokens",
+      "item": [
+        {
+          "name": "Get Notifications Feed (Filter All/Read/Unread)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?filter=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "filter", "value": "all", "description": "all | read | unread" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/NOTIFICATION_ID",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "NOTIFICATION_ID"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Register Mobile FCM Push Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"sample_firebase_fcm_token_xyz\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/fcm-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "fcm-token"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

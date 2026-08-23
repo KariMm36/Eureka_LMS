@@ -1,0 +1,396 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// 1. User & Authentication
+// ----------------------------------------------------
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum StageKey {
+  PRIMARY
+  PREPARATORY
+  SECONDARY
+}
+
+enum QuestionType {
+  MCQ
+  ESSAY
+}
+
+enum NotificationType {
+  LESSON
+  EXAM
+  HOMEWORK
+  ANNOUNCEMENT
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  fullName            String   @db.VarChar(191)
+  email               String   @unique @db.VarChar(191)
+  phone               String   @unique @db.VarChar(50)
+  password            String   @db.VarChar(255)
+  role                Role     @default(STUDENT)
+  avatarUrl           String?  @default("default-avatar.png") @db.VarChar(255)
+  appLanguage         String   @default("ar") @db.VarChar(10)
+  darkMode            Boolean  @default(false)
+  notifyExams         Boolean  @default(true)
+  notifySubjects      Boolean  @default(true)
+  notifyHomework      Boolean  @default(true)
+  notifyAnnouncements Boolean  @default(true)
+  fcmToken            String?  @db.Text
+  isVerified          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  teacherGroups  Group[]         @relation("TeacherGroups")
+  notifications  Notification[]
+  otps           OTP[]
+
+  @@map("users")
+}
+
+model OTP {
+  id        String   @id @default(uuid())
+  email     String   @db.VarChar(191)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpCode   String   @db.VarChar(10)
+  type      String   @db.VarChar(50) // FORGOT_PASSWORD, VERIFY_ACCOUNT
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, type, isUsed])
+  @@map("otps")
+}
+
+// ----------------------------------------------------
+// 2. Student Profile & Onboarding
+// ----------------------------------------------------
+model StudentProfile {
+  id                    String      @id @default(uuid())
+  userId                String      @unique
+  user                  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentPhone           String?     @db.VarChar(50) // رقم ولي الأمر
+  stageId               String?
+  stage                 Stage?      @relation(fields: [stageId], references: [id])
+  gradeLevelId          String?
+  gradeLevel            GradeLevel? @relation(fields: [gradeLevelId], references: [id])
+  isOnboardingCompleted Boolean     @default(false)
+
+  selectedSubjects    StudentSubject[]
+  enrollments         GroupEnrollment[]
+  homeworkSubmissions HomeworkSubmission[]
+  examSubmissions     ExamSubmission[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@map("student_profiles")
+}
+
+// ----------------------------------------------------
+// 3. Academic Hierarchy (Stages, Grades, Subjects)
+// ----------------------------------------------------
+model Stage {
+  id     String   @id @default(uuid())
+  key    StageKey @unique
+  nameAr String   @db.VarChar(100) // ابتدائي، إعدادي، ثانوي
+  nameEn String   @db.VarChar(100)
+  order  Int      @default(1)
+
+  grades   GradeLevel[]
+  students StudentProfile[]
+  groups   Group[]
+
+  @@map("stages")
+}
+
+model GradeLevel {
+  id          String @id @default(uuid())
+  stageId     String
+  stage       Stage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  nameAr      String @db.VarChar(100) // e.g. الصف السادس الابتدائي
+  nameEn      String @db.VarChar(100)
+  gradeNumber Int
+
+  students StudentProfile[]
+  groups   Group[]
+  units    Unit[]
+
+  @@map("grade_levels")
+}
+
+model Subject {
+  id      String @id @default(uuid())
+  nameAr  String @db.VarChar(100) // عربي، رياضة، حاسب آلي، إنجليزي...
+  nameEn  String @db.VarChar(100)
+  iconUrl String @db.VarChar(255)
+
+  units    Unit[]
+  groups   Group[]
+  students StudentSubject[]
+
+  @@map("subjects")
+}
+
+model StudentSubject {
+  id        String         @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, subjectId])
+  @@map("student_subjects")
+}
+
+// ----------------------------------------------------
+// 4. Curriculum (Units, Lessons, Videos, PDFs)
+// ----------------------------------------------------
+model Unit {
+  id           String     @id @default(uuid())
+  subjectId    String
+  subject      Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  gradeLevelId String
+  gradeLevel   GradeLevel @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
+  title        String     @db.VarChar(191) // e.g. الجبر
+  order        Int        @default(1)
+
+  lessons Lesson[]
+
+  @@index([subjectId, gradeLevelId])
+  @@map("units")
+}
+
+model Lesson {
+  id          String  @id @default(uuid())
+  unitId      String
+  unit        Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  title       String  @db.VarChar(191) // e.g. المعادلات الخطية
+  description String? @db.Text
+  order       Int     @default(1)
+
+  videos    LessonVideo[]
+  materials LessonMaterial[]
+  homework  Homework[]
+  exams     Exam[]
+
+  @@index([unitId, order])
+  @@map("lessons")
+}
+
+model LessonVideo {
+  id              String  @id @default(uuid())
+  lessonId        String
+  lesson          Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title           String  @db.VarChar(191)
+  videoUrl        String  @db.VarChar(255)
+  durationSeconds Int     @default(0)
+  description     String? @db.Text
+
+  @@map("lesson_videos")
+}
+
+model LessonMaterial {
+  id            String  @id @default(uuid())
+  lessonId      String
+  lesson        Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title         String  @db.VarChar(191)
+  fileUrl       String  @db.VarChar(255)
+  fileType      String  @default("PDF") @db.VarChar(20)
+  fileSizeBytes Int?
+
+  @@map("lesson_materials")
+}
+
+// ----------------------------------------------------
+// 5. Groups & Enrollment
+// ----------------------------------------------------
+model Group {
+  id           String     @id @default(uuid())
+  name         String     @db.VarChar(191) // الصف السادس - مجموعة أ
+  teacherId    String
+  teacher      User       @relation("TeacherGroups", fields: [teacherId], references: [id])
+  subjectId    String
+  subject      Subject    @relation(fields: [subjectId], references: [id])
+  stageId      String
+  stage        Stage      @relation(fields: [stageId], references: [id])
+  gradeLevelId String
+  gradeLevel   GradeLevel @relation(fields: [gradeLevelId], references: [id])
+  groupCode    String     @unique @db.VarChar(50) // e.g. PHY-10-A
+  scheduleDays String     @db.VarChar(191) // "الأحد,الثلاثاء,الخميس"
+  scheduleTime String?    @db.VarChar(50) // "05:00 PM"
+  maxCapacity  Int        @default(50)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+
+  enrollments GroupEnrollment[]
+  homeworks   Homework[]
+  exams       Exam[]
+
+  @@index([isActive, stageId, subjectId])
+  @@map("groups")
+}
+
+model GroupEnrollment {
+  id        String         @id @default(uuid())
+  groupId   String
+  group     Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status    String         @default("ACTIVE") @db.VarChar(20)
+  joinedAt  DateTime       @default(now())
+
+  @@unique([groupId, studentId])
+  @@map("group_enrollments")
+}
+
+// ----------------------------------------------------
+// 6. Homework & Submissions
+// ----------------------------------------------------
+model Homework {
+  id              String   @id @default(uuid())
+  groupId         String
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  lessonId        String?
+  lesson          Lesson?  @relation(fields: [lessonId], references: [id])
+  title           String   @db.VarChar(191)
+  unitName        String?  @db.VarChar(191)
+  durationMinutes Int      @default(30)
+  totalScore      Int
+  dueDate         DateTime
+  createdAt       DateTime @default(now())
+
+  questions   HomeworkQuestion[]
+  submissions HomeworkSubmission[]
+
+  @@map("homeworks")
+}
+
+model HomeworkQuestion {
+  id                 String       @id @default(uuid())
+  homeworkId         String
+  homework           Homework     @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  type               QuestionType @default(MCQ)
+  questionText       String       @db.Text
+  options            String?      @db.Text // JSON array of strings
+  correctOptionIndex Int?
+  minWords           Int          @default(0)
+  score              Int
+  order              Int          @default(1)
+
+  @@map("homework_questions")
+}
+
+model HomeworkSubmission {
+  id                        String         @id @default(uuid())
+  homeworkId                String
+  homework                  Homework       @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  studentId                 String
+  student                   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answersJson               String         @db.Text
+  totalScoreObtained        Int            @default(0)
+  correctCount              Int            @default(0)
+  underReviewCount          Int            @default(0)
+  wrongCount                Int            @default(0)
+  percentileText            String?        @db.VarChar(100)
+  averageTimePerQuestionSec Float          @default(0)
+  fastestQuestionSec        Float          @default(0)
+  slowestQuestionSec        Float          @default(0)
+  status                    String         @default("SUBMITTED") @db.VarChar(20)
+  submittedAt               DateTime       @default(now())
+
+  @@unique([homeworkId, studentId])
+  @@map("homework_submissions")
+}
+
+// ----------------------------------------------------
+// 7. Exams & Submissions
+// ----------------------------------------------------
+model Exam {
+  id                     String   @id @default(uuid())
+  groupId                String
+  group                  Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  lessonId               String?
+  lesson                 Lesson?  @relation(fields: [lessonId], references: [id])
+  title                  String   @db.VarChar(191)
+  durationMinutes        Int
+  passingScorePercentage Int      @default(60)
+  guidelinesJson         String?  @db.Text
+  startTime              DateTime
+  endTime                DateTime
+  totalScore             Int
+  createdAt              DateTime @default(now())
+
+  questions   ExamQuestion[]
+  submissions ExamSubmission[]
+
+  @@map("exams")
+}
+
+model ExamQuestion {
+  id                 String       @id @default(uuid())
+  examId             String
+  exam               Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  type               QuestionType @default(MCQ)
+  questionText       String       @db.Text
+  options            String?      @db.Text // JSON array of strings
+  correctOptionIndex Int?
+  explanation        String?      @db.Text
+  score              Int
+  order              Int          @default(1)
+
+  @@map("exam_questions")
+}
+
+model ExamSubmission {
+  id                        String         @id @default(uuid())
+  examId                    String
+  exam                      Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentId                 String
+  student                   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answersJson               String         @db.Text
+  totalScoreObtained        Int            @default(0)
+  scorePercentage           Float          @default(0)
+  passed                    Boolean        @default(false)
+  correctCount              Int            @default(0)
+  underReviewCount          Int            @default(0)
+  wrongCount                Int            @default(0)
+  averageTimePerQuestionSec Float          @default(0)
+  fastestQuestionSec        Float          @default(0)
+  slowestQuestionSec        Float          @default(0)
+  submittedAt               DateTime       @default(now())
+
+  @@unique([examId, studentId])
+  @@map("exam_submissions")
+}
+
+// ----------------------------------------------------
+// 8. Notifications
+// ----------------------------------------------------
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String           @db.VarChar(191)
+  body        String           @db.Text
+  type        NotificationType @default(ANNOUNCEMENT)
+  referenceId String?          @db.VarChar(191)
+  attachments String?          @db.Text
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@map("notifications")
+}
