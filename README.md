@@ -9,10 +9,12 @@
 ## 📑 Table of Contents
 1. [Authentication (`/auth`)](#1-authentication)
 2. [Academic Catalogue (`/academic`)](#2-academic-catalogue)
-3. [Student Profile & Settings (`/students`)](#3-student-profile--settings)
+3. [Student Profile, Settings & Analytics (`/students`)](#3-student-profile-settings--analytics)
 4. [Groups & Enrollment (`/groups`)](#4-groups--enrollment)
 5. [Home Dashboard Aggregator (`/home`)](#5-home-dashboard)
-6. [Notifications (`/notifications`)](#6-notifications)
+6. [Homework Engine (`/homework`)](#6-homework-engine)
+7. [Exams & Quizzes Timed Engine (`/exams`)](#7-exams--quizzes-timed-engine)
+8. [Notifications (`/notifications`)](#8-notifications)
 
 ---
 
@@ -46,8 +48,7 @@ Creates a new student or teacher account and sends an automated **Welcome Email*
       "fullName": "أحمد عماد محمد",
       "email": "student@eureka.com",
       "phone": "01020324779",
-      "role": "STUDENT",
-      "studentProfile": { "id": "profile-uuid" }
+      "role": "STUDENT"
     },
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
@@ -67,23 +68,6 @@ Creates a new student or teacher account and sends an automated **Welcome Email*
   "password": "Password@123"
 }
 ```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم تسجيل الدخول بنجاح",
-  "data": {
-    "user": {
-      "id": "user-uuid",
-      "fullName": "أحمد عماد محمد",
-      "email": "student@eureka.com",
-      "role": "STUDENT"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
-```
 
 ---
 
@@ -92,24 +76,7 @@ Generates a 6-digit OTP code with a 10-minute expiry and delivers it to the user
 - **Method**: `POST`
 - **URL**: `/api/v1/auth/forgot-password`
 - **Auth**: None
-- **Request Body**:
-```json
-{
-  "email": "student@eureka.com"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح",
-  "data": {
-    "email": "student@eureka.com",
-    "expiresInMinutes": 10
-  }
-}
-```
+- **Request Body**: `{ "email": "student@eureka.com" }`
 
 ---
 
@@ -117,24 +84,7 @@ Generates a 6-digit OTP code with a 10-minute expiry and delivers it to the user
 - **Method**: `POST`
 - **URL**: `/api/v1/auth/verify-otp`
 - **Auth**: None
-- **Request Body**:
-```json
-{
-  "email": "student@eureka.com",
-  "otpCode": "584920"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم التحقق من الرمز بنجاح",
-  "data": {
-    "resetToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
-```
+- **Request Body**: `{ "email": "student@eureka.com", "otpCode": "584920" }`
 
 ---
 
@@ -146,17 +96,9 @@ Generates a 6-digit OTP code with a 10-minute expiry and delivers it to the user
 ```json
 {
   "email": "student@eureka.com",
-  "resetToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "resetToken": "eyJhbGci...",
   "newPassword": "NewPassword@123",
   "confirmPassword": "NewPassword@123"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تمت إعادة تعيين كلمة المرور بنجاح"
 }
 ```
 
@@ -166,22 +108,6 @@ Generates a 6-digit OTP code with a 10-minute expiry and delivers it to the user
 - **Method**: `PUT`
 - **URL**: `/api/v1/auth/update-password`
 - **Auth**: `Bearer <TOKEN>`
-- **Request Body**:
-```json
-{
-  "currentPassword": "Password@123",
-  "newPassword": "NewPassword@123",
-  "confirmPassword": "NewPassword@123"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم تحديث كلمة المرور بنجاح"
-}
-```
 
 ---
 
@@ -189,7 +115,6 @@ Generates a 6-digit OTP code with a 10-minute expiry and delivers it to the user
 - **Method**: `GET`
 - **URL**: `/api/v1/auth/me`
 - **Auth**: `Bearer <TOKEN>`
-- **Success Response (`200 OK`)**: Returns current user object.
 
 ---
 
@@ -200,41 +125,6 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **Method**: `GET`
 - **URL**: `/api/v1/academic/stages`
 - **Auth**: None
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "قائمة المراحل والصفوف الدراسية",
-  "data": [
-    {
-      "id": "stage-primary",
-      "nameAr": "المرحلة الابتدائية",
-      "key": "PRIMARY",
-      "grades": [
-        { "id": "grade-1", "nameAr": "الصف الأول الابتدائي", "gradeNumber": 1 },
-        { "id": "grade-6", "nameAr": "الصف السادس الابتدائي", "gradeNumber": 6 }
-      ]
-    },
-    {
-      "id": "stage-prep",
-      "nameAr": "المرحلة الإعدادية",
-      "key": "PREPARATORY",
-      "grades": [
-        { "id": "grade-7", "nameAr": "الصف الأول الإعدادي", "gradeNumber": 7 }
-      ]
-    },
-    {
-      "id": "stage-sec",
-      "nameAr": "المرحلة الثانوية",
-      "key": "SECONDARY",
-      "grades": [
-        { "id": "grade-10", "nameAr": "الصف الأول الثانوي", "gradeNumber": 10 }
-      ]
-    }
-  ]
-}
-```
 
 ---
 
@@ -243,7 +133,6 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **URL**: `/api/v1/academic/subjects`
 - **Query Params**: `gradeLevelId` (optional)
 - **Auth**: None
-- **Success Response (`200 OK`)**: Returns array of subjects with icon URLs.
 
 ---
 
@@ -251,7 +140,6 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **Method**: `GET`
 - **URL**: `/api/v1/academic/subjects/:subjectId/topics`
 - **Auth**: None
-- **Success Response (`200 OK`)**: Returns curriculum units, ordered lessons, video stream links, and attached PDFs.
 
 ---
 
@@ -263,7 +151,7 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 
 ---
 
-## 3. Student Profile & Settings
+## 3. Student Profile, Settings & Analytics
 
 ### 3.1 Complete Student Onboarding
 - **Method**: `POST`
@@ -278,14 +166,6 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
   "parentPhone": "01020824778"
 }
 ```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم إكمال بيانات الطالب واختيار المواد بنجاح"
-}
-```
 
 ---
 
@@ -293,47 +173,67 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **Method**: `GET`
 - **URL**: `/api/v1/students/profile`
 - **Auth**: `Bearer <TOKEN>`
-- **Success Response (`200 OK`)**: Returns stage, grade, parent phone, selected subjects, and active group enrollments.
 
 ---
 
-### 3.3 Update Personal Profile & Avatar
-- **Method**: `PUT`
-- **URL**: `/api/v1/students/profile`
+### 3.3 Get Student Analytics & Performance Breakdown 📊
+- **Method**: `GET`
+- **URL**: `/api/v1/students/analytics`
 - **Auth**: `Bearer <TOKEN>`
-- **Content-Type**: `multipart/form-data`
-- **Form Fields**:
-  - `fullName` (string)
-  - `phone` (string)
-  - `parentPhone` (string)
-  - `gradeLevelId` (string)
-  - `avatar` (file - Max 5MB JPG/PNG/WEBP)
 - **Success Response (`200 OK`)**:
 ```json
 {
   "success": true,
   "statusCode": 200,
-  "message": "تم تحديث الملف الشخصي بنجاح"
+  "message": "تقرير تحليلات أداء ومستوى الطالب",
+  "data": {
+    "homeworkAnalytics": {
+      "totalAssigned": 12,
+      "completed": 10,
+      "pending": 2,
+      "completionRatePercentage": 83,
+      "averageScorePercentage": 88
+    },
+    "examAnalytics": {
+      "totalAssigned": 4,
+      "completed": 3,
+      "passed": 3,
+      "failed": 0,
+      "overallAveragePercentage": 92
+    },
+    "rankBadge": "أنت ضمن أعلى 15% من الطلاب",
+    "subjectStrengths": [
+      {
+        "subjectId": "subj-phys",
+        "subjectName": "الفيزياء",
+        "performancePercentage": 95,
+        "status": "ممتاز"
+      },
+      {
+        "subjectId": "subj-math",
+        "subjectName": "الرياضيات",
+        "performancePercentage": 88,
+        "status": "ممتاز"
+      }
+    ]
+  }
 }
 ```
 
 ---
 
-### 3.4 Update App Settings
+### 3.4 Update Personal Profile & Avatar
+- **Method**: `PUT`
+- **URL**: `/api/v1/students/profile`
+- **Auth**: `Bearer <TOKEN>`
+- **Content-Type**: `multipart/form-data` (Max 5MB Avatar upload)
+
+---
+
+### 3.5 Update App Settings
 - **Method**: `PUT`
 - **URL**: `/api/v1/students/settings`
 - **Auth**: `Bearer <TOKEN>`
-- **Request Body**:
-```json
-{
-  "appLanguage": "ar",
-  "darkMode": true,
-  "notifyExams": true,
-  "notifySubjects": true,
-  "notifyHomework": true,
-  "notifyAnnouncements": true
-}
-```
 
 ---
 
@@ -343,37 +243,6 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **Method**: `GET`
 - **URL**: `/api/v1/groups/search?query=فيزياء&page=1&limit=20`
 - **Auth**: `Bearer <TOKEN>`
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "نتائج البحث عن المجموعات",
-  "data": {
-    "pagination": {
-      "totalCount": 4,
-      "page": 1,
-      "pageSize": 20,
-      "totalPages": 1,
-      "hasNextPage": false
-    },
-    "groups": [
-      {
-        "id": "grp-phy-10",
-        "name": "مجموعة الفيزياء - الصف الأول الثانوي (أ)",
-        "groupCode": "PHY-10-A",
-        "scheduleDays": ["الأحد", "الثلاثاء", "الخميس"],
-        "scheduleTime": "05:00 PM",
-        "studentCount": 18,
-        "maxCapacity": 50,
-        "isFull": false,
-        "teacher": { "fullName": "أ/ أحمد محمد" },
-        "subject": { "nameAr": "الفيزياء" }
-      }
-    ]
-  }
-}
-```
 
 ---
 
@@ -388,24 +257,11 @@ Returns Primary, Preparatory, and Secondary stages with grade levels (served fro
 - **Method**: `POST`
 - **URL**: `/api/v1/groups/join-by-code`
 - **Auth**: `Bearer <TOKEN>`
-- **Request Body**:
-```json
-{
-  "groupCode": "PHY-10-A"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم الانضمام بنجاح إلى مجموعة الفيزياء - الصف الأول الثانوي (أ)"
-}
-```
+- **Request Body**: `{ "groupCode": "PHY-10-A" }`
 
 ---
 
-### 4.4 Join Open Group Directly (Without Code)
+### 4.4 Join Open Group Directly
 - **Method**: `POST`
 - **URL**: `/api/v1/groups/:groupId/join`
 - **Auth**: `Bearer <TOKEN>`
@@ -426,80 +282,82 @@ Single aggregated call delivering everything required on the mobile home screen.
 - **Method**: `GET`
 - **URL**: `/api/v1/home`
 - **Auth**: `Bearer <TOKEN>`
-- **Success Response (`200 OK`)**:
+
+---
+
+## 6. Homework Engine
+
+### 6.1 Get All Student Homework Feed (Pending / Completed)
+- **Method**: `GET`
+- **URL**: `/api/v1/homework?status=pending` (or `completed` or `all`)
+- **Auth**: `Bearer <TOKEN>`
+
+---
+
+### 6.2 Get Homework Questions for Taking (MCQ & Essay)
+- **Method**: `GET`
+- **URL**: `/api/v1/homework/:homeworkId`
+- **Auth**: `Bearer <TOKEN>`
+- **Description**: Returns questions with choices and word limits. Correct answers are stripped for security.
+
+---
+
+### 6.3 Submit Homework Answers (Auto-grading & Speed Analytics)
+- **Method**: `POST`
+- **URL**: `/api/v1/homework/:homeworkId/submit`
+- **Auth**: `Bearer <TOKEN>`
+- **Request Body**:
 ```json
 {
-  "success": true,
-  "statusCode": 200,
-  "message": "بيانات الصفحة الرئيسية للطالب",
-  "data": {
-    "student": {
-      "fullName": "أحمد عماد محمد",
-      "greeting": "مرحباً بك يا أحمد 👋",
-      "gradeName": "الصف السادس الابتدائي",
-      "stageName": "المرحلة الابتدائية"
-    },
-    "unreadNotificationsCount": 3,
-    "nextClass": {
-      "subjectName": "الرياضيات",
-      "teacherName": "أ/ محمد علي",
-      "time": "04:30 PM",
-      "status": "NEXT"
-    },
-    "todaySchedule": [
-      {
-        "id": "math-slot-1",
-        "subjectName": "الرياضيات",
-        "teacherName": "أ/ محمد علي",
-        "time": "04:30 PM - 06:00 PM",
-        "isCurrent": true
-      }
-    ],
-    "pendingHomework": [
-      {
-        "id": "hw-1",
-        "title": "حل مسائل الجبر - صفحة 45",
-        "subjectName": "الرياضيات",
-        "dueText": "ينتهي غداً"
-      }
-    ],
-    "upcomingExams": [
-      {
-        "id": "exam-1",
-        "title": "امتحان نصف الترم - الرياضيات",
-        "subjectName": "الرياضيات",
-        "countdownText": "يبدأ بعد 02:45:00"
-      }
-    ]
+  "answers": [
+    { "questionOrder": 1, "selectedOption": 1, "timeSpentSeconds": 15 },
+    { "questionOrder": 2, "selectedOption": 0, "timeSpentSeconds": 20 },
+    { "questionOrder": 3, "essayText": "تطبيقات قوانين نيوتن تشمل حركة السيارات واستكشاف الفضاء...", "timeSpentSeconds": 60 }
+  ],
+  "timeAnalytics": {
+    "averageTimePerQuestionSec": 31.6,
+    "fastestQuestionSec": 15,
+    "slowestQuestionSec": 60
   }
 }
 ```
 
 ---
 
-## 6. Notifications
-
-### 6.1 Get Notifications Feed
+### 6.4 Get Homework Result Scorecard & Review
 - **Method**: `GET`
-- **URL**: `/api/v1/notifications?filter=all` (or `read` or `unread`)
+- **URL**: `/api/v1/homework/:homeworkId/result`
 - **Auth**: `Bearer <TOKEN>`
 - **Success Response (`200 OK`)**:
 ```json
 {
   "success": true,
   "statusCode": 200,
-  "message": "قائمة الإشعارات",
+  "message": "تقرير نتيجة الواجب ومراجعة الإجابات",
   "data": {
-    "unreadCount": 2,
-    "notifications": [
+    "homeworkId": "hw-phys-01",
+    "title": "حل مسائل الفصل الثاني - الحركة والقوة",
+    "subjectName": "الفيزياء",
+    "totalScoreObtained": 20,
+    "totalScoreMax": 30,
+    "correctCount": 2,
+    "underReviewCount": 1,
+    "wrongCount": 0,
+    "percentileText": "أنت ضمن أعلى 20% من الطلاب",
+    "timeAnalytics": {
+      "averageTimePerQuestionSec": 31.6,
+      "fastestQuestionSec": 15,
+      "slowestQuestionSec": 60
+    },
+    "answersReview": [
       {
-        "id": "notif-1",
-        "title": "تمت إضافة درس جديد في مادة الفيزياء",
-        "body": "قام أ/ أحمد محمد بإضافة شرح وحل مسائل على قوانين الحركة.",
-        "type": "NEW_LESSON",
-        "referenceId": "lesson-phys-02",
-        "isRead": false,
-        "createdAt": "2026-08-23T10:00:00.000Z"
+        "questionOrder": 1,
+        "questionText": "ما هي وحدة قياس القوة في النظام الدولي؟",
+        "selectedOption": 1,
+        "correctOptionIndex": 1,
+        "isCorrect": true,
+        "scoreObtained": 10,
+        "maxScore": 10
       }
     ]
   }
@@ -508,35 +366,102 @@ Single aggregated call delivering everything required on the mobile home screen.
 
 ---
 
-### 6.2 Get Notification Details
+## 7. Exams & Quizzes Timed Engine
+
+### 7.1 Get All Student Exams Feed
+- **Method**: `GET`
+- **URL**: `/api/v1/exams?tab=all` (or `available` or `completed` or `upcoming`)
+- **Auth**: `Bearer <TOKEN>`
+
+---
+
+### 7.2 Get Exam Instructions & Guidelines
+- **Method**: `GET`
+- **URL**: `/api/v1/exams/:examId/instructions`
+- **Auth**: `Bearer <TOKEN>`
+
+---
+
+### 7.3 Start Live Exam Session
+- **Method**: `POST`
+- **URL**: `/api/v1/exams/:examId/start`
+- **Auth**: `Bearer <TOKEN>`
+
+---
+
+### 7.4 Submit Exam Answers & Palette Statuses
+- **Method**: `POST`
+- **URL**: `/api/v1/exams/:examId/submit`
+- **Auth**: `Bearer <TOKEN>`
+- **Request Body**:
+```json
+{
+  "answers": [
+    { "questionOrder": 1, "selectedOption": 1, "paletteStatus": "ANSWERED", "timeSpentSeconds": 30 },
+    { "questionOrder": 2, "selectedOption": 1, "paletteStatus": "ANSWERED", "timeSpentSeconds": 25 }
+  ],
+  "timeAnalytics": {
+    "averageTimePerQuestionSec": 27.5,
+    "fastestQuestionSec": 25,
+    "slowestQuestionSec": 30
+  }
+}
+```
+
+---
+
+### 7.5 Get Exam Report Card
+- **Method**: `GET`
+- **URL**: `/api/v1/exams/:examId/result`
+- **Auth**: `Bearer <TOKEN>`
+- **Success Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "تقرير نتيجة الامتحان",
+  "data": {
+    "examId": "exam-phys-01",
+    "title": "امتحان الفيزياء الأسبوعي",
+    "subjectName": "الفيزياء",
+    "totalScoreObtained": 90,
+    "totalScoreMax": 100,
+    "scorePercentage": 90,
+    "passed": true,
+    "correctCount": 9,
+    "wrongCount": 1,
+    "percentileBadge": "أنت ضمن أعلى 20% من الطلاب"
+  }
+}
+```
+
+---
+
+## 8. Notifications
+
+### 8.1 Get Notifications Feed
+- **Method**: `GET`
+- **URL**: `/api/v1/notifications?filter=all` (or `read` or `unread`)
+- **Auth**: `Bearer <TOKEN>`
+
+---
+
+### 8.2 Get Notification Details
 - **Method**: `GET`
 - **URL**: `/api/v1/notifications/:id`
 - **Auth**: `Bearer <TOKEN>`
 
 ---
 
-### 6.3 Mark All as Read
+### 8.3 Mark All as Read
 - **Method**: `PATCH`
 - **URL**: `/api/v1/notifications/read-all`
 - **Auth**: `Bearer <TOKEN>`
 
 ---
 
-### 6.4 Register Device Firebase FCM Push Token
+### 8.4 Register Device Firebase Push Token (FCM)
 - **Method**: `POST`
 - **URL**: `/api/v1/notifications/fcm-token`
 - **Auth**: `Bearer <TOKEN>`
-- **Request Body**:
-```json
-{
-  "fcmToken": "sample_fcm_device_token_xyz"
-}
-```
-- **Success Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "تم تحديث رمز الإشعارات بنجاح"
-}
-```
+- **Request Body**: `{ "fcmToken": "sample_fcm_token_xyz" }`

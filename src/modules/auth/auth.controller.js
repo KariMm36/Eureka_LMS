@@ -5,7 +5,7 @@ export class AuthController {
   static async register(req, res, next) {
     try {
       const result = await AuthService.register(req.body);
-      return ApiResponse.created(res, result, 'تم إنشاء الحساب بنجاح');
+      return ApiResponse.created(res, result, 'تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني لتفعيل الحساب');
     } catch (error) {
       next(error);
     }
@@ -15,6 +15,24 @@ export class AuthController {
     try {
       const result = await AuthService.login(req.body);
       return ApiResponse.success(res, result, 'تم تسجيل الدخول بنجاح');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async refreshToken(req, res, next) {
+    try {
+      const result = await AuthService.refreshAccessToken(req.body.refreshToken);
+      return ApiResponse.success(res, result, 'تم تجديد رمز الدخول بنجاح');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async logout(req, res, next) {
+    try {
+      const result = await AuthService.logout(req.user.id);
+      return ApiResponse.success(res, result, result.message);
     } catch (error) {
       next(error);
     }
@@ -63,6 +81,24 @@ export class AuthController {
   static async getMe(req, res, next) {
     try {
       return ApiResponse.success(res, req.user, 'بيانات المستخدم الحالية');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async sendVerificationEmail(req, res, next) {
+    try {
+      const result = await AuthService.sendVerificationEmail(req.user.id);
+      return ApiResponse.success(res, result, 'تم إرسال رمز التحقق إلى بريدك الإلكتروني');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyEmail(req, res, next) {
+    try {
+      const result = await AuthService.verifyEmail({ userId: req.user.id, otpCode: req.body.otpCode });
+      return ApiResponse.success(res, result, result.message);
     } catch (error) {
       next(error);
     }

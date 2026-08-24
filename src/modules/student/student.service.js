@@ -2,7 +2,7 @@ import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
 
 export class StudentService {
-  static async completeOnboarding(userId, { stageId, gradeLevelId, selectedSubjectIds, parentPhone }) {
+  static async completeOnboarding(userId, { stageId, gradeLevelId, selectedSubjectIds, subjectIds, parentPhone }) {
     const studentProfile = await prisma.studentProfile.findUnique({
       where: { userId },
     });
@@ -10,6 +10,8 @@ export class StudentService {
     if (!studentProfile) {
       throw ApiError.notFound('الملف الشخصي للطالب غير موجود');
     }
+
+    const finalSubjectIds = selectedSubjectIds || subjectIds || [];
 
     // Verify Stage & GradeLevel exist
     const stage = await prisma.stage.findUnique({ where: { id: stageId } });
@@ -26,10 +28,11 @@ export class StudentService {
       });
 
       // Insert selected subjects
-      const subjectMappings = selectedSubjectIds.map((subjectId) => ({
+      const subjectMappings = finalSubjectIds.map((subjectId) => ({
         studentId: studentProfile.id,
         subjectId,
       }));
+
 
       await tx.studentSubject.createMany({
         data: subjectMappings,
@@ -185,5 +188,161 @@ export class StudentService {
     });
 
     return updatedUser;
+  }
+
+  /**
+   * Get complete student performance analytics, completion rates & subject strength breakdown
+   */
+  static async getStudentAnalytics(userId) {
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId },
+      include: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          include: {
+            group: {
+              include: {
+                subject: true,
+                homeworks: true,
+                exams: true,
+              },
+            },
+          },
+        },
+        homeworkSubmissions: {
+          include: {
+            homework: {
+              include: {
+                group: { include: { subject: true } },
+              },
+            },
+          },
+        },
+        examSubmissions: {
+          include: {
+            exam: {
+              include: {
+                group: { include: { subject: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!studentProfile) {
+      throw ApiError.notFound('الملف الشخصي للطالب غير موجود');
+    }
+
+    // 1. Homework Calculations
+    let totalAssignedHomework = 0;
+    studentProfile.enrollments.forEach((e) => {
+      totalAssignedHomework += e.group.homeworks.length;
+    });
+
+    const completedHomework = studentProfile.homeworkSubmissions.length;
+    const pendingHomework = Math.max(0, totalAssignedHomework - completedHomework);
+    const homeworkCompletionRate = totalAssignedHomework > 0
+      ? Math.round((completedHomework / totalAssignedHomework) * 100)
+      : 100;
+
+    let totalHomeworkScoreObtained = 0;
+    let totalHomeworkMaxScore = 0;
+    studentProfile.homeworkSubmissions.forEach((sub) => {
+      totalHomeworkScoreObtained += sub.totalScoreObtained;
+      totalHomeworkMaxScore += sub.homework.totalScore;
+    });
+    const averageHomeworkPercentage = totalHomeworkMaxScore > 0
+      ? Math.round((totalHomeworkScoreObtained / totalHomeworkMaxScore) * 100)
+      : 0;
+
+    // 2. Exam Calculations
+    let totalAssignedExams = 0;
+    studentProfile.enrollments.forEach((e) => {
+      totalAssignedExams += e.group.exams.length;
+    });
+
+    const completedExams = studentProfile.examSubmissions.length;
+    const passedExams = studentProfile.examSubmissions.filter((sub) => sub.passed).length;
+    
+    let totalExamPercentageSum = 0;
+    studentProfile.examSubmissions.forEach((sub) => {
+      totalExamPercentageSum += sub.scorePercentage;
+    });
+    const overallExamAveragePercentage = completedExams > 0
+      ? Math.round(totalExamPercentageSum / completedExams)
+      : 0;
+
+    // 3. Subject-by-Subject Strengths Breakdown
+    const subjectStatsMap = new Map();
+    studentProfile.enrollments.forEach((e) => {
+      const subj = e.group.subject;
+      if (!subjectStatsMap.has(subj.id)) {
+        subjectStatsMap.set(subj.id, {
+          subjectId: subj.id,
+          subjectName: subj.nameAr,
+          subjectIcon: subj.iconUrl,
+          totalObtained: 0,
+          totalMax: 0,
+          submissionCount: 0,
+        });
+      }
+    });
+
+    studentProfile.homeworkSubmissions.forEach((sub) => {
+      const subjId = sub.homework.group.subjectId;
+      if (subjectStatsMap.has(subjId)) {
+        const item = subjectStatsMap.get(subjId);
+        item.totalObtained += sub.totalScoreObtained;
+        item.totalMax += sub.homework.totalScore;
+        item.submissionCount++;
+      }
+    });
+
+    studentProfile.examSubmissions.forEach((sub) => {
+      const subjId = sub.exam.group.subjectId;
+      if (subjectStatsMap.has(subjId)) {
+        const item = subjectStatsMap.get(subjId);
+        item.totalObtained += sub.totalScoreObtained;
+        item.totalMax += sub.exam.totalScore;
+        item.submissionCount++;
+      }
+    });
+
+    const subjectStrengths = Array.from(subjectStatsMap.values()).map((stat) => {
+      const percentage = stat.totalMax > 0
+        ? Math.round((stat.totalObtained / stat.totalMax) * 100)
+        : 100;
+      return {
+        subjectId: stat.subjectId,
+        subjectName: stat.subjectName,
+        subjectIcon: stat.subjectIcon,
+        performancePercentage: percentage,
+        status: percentage >= 85 ? 'ممتاز' : percentage >= 70 ? 'جيد جداً' : percentage >= 50 ? 'جيد' : 'بحاجة لتحسين',
+      };
+    });
+
+    return {
+      homeworkAnalytics: {
+        totalAssigned: totalAssignedHomework,
+        completed: completedHomework,
+        pending: pendingHomework,
+        completionRatePercentage: homeworkCompletionRate,
+        averageScorePercentage: averageHomeworkPercentage,
+      },
+      examAnalytics: {
+        totalAssigned: totalAssignedExams,
+        completed: completedExams,
+        passed: passedExams,
+        failed: completedExams - passedExams,
+        overallAveragePercentage: overallExamAveragePercentage,
+      },
+      rankBadge: overallExamAveragePercentage >= 85
+        ? 'أنت ضمن أعلى 15% من الطلاب'
+        : overallExamAveragePercentage >= 70
+        ? 'أنت ضمن أعلى 30% من الطلاب'
+        : 'واصل المحاولة لتحسين ترتيبك',
+      subjectStrengths,
+    };
   }
 }

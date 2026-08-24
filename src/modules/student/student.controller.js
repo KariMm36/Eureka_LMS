@@ -33,11 +33,13 @@ export class StudentController {
 
   static async updateSubjects(req, res, next) {
     try {
+      const subjectIds = req.body.selectedSubjectIds || req.body.subjectIds;
       const result = await StudentService.updateSelectedSubjects(
         req.user.id,
-        req.body.selectedSubjectIds
+        subjectIds
       );
       return ApiResponse.success(res, result, 'تم تحديث قائمة المواد الدراسية بنجاح');
+
     } catch (error) {
       next(error);
     }
@@ -47,6 +49,15 @@ export class StudentController {
     try {
       const result = await StudentService.updateSettings(req.user.id, req.body);
       return ApiResponse.success(res, result, 'تم حفظ الإعدادات بنجاح');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAnalytics(req, res, next) {
+    try {
+      const analytics = await StudentService.getStudentAnalytics(req.user.id);
+      return ApiResponse.success(res, analytics, 'تقرير تحليلات أداء ومستوى الطالب');
     } catch (error) {
       next(error);
     }

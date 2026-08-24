@@ -1,5 +1,9 @@
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
+import { validateEssayMinWords } from '../../utils/essay.util.js';
+import { computeExamPercentile } from '../../utils/percentile.util.js';
+import { sendPushNotification } from '../../utils/pushNotification.util.js';
+
 
 export class ExamService {
   /**
@@ -189,6 +193,28 @@ export class ExamService {
       throw ApiError.notFound('الامتحان غير موجود');
     }
 
+    // Enforce time window using server time (ignores client clock drift)
+    const now = new Date();
+    if (now < new Date(exam.startTime)) {
+      throw ApiError.badRequest(`الامتحان لم يبدأ بعد. يبدأ في ${new Date(exam.startTime).toLocaleString('ar-EG')}`);
+    }
+    if (now > new Date(exam.endTime)) {
+      throw ApiError.badRequest('انتهت فترة الامتحان ولم يعد بالإمكان البدء فيه');
+    }
+
+    // Check if student already submitted
+    const existingSubmission = await prisma.examSubmission.findUnique({
+      where: {
+        examId_studentId: {
+          examId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+    if (existingSubmission) {
+      throw ApiError.conflict('لقد قمت بإنهاء هذا الامتحان مسبقاً');
+    }
+
     const sanitizedQuestions = exam.questions.map((q) => ({
       ...q,
       options: q.options ? JSON.parse(q.options) : [],
@@ -201,9 +227,12 @@ export class ExamService {
       durationMinutes: exam.durationMinutes,
       totalScore: exam.totalScore,
       totalQuestions: sanitizedQuestions.length,
+      serverTime: now.toISOString(),
+      sessionEndsAt: exam.endTime,
       questions: sanitizedQuestions,
     };
   }
+
 
   /**
    * 4. Submit Exam Answers & Auto-grade
@@ -275,12 +304,15 @@ export class ExamService {
           timeSpentSeconds: ans.timeSpentSeconds || 0,
         };
       } else {
+        // Essay Question — validate minWords before accepting
+        validateEssayMinWords(ans.essayText, question.minWords, question.order);
         underReviewCount++;
         return {
           questionId: question.id,
           questionOrder: question.order,
           questionText: question.questionText,
           essayText: ans.essayText,
+          wordCount: ans.essayText ? ans.essayText.trim().split(/\s+/).filter(Boolean).length : 0,
           isUnderReview: true,
           scoreObtained: 0,
           maxScore: question.score,
@@ -310,6 +342,32 @@ export class ExamService {
       },
     });
 
+    // Compute real peer percentile AFTER the submission is saved
+    const percentileText = await computeExamPercentile(examId, totalScoreObtained);
+
+    // Auto-create in-app notification for the student
+    const notifTitle = passed ? '🎉 مبارك! لقد اجتزت الامتحان' : '📊 نتيجة الامتحان';
+    const notifBody = `تم إنهاء امتحان "${exam.title}" بنتيجة ${Math.round(scorePercentage)}% (${passed ? 'ناجح 🟢' : 'راسب 🔴'}) - حصلت على ${totalScoreObtained}/${exam.totalScore}`;
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        title: notifTitle,
+        body: notifBody,
+        type: 'EXAM',
+        referenceId: examId,
+      },
+    });
+
+    // Send push notification to student's mobile device
+    sendPushNotification({
+      userId,
+      title: notifTitle,
+      body: notifBody,
+      data: { type: 'EXAM', referenceId: examId },
+    }).catch((err) => console.error('[Push Notification] Error sending exam push:', err.message));
+
+
     return {
       submissionId: submission.id,
       totalScoreObtained,
@@ -319,6 +377,7 @@ export class ExamService {
       correctCount,
       wrongCount,
       underReviewCount,
+      percentileText,
     };
   }
 
@@ -368,7 +427,7 @@ export class ExamService {
       correctCount: submission.correctCount,
       underReviewCount: submission.underReviewCount,
       wrongCount: submission.wrongCount,
-      percentileBadge: 'أنت ضمن أعلى 20% من الطلاب',
+      percentileBadge: await computeExamPercentile(submission.examId, submission.totalScoreObtained),
       timeAnalytics: {
         averageTimePerQuestionSec: submission.averageTimePerQuestionSec,
         fastestQuestionSec: submission.fastestQuestionSec,

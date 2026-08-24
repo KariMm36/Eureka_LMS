@@ -1,5 +1,9 @@
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
+import { validateEssayMinWords } from '../../utils/essay.util.js';
+import { computeHomeworkPercentile } from '../../utils/percentile.util.js';
+import { sendPushNotification } from '../../utils/pushNotification.util.js';
+
 
 export class HomeworkService {
   /**
@@ -231,13 +235,15 @@ export class HomeworkService {
           timeSpentSeconds: ans.timeSpentSeconds || 0,
         };
       } else {
-        // Essay Question
+        // Essay Question — validate minWords before accepting
+        validateEssayMinWords(ans.essayText, question.minWords, question.order);
         underReviewCount++;
         return {
           questionId: question.id,
           questionOrder: question.order,
           questionText: question.questionText,
           essayText: ans.essayText,
+          wordCount: ans.essayText ? ans.essayText.trim().split(/\s+/).filter(Boolean).length : 0,
           isUnderReview: true,
           scoreObtained: 0, // Pending teacher manual review
           maxScore: question.score,
@@ -255,13 +261,45 @@ export class HomeworkService {
         correctCount,
         wrongCount,
         underReviewCount,
-        percentileText: 'أنت ضمن أعلى 20% من الطلاب',
+        percentileText: 'جارٍ الحساب...',
         averageTimePerQuestionSec: timeAnalytics?.averageTimePerQuestionSec || 30,
         fastestQuestionSec: timeAnalytics?.fastestQuestionSec || 15,
         slowestQuestionSec: timeAnalytics?.slowestQuestionSec || 60,
         status: underReviewCount > 0 ? 'UNDER_REVIEW' : 'GRADED',
       },
     });
+
+    // Compute real peer percentile AFTER the submission is saved
+    const percentileText = await computeHomeworkPercentile(homeworkId, totalScoreObtained);
+    await prisma.homeworkSubmission.update({
+      where: { id: submission.id },
+      data: { percentileText },
+    });
+
+    // Auto-create in-app notification for the student
+    const notifTitle = '🎉 تم تسليم الواجب بنجاح';
+    const notifBody = underReviewCount > 0
+      ? `تم تسليم واجب "${homework.title}" بنجاح. درجتك الحالية: ${totalScoreObtained}/${homework.totalScore} (سؤال مقالي قيد التصحيح)`
+      : `تم تسليم واجب "${homework.title}" بنجاح واحتساب درجتك: ${totalScoreObtained}/${homework.totalScore}`;
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        title: notifTitle,
+        body: notifBody,
+        type: 'HOMEWORK',
+        referenceId: homeworkId,
+      },
+    });
+
+    // Send push notification to student's mobile device
+    sendPushNotification({
+      userId,
+      title: notifTitle,
+      body: notifBody,
+      data: { type: 'HOMEWORK', referenceId: homeworkId },
+    }).catch((err) => console.error('[Push Notification] Error sending homework push:', err.message));
+
 
     return {
       submissionId: submission.id,
@@ -270,7 +308,7 @@ export class HomeworkService {
       correctCount,
       wrongCount,
       underReviewCount,
-      percentileText: submission.percentileText,
+      percentileText,
       status: submission.status,
     };
   }

@@ -49,6 +49,7 @@ model User {
   notifyHomework      Boolean  @default(true)
   notifyAnnouncements Boolean  @default(true)
   fcmToken            String?  @db.Text
+  refreshTokenHash    String?  @db.VarChar(255)
   isVerified          Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -349,8 +350,10 @@ model ExamQuestion {
   options            String?      @db.Text // JSON array of strings
   correctOptionIndex Int?
   explanation        String?      @db.Text
+  minWords           Int          @default(0)
   score              Int
   order              Int          @default(1)
+
 
   @@map("exam_questions")
 }

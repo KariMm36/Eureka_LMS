@@ -11,6 +11,7 @@ import { swaggerDocument } from './config/swagger.config.js';
 // Middlewares
 import { errorHandler } from './middlewares/error.middleware.js';
 import { ApiResponse } from './utils/apiResponse.js';
+import { ENV } from './config/env.config.js';
 
 // Feature Routes
 import authRoutes from './modules/auth/auth.routes.js';
@@ -29,7 +30,31 @@ const app = express();
 
 // Global Middlewares
 app.use(helmet({ contentSecurityPolicy: false })); // allow Swagger UI assets
-app.use(cors());
+// Configure CORS allow-list from env var CORS_ORIGINS (comma-separated)
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+  : ENV.NODE_ENV === 'development'
+  ? ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:19006', 'http://localhost:8081']
+  : [];
+
+if (ENV.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  console.warn('[Eureka] WARNING: CORS_ORIGINS is not set in production — all cross-origin requests will be blocked');
+}
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS: Origin ${origin} is not allowed`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -38,8 +63,20 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Swagger API Documentation UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha',
+      docExpansion: 'list',
+      filter: true,
+    },
+  })
+);
 app.use('/docs', (req, res) => res.redirect('/api-docs'));
+
 
 // Health Check API
 app.get('/health', (req, res) => {

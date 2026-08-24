@@ -93,3 +93,18 @@ export const updatePasswordSchema = Joi.object({
     'any.required': 'يرجى تأكيد كلمة المرور الجديدة',
   }),
 });
+
+export const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required().messages({
+    'string.empty': 'رمز التحديث مطلوب',
+    'any.required': 'رمز التحديث مطلوب',
+  }),
+});
+
+export const verifyEmailSchema = Joi.object({
+  otpCode: Joi.string().length(6).required().messages({
+    'string.length': 'رمز التحقق يجب أن يتكون من 6 أرقام',
+    'any.required': 'رمز التحقق مطلوب',
+  }),
+});
+

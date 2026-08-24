@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
-import { signToken } from '../../utils/jwt.util.js';
+import { signToken, verifyToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.util.js';
 import { generateOTP } from '../../utils/otp.util.js';
 import { sendEmail } from '../../config/mailer.config.js';
 import { ENV } from '../../config/env.config.js';
-import { getWelcomeEmailTemplate, getOtpEmailTemplate } from '../../utils/emailTemplates.js';
+import { getWelcomeEmailTemplate, getOtpEmailTemplate, getVerifyEmailTemplate } from '../../utils/emailTemplates.js';
 
 export class AuthService {
   static async register({ fullName, email, phone, password, role = 'STUDENT' }) {
@@ -40,23 +40,51 @@ export class AuthService {
       },
     });
 
-    // Send Welcome Email asynchronously without blocking response
+    // Generate tokens
+    const token = signToken({ id: user.id, role: user.role, email: user.email });
+    const refreshToken = signRefreshToken({ id: user.id });
+
+    // Store hashed refresh token
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 8);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshTokenHash },
+    });
+
+    // Generate and send verification OTP
+    const otpCode = generateOTP(6);
+    const expiresAt = new Date(Date.now() + ENV.OTP_EXPIRES_MINUTES * 60 * 1000);
+    await prisma.oTP.create({
+      data: {
+        email: user.email,
+        userId: user.id,
+        otpCode,
+        type: 'VERIFY_ACCOUNT',
+        expiresAt,
+      },
+    });
+
+    // Send Verification Email + Welcome Email asynchronously
     sendEmail({
       to: user.email,
-      subject: 'مرحباً بك في منصة يوريكا التعليمية 🎉',
-      text: `مرحباً ${user.fullName}، يسعدنا انضمامك إلى مجتمع يوريكا التعليمي! ابدأ الآن باختيار مرحلتك وموادك الدراسية.`,
-      html: getWelcomeEmailTemplate({ fullName: user.fullName }),
-    }).catch((err) => console.error('Failed to send welcome email:', err.message));
+      subject: 'تأكيد بريدك الإلكتروني - منصة يوريكا 🎉',
+      text: `مرحباً ${user.fullName}، رمز تأكيد حسابك هو: ${otpCode}. ينتهي الرمز خلال ${ENV.OTP_EXPIRES_MINUTES} دقائق.`,
+      html: getVerifyEmailTemplate({
+        fullName: user.fullName,
+        otpCode,
+        expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
+      }),
+    }).catch((err) => console.error('Failed to send verification email on register:', err.message));
 
-    const token = signToken({ id: user.id, role: user.role, email: user.email });
-
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, refreshTokenHash: __, ...userWithoutSensitive } = user;
 
     return {
-      user: userWithoutPassword,
+      user: userWithoutSensitive,
       token,
+      refreshToken,
     };
   }
+
 
   static async login({ email, password }) {
     const user = await prisma.user.findUnique({
@@ -86,12 +114,21 @@ export class AuthService {
     }
 
     const token = signToken({ id: user.id, role: user.role, email: user.email });
+    const refreshToken = signRefreshToken({ id: user.id });
 
-    const { password: _, ...userWithoutPassword } = user;
+    // Hash & store refresh token in DB (allows server-side invalidation on logout)
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 8);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshTokenHash },
+    });
+
+    const { password: _, refreshTokenHash: __, ...userWithoutSensitive } = user;
 
     return {
-      user: userWithoutPassword,
+      user: userWithoutSensitive,
       token,
+      refreshToken,
     };
   }
 
@@ -176,11 +213,22 @@ export class AuthService {
   }
 
   static async resetPassword({ email, resetToken, newPassword }) {
+    // Verify the resetToken is valid, not expired, and was issued for THIS email
+    let decoded;
     try {
-      const decoded = signToken.verify ? signToken.verify(resetToken, ENV.JWT_SECRET) : null;
-    } catch (_) {}
+      decoded = verifyToken(resetToken);
+    } catch (err) {
+      throw ApiError.badRequest('رمز إعادة التعيين غير صالح أو انتهت صلاحيته. يرجى طلب رمز جديد');
+    }
 
-    // Verify token payload
+    if (decoded.purpose !== 'RESET_PASSWORD') {
+      throw ApiError.badRequest('رمز إعادة التعيين غير صالح');
+    }
+
+    if (decoded.email !== email.toLowerCase()) {
+      throw ApiError.badRequest('البريد الإلكتروني لا يتطابق مع رمز إعادة التعيين');
+    }
+
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
@@ -201,6 +249,7 @@ export class AuthService {
       message: 'تم تحديث كلمة المرور بنجاح، يمكنك الآن تسجيل الدخول',
     };
   }
+
 
   static async updatePassword({ userId, currentPassword, newPassword }) {
     const user = await prisma.user.findUnique({
@@ -228,4 +277,161 @@ export class AuthService {
       message: 'تم تحديث كلمة المرور بنجاح',
     };
   }
+
+  /**
+   * Refresh Access Token using a valid Refresh Token
+   * Mobile clients call this when their access token expires (every 15 mins)
+   */
+  static async refreshAccessToken(refreshToken) {
+    if (!refreshToken) {
+      throw ApiError.unauthorized('رمز التحديث غير موجود');
+    }
+
+    // Verify the refresh token is structurally valid
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(refreshToken);
+    } catch (err) {
+      throw ApiError.unauthorized('رمز التحديث غير صالح أو انتهت صلاحيته. يرجى تسجيل الدخول مجدداً');
+    }
+
+    // Fetch the user and their stored refresh token hash
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, role: true, email: true, refreshTokenHash: true },
+    });
+
+    if (!user || !user.refreshTokenHash) {
+      throw ApiError.unauthorized('الجلسة غير صالحة. يرجى تسجيل الدخول مجدداً');
+    }
+
+    // Compare the incoming token against the stored hash
+    const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    if (!isValid) {
+      throw ApiError.unauthorized('رمز التحديث غير مطابق. يرجى تسجيل الدخول مجدداً');
+    }
+
+    // Issue a new short-lived access token
+    const newAccessToken = signToken({ id: user.id, role: user.role, email: user.email });
+
+    return {
+      token: newAccessToken,
+      expiresIn: ENV.JWT_EXPIRES_IN,
+    };
+  }
+
+  /**
+   * Logout — invalidate refresh token by clearing it from DB
+   */
+  static async logout(userId) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { refreshTokenHash: null },
+    });
+
+    return { message: 'تم تسجيل الخروج بنجاح' };
+  }
+
+  /**
+   * Request / Resend Email Verification OTP
+   */
+  static async sendVerificationEmail(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw ApiError.notFound('المستخدم غير موجود');
+    }
+
+    if (user.isVerified) {
+      throw ApiError.badRequest('البريد الإلكتروني مفعّل بالفعل');
+    }
+
+    const otpCode = generateOTP(6);
+    const expiresAt = new Date(Date.now() + ENV.OTP_EXPIRES_MINUTES * 60 * 1000);
+
+    // Invalidate old verification OTPs
+    await prisma.oTP.deleteMany({
+      where: { userId: user.id, type: 'VERIFY_ACCOUNT' },
+    });
+
+    await prisma.oTP.create({
+      data: {
+        email: user.email,
+        userId: user.id,
+        otpCode,
+        type: 'VERIFY_ACCOUNT',
+        expiresAt,
+      },
+    });
+
+    await sendEmail({
+      to: user.email,
+      subject: 'تأكيد بريدك الإلكتروني - تطبيق يوريكا',
+      text: `رمز التحقق الخاص بك هو: ${otpCode}. ينتهي الرمز خلال ${ENV.OTP_EXPIRES_MINUTES} دقائق.`,
+      html: getVerifyEmailTemplate({
+        fullName: user.fullName,
+        otpCode,
+        expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
+      }),
+    });
+
+    return {
+      email: user.email,
+      expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
+    };
+  }
+
+  /**
+   * Verify Email using OTP Code
+   */
+  static async verifyEmail({ userId, otpCode }) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw ApiError.notFound('المستخدم غير موجود');
+    }
+
+    if (user.isVerified) {
+      return { message: 'البريد الإلكتروني مفعّل بالفعل', isVerified: true };
+    }
+
+    const otpRecord = await prisma.oTP.findFirst({
+      where: {
+        userId,
+        otpCode,
+        type: 'VERIFY_ACCOUNT',
+        isUsed: false,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!otpRecord) {
+      throw ApiError.badRequest('رمز التحقق غير صحيح أو انتهت صلاحيته');
+    }
+
+    // Mark OTP as used and update user verification status
+    await prisma.$transaction([
+      prisma.oTP.update({
+        where: { id: otpRecord.id },
+        data: { isUsed: true },
+      }),
+      prisma.user.update({
+        where: { id: userId },
+        data: { isVerified: true },
+      }),
+    ]);
+
+    return {
+      message: 'تم تفعيل وتأكيد البريد الإلكتروني بنجاح 🎉',
+      isVerified: true,
+    };
+  }
 }
+
+

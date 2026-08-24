@@ -4,7 +4,21 @@ import { authenticate } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 
-// GET /api/v1/home
-router.get('/', authenticate, HomeController.getHomeFeed);
+// Home routes require authentication
+router.use(authenticate);
+
+
+/**
+ * @swagger
+ * /home/dashboard:
+ *   get:
+ *     summary: Get consolidated student home dashboard feed
+ *     tags: [5. Home Dashboard]
+
+ *     responses:
+ *       200:
+ *         description: Next class banner, today's schedule, homework deadlines, upcoming exams, and unread notifications
+ */
+router.get('/dashboard', HomeController.getHomeFeed);
 
 export default router;

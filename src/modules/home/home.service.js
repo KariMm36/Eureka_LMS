@@ -1,5 +1,7 @@
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
+import { parseScheduleDays, isGroupScheduledOn } from '../../utils/schedule.util.js';
+
 
 export class HomeService {
   /**
@@ -82,25 +84,14 @@ export class HomeService {
     });
 
     // 3. Next Class Banner & Today's Schedule
-    const arabicDaysMap = {
-      0: 'الأحد',
-      1: 'الإثنين',
-      2: 'الثلاثاء',
-      3: 'الأربعاء',
-      4: 'الخميس',
-      5: 'الجمعة',
-      6: 'السبت',
-    };
-    const currentArabicDay = arabicDaysMap[now.getDay()];
-
     const todaySchedule = [];
     let nextClass = null;
 
     for (const enrollment of student.studentProfile.enrollments) {
       const g = enrollment.group;
-      const days = g.scheduleDays ? g.scheduleDays.split(',') : [];
+      const days = parseScheduleDays(g.scheduleDays);
 
-      if (days.includes(currentArabicDay)) {
+      if (isGroupScheduledOn(g.scheduleDays, now)) {
         todaySchedule.push({
           groupId: g.id,
           groupName: g.name,
@@ -123,6 +114,7 @@ export class HomeService {
         };
       }
     }
+
 
     return {
       studentInfo: {

@@ -143,6 +143,77 @@ export const getOtpEmailTemplate = ({ fullName, otpCode, expiresInMinutes = 10 }
     </tr>
   </table>
 </body>
+  `.trim();
+};
+
+export const getVerifyEmailTemplate = ({ fullName, otpCode, expiresInMinutes = 10 }) => {
+
+  return `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تأكيد البريد الإلكتروني - Eureka</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333333; direction: rtl;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f7f6; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" max-width="600" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td align="center" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px 20px;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">
+                ✉️ تأكيد البريد الإلكتروني
+              </h1>
+              <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 15px;">
+                منصة Eureka التعليمية
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 35px 30px;">
+              <h2 style="color: #111827; font-size: 18px; margin-top: 0;">
+                مرحباً ${fullName || 'عزيزي المستخدم'} 👋
+              </h2>
+              <p style="color: #4b5563; font-size: 15px; line-height: 1.7; margin-bottom: 20px;">
+                شكراً لتسجيلك في تطبيق Eureka. يرجى استخدام رمز التحقق التالي لتأكيد بريدك الإلكتروني وتفعيل حسابك بالكامل:
+              </p>
+
+              <!-- OTP Code Display Card -->
+              <div align="center" style="margin: 30px 0;">
+                <div style="display: inline-block; background-color: #f0fdf4; border: 2px dashed #10b981; border-radius: 10px; padding: 18px 36px; text-align: center;">
+                  <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #047857;">
+                    ${otpCode}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Expiry Alert -->
+              <div style="background-color: #fffbeb; border-right: 4px solid #f59e0b; padding: 12px 16px; border-radius: 6px; margin: 20px 0;">
+                <p style="color: #92400e; font-size: 13px; margin: 0;">
+                  ⏱️ هذا الرمز صالح للاستخدام لمدة <strong>${expiresInMinutes} دقائق</strong> فقط.
+                </p>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
+
+              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
+                © منصة Eureka التعليمية - جميع الحقوق محفوظة
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
 </html>
   `.trim();
 };
+

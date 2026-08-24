@@ -1,5 +1,7 @@
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
+import { parseScheduleDays } from '../../utils/schedule.util.js';
+
 
 export class GroupService {
   /**
@@ -56,7 +58,7 @@ export class GroupService {
       id: g.id,
       name: g.name,
       groupCode: g.groupCode,
-      scheduleDays: g.scheduleDays.split(','),
+      scheduleDays: parseScheduleDays(g.scheduleDays),
       scheduleTime: g.scheduleTime,
       maxCapacity: g.maxCapacity,
       studentCount: g._count.enrollments,
@@ -112,7 +114,7 @@ export class GroupService {
       id: group.id,
       name: group.name,
       groupCode: group.groupCode,
-      scheduleDays: group.scheduleDays.split(','),
+      scheduleDays: parseScheduleDays(group.scheduleDays),
       scheduleTime: group.scheduleTime,
       studentCount: group._count.enrollments,
       maxCapacity: group.maxCapacity,
@@ -165,7 +167,26 @@ export class GroupService {
       });
 
       if (existingEnrollment) {
-        throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+        if (existingEnrollment.status === 'ACTIVE') {
+          throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+        }
+        // Re-activate a previously left/inactive enrollment
+        const reactivated = await tx.groupEnrollment.update({
+          where: { id: existingEnrollment.id },
+          data: { status: 'ACTIVE', joinedAt: new Date() },
+          include: {
+            group: {
+              include: {
+                teacher: { select: { id: true, fullName: true, avatarUrl: true } },
+                subject: true,
+              },
+            },
+          },
+        });
+        return {
+          message: `تم إعادة الانضمام بنجاح إلى ${group.name}`,
+          enrollment: reactivated,
+        };
       }
 
       const enrollment = await tx.groupEnrollment.create({
@@ -235,7 +256,26 @@ export class GroupService {
       });
 
       if (existingEnrollment) {
-        throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+        if (existingEnrollment.status === 'ACTIVE') {
+          throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+        }
+        // Re-activate a previously left/inactive enrollment
+        const reactivated = await tx.groupEnrollment.update({
+          where: { id: existingEnrollment.id },
+          data: { status: 'ACTIVE', joinedAt: new Date() },
+          include: {
+            group: {
+              include: {
+                teacher: { select: { id: true, fullName: true, avatarUrl: true } },
+                subject: true,
+              },
+            },
+          },
+        });
+        return {
+          message: `تم إعادة الانضمام بنجاح إلى ${group.name}`,
+          enrollment: reactivated,
+        };
       }
 
       const enrollment = await tx.groupEnrollment.create({
@@ -313,7 +353,7 @@ export class GroupService {
         id: e.group.id,
         name: e.group.name,
         groupCode: e.group.groupCode,
-        scheduleDays: e.group.scheduleDays.split(','),
+        scheduleDays: parseScheduleDays(e.group.scheduleDays),
         scheduleTime: e.group.scheduleTime,
         studentCount: e.group._count.enrollments,
         homeworkCount: e.group._count.homeworks,
@@ -366,8 +406,9 @@ export class GroupService {
 
     return {
       ...group,
-      scheduleDays: group.scheduleDays.split(','),
+      scheduleDays: parseScheduleDays(group.scheduleDays),
       studentCount: group._count.enrollments,
     };
   }
 }
+
