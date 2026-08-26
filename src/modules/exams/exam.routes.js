@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { ExamController } from './exam.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { authorize } from '../../middlewares/role.middleware.js';
 
 const router = Router();
 
-// All exam routes require student authentication
-router.use(authenticate);
+// Student exam taking/submission routes — student-only
+router.use(authenticate, authorize('STUDENT', 'ADMIN'));
 
 
 /**

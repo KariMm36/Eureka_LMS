@@ -54,10 +54,19 @@ model User {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  studentProfile StudentProfile?
-  teacherGroups  Group[]         @relation("TeacherGroups")
-  notifications  Notification[]
-  otps           OTP[]
+  studentProfile   StudentProfile?
+  teacherGroups    Group[]          @relation("TeacherGroups")
+  notifications    Notification[]
+  otps             OTP[]
+  createdSubjects  Subject[]        @relation("CreatedSubjects")
+  createdUnits     Unit[]           @relation("CreatedUnits")
+  createdLessons   Lesson[]         @relation("CreatedLessons")
+  createdVideos    LessonVideo[]    @relation("CreatedVideos")
+  createdMaterials LessonMaterial[] @relation("CreatedMaterials")
+  createdHomeworks Homework[]       @relation("CreatedHomeworks")
+  createdExams     Exam[]           @relation("CreatedExams")
+  createdSessions  ClassSession[]   @relation("CreatedSessions")
+  teacherPayments  StudentPayment[] @relation("TeacherPayments")
 
   @@map("users")
 }
@@ -95,6 +104,8 @@ model StudentProfile {
   enrollments         GroupEnrollment[]
   homeworkSubmissions HomeworkSubmission[]
   examSubmissions     ExamSubmission[]
+  attendances         Attendance[]
+  payments            StudentPayment[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -134,10 +145,13 @@ model GradeLevel {
 }
 
 model Subject {
-  id      String @id @default(uuid())
-  nameAr  String @db.VarChar(100) // عربي، رياضة، حاسب آلي، إنجليزي...
-  nameEn  String @db.VarChar(100)
-  iconUrl String @db.VarChar(255)
+  id          String   @id @default(uuid())
+  nameAr      String   @db.VarChar(100) // عربي، رياضة، حاسب آلي، إنجليزي...
+  nameEn      String   @db.VarChar(100)
+  iconUrl     String   @db.VarChar(255)
+  createdById String?
+  createdBy   User?    @relation("CreatedSubjects", fields: [createdById], references: [id], onDelete: SetNull)
+  isGlobal    Boolean  @default(true)
 
   units    Unit[]
   groups   Group[]
@@ -168,6 +182,8 @@ model Unit {
   gradeLevel   GradeLevel @relation(fields: [gradeLevelId], references: [id], onDelete: Cascade)
   title        String     @db.VarChar(191) // e.g. الجبر
   order        Int        @default(1)
+  createdById  String?
+  createdBy    User?      @relation("CreatedUnits", fields: [createdById], references: [id], onDelete: SetNull)
 
   lessons Lesson[]
 
@@ -182,6 +198,8 @@ model Lesson {
   title       String  @db.VarChar(191) // e.g. المعادلات الخطية
   description String? @db.Text
   order       Int     @default(1)
+  createdById String?
+  createdBy   User?   @relation("CreatedLessons", fields: [createdById], references: [id], onDelete: SetNull)
 
   videos    LessonVideo[]
   materials LessonMaterial[]
@@ -200,6 +218,10 @@ model LessonVideo {
   videoUrl        String  @db.VarChar(255)
   durationSeconds Int     @default(0)
   description     String? @db.Text
+  createdById     String?
+  createdBy       User?   @relation("CreatedVideos", fields: [createdById], references: [id], onDelete: SetNull)
+  groupId         String?
+  group           Group?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@map("lesson_videos")
 }
@@ -212,6 +234,10 @@ model LessonMaterial {
   fileUrl       String  @db.VarChar(255)
   fileType      String  @default("PDF") @db.VarChar(20)
   fileSizeBytes Int?
+  createdById   String?
+  createdBy     User?   @relation("CreatedMaterials", fields: [createdById], references: [id], onDelete: SetNull)
+  groupId       String?
+  group         Group?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   @@map("lesson_materials")
 }
@@ -220,41 +246,51 @@ model LessonMaterial {
 // 5. Groups & Enrollment
 // ----------------------------------------------------
 model Group {
-  id           String     @id @default(uuid())
-  name         String     @db.VarChar(191) // الصف السادس - مجموعة أ
-  teacherId    String
-  teacher      User       @relation("TeacherGroups", fields: [teacherId], references: [id])
-  subjectId    String
-  subject      Subject    @relation(fields: [subjectId], references: [id])
-  stageId      String
-  stage        Stage      @relation(fields: [stageId], references: [id])
-  gradeLevelId String
-  gradeLevel   GradeLevel @relation(fields: [gradeLevelId], references: [id])
-  groupCode    String     @unique @db.VarChar(50) // e.g. PHY-10-A
-  scheduleDays String     @db.VarChar(191) // "الأحد,الثلاثاء,الخميس"
-  scheduleTime String?    @db.VarChar(50) // "05:00 PM"
-  maxCapacity  Int        @default(50)
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
+  id            String     @id @default(uuid())
+  name          String     @db.VarChar(191) // الصف السادس - مجموعة أ
+  teacherId     String
+  teacher       User       @relation("TeacherGroups", fields: [teacherId], references: [id])
+  subjectId     String
+  subject       Subject    @relation(fields: [subjectId], references: [id])
+  stageId       String
+  stage         Stage      @relation(fields: [stageId], references: [id])
+  gradeLevelId  String
+  gradeLevel    GradeLevel @relation(fields: [gradeLevelId], references: [id])
+  groupCode     String     @unique @db.VarChar(50) // e.g. PHY-10-A
+  scheduleDays  String     @db.VarChar(191) // "الأحد,الثلاثاء,الخميس"
+  scheduleTime  String?    @db.VarChar(50) // "05:00 PM"
+  maxCapacity   Int        @default(50)
+  coverImageUrl String?    @db.VarChar(255)
+  description   String?    @db.Text
+  defaultPrice  Decimal    @default(0) @db.Decimal(10, 2)
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
 
-  enrollments GroupEnrollment[]
-  homeworks   Homework[]
-  exams       Exam[]
+  enrollments     GroupEnrollment[]
+  homeworks       Homework[]
+  exams           Exam[]
+  sessions        ClassSession[]
+  payments        StudentPayment[]
+  lessonVideos    LessonVideo[]
+  lessonMaterials LessonMaterial[]
 
   @@index([isActive, stageId, subjectId])
   @@map("groups")
 }
 
 model GroupEnrollment {
-  id        String         @id @default(uuid())
-  groupId   String
-  group     Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  studentId String
-  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  status    String         @default("ACTIVE") @db.VarChar(20)
-  joinedAt  DateTime       @default(now())
+  id              String         @id @default(uuid())
+  groupId         String
+  group           Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status          String         @default("ACTIVE") @db.VarChar(20)
+  enrollmentPrice Decimal        @default(0) @db.Decimal(10, 2)
+  addedBy         String?
+  joinedAt        DateTime       @default(now())
 
   @@unique([groupId, studentId])
+  @@index([groupId, status])
   @@map("group_enrollments")
 }
 
@@ -267,6 +303,8 @@ model Homework {
   group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   lessonId        String?
   lesson          Lesson?  @relation(fields: [lessonId], references: [id])
+  createdById     String?
+  createdBy       User?    @relation("CreatedHomeworks", fields: [createdById], references: [id], onDelete: SetNull)
   title           String   @db.VarChar(191)
   unitName        String?  @db.VarChar(191)
   durationMinutes Int      @default(30)
@@ -288,6 +326,8 @@ model HomeworkQuestion {
   questionText       String       @db.Text
   options            String?      @db.Text // JSON array of strings
   correctOptionIndex Int?
+  explanation        String?      @db.Text
+  modelAnswer        String?      @db.Text
   minWords           Int          @default(0)
   score              Int
   order              Int          @default(1)
@@ -314,6 +354,7 @@ model HomeworkSubmission {
   submittedAt               DateTime       @default(now())
 
   @@unique([homeworkId, studentId])
+  @@index([homeworkId, status])
   @@map("homework_submissions")
 }
 
@@ -326,6 +367,8 @@ model Exam {
   group                  Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   lessonId               String?
   lesson                 Lesson?  @relation(fields: [lessonId], references: [id])
+  createdById            String?
+  createdBy              User?    @relation("CreatedExams", fields: [createdById], references: [id], onDelete: SetNull)
   title                  String   @db.VarChar(191)
   durationMinutes        Int
   passingScorePercentage Int      @default(60)
@@ -350,10 +393,10 @@ model ExamQuestion {
   options            String?      @db.Text // JSON array of strings
   correctOptionIndex Int?
   explanation        String?      @db.Text
+  modelAnswer        String?      @db.Text
   minWords           Int          @default(0)
   score              Int
   order              Int          @default(1)
-
 
   @@map("exam_questions")
 }
@@ -377,11 +420,71 @@ model ExamSubmission {
   submittedAt               DateTime       @default(now())
 
   @@unique([examId, studentId])
+  @@index([examId, scorePercentage])
   @@map("exam_submissions")
 }
 
 // ----------------------------------------------------
-// 8. Notifications
+// 8. Class Sessions & Attendance
+// ----------------------------------------------------
+model ClassSession {
+  id          String       @id @default(uuid())
+  groupId     String
+  group       Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User         @relation("CreatedSessions", fields: [createdById], references: [id])
+  title       String       @db.VarChar(191)
+  sessionDate DateTime
+  qrToken     String?      @unique @db.VarChar(100)
+  sessionCode String?      @unique @db.VarChar(20) // 6-digit PIN code for attendance
+  qrExpiresAt DateTime?
+  attendances Attendance[]
+  createdAt   DateTime     @default(now())
+
+  @@index([groupId, sessionDate])
+  @@index([sessionCode])
+  @@map("class_sessions")
+}
+
+model Attendance {
+  id         String         @id @default(uuid())
+  sessionId  String
+  session    ClassSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     String         @default("PRESENT") @db.VarChar(20) // PRESENT, LATE, ABSENT
+  recordedAt DateTime       @default(now())
+
+  @@unique([sessionId, studentId])
+  @@index([sessionId, status])
+  @@map("attendances")
+}
+
+// ----------------------------------------------------
+// 9. Student Payments & Finance Ledger (Append-Only)
+// ----------------------------------------------------
+model StudentPayment {
+  id            String         @id @default(uuid())
+  teacherId     String
+  teacher       User           @relation("TeacherPayments", fields: [teacherId], references: [id])
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  groupId       String
+  group         Group          @relation(fields: [groupId], references: [id])
+  amount        Decimal        @db.Decimal(10, 2)
+  paymentMethod String         @db.VarChar(50) // CASH, VODAFONE_CASH, INSTAPAY, CARD
+  monthLabel    String         @db.VarChar(50) // e.g. "أكتوبر 2026"
+  receiptUrl    String?        @db.VarChar(255)
+  notes         String?        @db.Text
+  paidAt        DateTime       @default(now())
+
+  @@index([teacherId, paidAt])
+  @@index([teacherId, groupId, monthLabel])
+  @@map("student_payments")
+}
+
+// ----------------------------------------------------
+// 10. Notifications
 // ----------------------------------------------------
 model Notification {
   id          String           @id @default(uuid())
@@ -395,5 +498,7 @@ model Notification {
   isRead      Boolean          @default(false)
   createdAt   DateTime         @default(now())
 
+  @@index([userId, isRead, createdAt])
   @@map("notifications")
 }
+

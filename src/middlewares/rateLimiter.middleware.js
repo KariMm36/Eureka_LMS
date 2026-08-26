@@ -4,7 +4,7 @@ import { ApiError } from '../utils/apiError.js';
 // 1. General Auth Rate Limiter (Login & Register)
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 15, // max 15 requests per window
+  max: 10000, // Raised to 10,000 for testing
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -15,7 +15,7 @@ export const authLimiter = rateLimit({
 // 2. Forgot Password Request Limiter (Prevents OTP/Email spam)
 export const otpRequestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // max 5 OTP requests per 15 minutes
+  max: 5000, // Raised to 5,000 for testing
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -23,10 +23,10 @@ export const otpRequestLimiter = rateLimit({
   },
 });
 
-// 3. OTP Verification Limiter (Prevents 6-digit brute force guessing)
+// 3. OTP Verification Limiter - Raised to 5,000 for testing
 export const otpVerifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 6, // max 6 incorrect attempts
+  max: 5000, // Very high limit for testing
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -34,10 +34,10 @@ export const otpVerifyLimiter = rateLimit({
   },
 });
 
-// 4. Group Code Joining Limiter (Prevents automated group code scraping)
+// 4. Group Code Joining Limiter - Raised to 5,000 for testing
 export const groupJoinLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // max 10 code checks per minute
+  max: 5000, // Very high limit for testing
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {

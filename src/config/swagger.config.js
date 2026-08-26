@@ -54,6 +54,42 @@ const swaggerOptions = {
         name: '9. Student Analytics',
         description: 'Aggregated completion rates, average scores, subject strengths, and dynamic peer ranking badges.',
       },
+      {
+        name: '10. Teacher Dashboard',
+        description: 'Teacher consolidated dashboard KPIs, class schedule today, revenue collection stats, and active exam roster.',
+      },
+      {
+        name: '11. Teacher Groups & Student Roster',
+        description: 'Group CRUD, cover photo, student roster with payment status, custom pricing, and find-or-create enrollment.',
+      },
+      {
+        name: '12. Attendance & QR Roll-Call',
+        description: 'Live QR attendance generation (10-min TTL), manual roll-call batching, and session attendance reports.',
+      },
+      {
+        name: '13. Curriculum Content CRUD',
+        description: 'Teacher private subjects, units, lessons, 500MB video uploads, and 10MB study PDF materials.',
+      },
+      {
+        name: '14. Homework Authoring & Grading',
+        description: 'Homework authoring wizard with nested questions, model answers, submission roster, and essay manual grading.',
+      },
+      {
+        name: '15. Exam Authoring & Grade Sheet',
+        description: 'Exam authoring wizard with time window, passing percentage, grade sheet (كشف درجات), and essay grading.',
+      },
+      {
+        name: '16. Income & Payment Ledger',
+        description: 'Financial KPI summary, paid/unpaid rosters, per-student pricing, and append-only receipt payment records.',
+      },
+      {
+        name: '17. Teacher Broadcast Notifications',
+        description: 'Group and grade-level broadcast announcements dispatched to students with FCM push notifications.',
+      },
+      {
+        name: '18. Teacher Profile & Settings',
+        description: 'Teacher personal profile, avatar photo upload, language selection, and notification preference settings.',
+      },
     ],
     components: {
       securitySchemes: {

@@ -432,6 +432,34 @@ export class AuthService {
       isVerified: true,
     };
   }
+
+  /**
+   * Delete Account (Self-service account deletion)
+   */
+  static async deleteAccount(userId, password = null) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw ApiError.notFound('المستخدم غير موجود');
+    }
+
+    if (password) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw ApiError.badRequest('كلمة المرور غير صحيحة');
+      }
+    }
+
+    // Delete user (Prisma cascade relations will clean up StudentProfile, OTPs, Notifications)
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return { message: 'تم حذف الحساب وجميع البيانات المرتبطة به بنجاح' };
+  }
 }
+
 
 

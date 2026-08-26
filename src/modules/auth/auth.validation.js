@@ -82,15 +82,23 @@ export const resetPasswordSchema = Joi.object({
 
 export const updatePasswordSchema = Joi.object({
   currentPassword: Joi.string().required().messages({
-    'any.required': 'كلمة المرور الحالية مطلوبة',
+    'string.empty': 'حقل كلمة المرور الحالية مطلوب',
+    'any.required': 'حقل كلمة المرور الحالية مطلوب',
   }),
   newPassword: Joi.string().min(6).required().messages({
-    'string.min': 'يجب أن تحتوي كلمة المرور الجديدة على 6 أحرف على الأقل',
-    'any.required': 'كلمة المرور الجديدة مطلوبة',
+    'string.min': 'يجب أن لا تقل كلمة المرور الجديدة عن 6 أحرف',
+    'string.empty': 'حقل كلمة المرور الجديدة مطلوب',
+    'any.required': 'حقل كلمة المرور الجديدة مطلوب',
   }),
   confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
     'any.only': 'كلمتا المرور غير متطابقتين',
     'any.required': 'يرجى تأكيد كلمة المرور الجديدة',
+  }),
+});
+
+export const deleteAccountSchema = Joi.object({
+  password: Joi.string().optional().messages({
+    'string.empty': 'يرجى إدخال كلمة المرور لتأكيد الحذف',
   }),
 });
 

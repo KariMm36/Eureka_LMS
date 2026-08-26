@@ -161,6 +161,14 @@ export class TestSetupHelper {
     };
   }
 
+  async createStudent(options = {}) {
+    return this.createUser({ role: 'STUDENT', ...options });
+  }
+
+  async createTeacher(options = {}) {
+    return this.createUser({ role: 'TEACHER', ...options });
+  }
+
   /**
    * 3. Create a Group with Teacher & Academic links
    */
@@ -175,7 +183,8 @@ export class TestSetupHelper {
       assignedTeacherId = teacher.user.id;
     }
 
-    const code = (groupCode || `GRP_${this.prefix.slice(-4)}_${Math.floor(1000 + Math.random() * 9000)}`).toUpperCase();
+    const randomSuffix = `${Date.now().toString().slice(-6)}_${Math.floor(1000 + Math.random() * 9000)}`;
+    const code = (groupCode || `GRP_${this.prefix.slice(-4)}_${randomSuffix}`).toUpperCase();
 
     const group = await prisma.group.create({
       data: {

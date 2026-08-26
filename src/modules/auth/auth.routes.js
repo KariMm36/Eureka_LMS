@@ -16,6 +16,7 @@ import {
   resetPasswordSchema,
   updatePasswordSchema,
   verifyEmailSchema,
+  deleteAccountSchema,
 } from './auth.validation.js';
 
 const router = Router();
@@ -264,4 +265,28 @@ router.put('/update-password', authenticate, validate(updatePasswordSchema), Aut
  */
 router.get('/me', authenticate, AuthController.getMe);
 
+/**
+ * @swagger
+ * /auth/account:
+ *   delete:
+ *     summary: Delete authenticated user account and associated personal data
+ *     tags: [1. Authentication & Verification]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password: { type: string, example: "Secret123!" }
+ *     responses:
+ *       200:
+ *         description: Account successfully deleted
+ *       400:
+ *         description: Incorrect password confirmation
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/account', authenticate, validate(deleteAccountSchema), AuthController.deleteAccount);
+
 export default router;
+

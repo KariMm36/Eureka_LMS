@@ -130,4 +130,32 @@ router.put('/settings', validate(updateSettingsSchema), StudentController.update
  */
 router.get('/analytics', StudentController.getAnalytics);
 
+/**
+ * @swagger
+ * /students/attendance/record:
+ *   post:
+ *     summary: Record student attendance by scanning live QR code or entering 6-digit session PIN
+ *     tags: [3. Student Onboarding & Profile]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               qrToken: { type: string, example: "a3f89e21b7c..." }
+ *               sessionCode: { type: string, example: "784291" }
+ *     responses:
+ *       200:
+ *         description: Attendance recorded successfully
+ *       400:
+ *         description: QR or Code expired
+ *       403:
+ *         description: Student not enrolled in group
+ *       404:
+ *         description: Session not found
+ */
+router.post('/attendance/record', StudentController.recordAttendance);
+
 export default router;
+

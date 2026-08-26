@@ -17,11 +17,46 @@
     { "key": "groupId", "value": "", "type": "string" },
     { "key": "homeworkId", "value": "", "type": "string" },
     { "key": "examId", "value": "", "type": "string" },
-    { "key": "notificationId", "value": "", "type": "string" }
+    { "key": "notificationId", "value": "", "type": "string" },
+    { "key": "teacherToken", "value": "", "type": "string" },
+    { "key": "teacherGroupId", "value": "", "type": "string" },
+    { "key": "teacherStudentId", "value": "", "type": "string" }
   ],
   "item": [
     {
+      "name": "Step 0: System Health & Diagnostics",
+      "description": "## 🩺 Phase 0: System Health & Diagnostics\n\n### 🖥️ Endpoints Covered:\n* `GET /health` or `GET /api/v1/health` (Server status, database heartbeat, and timestamp)\n\n### ⚙️ Automation Highlights:\n* Verifies that the Express API server is active and responding with status 200 OK before running any other journey tests.",
+      "item": [
+        {
+          "name": "0.1 Server Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Server is healthy', function () {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.eql(true);",
+                  "    pm.expect(res.data.status).to.eql('healthy');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
       "name": "Step 1: Authentication & Verification",
+
       "description": "## 🔐 Phase 1: Authentication & Account Verification\n\n### 📱 Mobile UI Screens Covered:\n* `Register Screen` (Full name, Egyptian phone `01[0125]XXXXXXXX`, email, password)\n* `Email Verification OTP Screen` (6-digit code sent via SMTP)\n* `Login Screen` (Returns JWT access token + refresh token)\n* `Forgot Password & Reset Password Screens`\n\n### ⚙️ Automation Highlights:\n* Automatically captures `{{token}}` and `{{refreshToken}}` upon successful registration or login.\n* All subsequent requests inherit `Authorization: Bearer {{token}}` automatically.",
       "item": [
         {
@@ -181,6 +216,53 @@
               "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"] }
+          }
+        },
+        {
+          "name": "1.10 Register Teacher (Capture Teacher Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('teacherToken', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"الأستاذ طارق منصور\",\n  \"email\": \"teacher.journey@eureka-test.com\",\n  \"phone\": \"01098765432\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"TEACHER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "1.11 Logout",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "1.12 Delete Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/account", "host": ["{{baseUrl}}"], "path": ["auth", "account"] }
           }
         }
       ]
@@ -621,6 +703,415 @@
           }
         }
       ]
+    },
+    {
+      "name": "Step 10: Teacher Dashboard",
+      "description": "## 📊 Phase 10: Teacher Dashboard & Metrics\n\n### 📱 Mobile UI Screens Covered:\n* `Teacher_Home Screen` (Consolidated metrics: total students, active groups, active exams, revenue collection %, today's class schedule, active exams list).",
+      "item": [
+        {
+          "name": "10.1 Get Teacher Dashboard KPIs",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/dashboard", "host": ["{{baseUrl}}"], "path": ["teacher", "dashboard"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 11: Teacher Groups & Student Roster",
+      "description": "## 👥 Phase 11: Teacher Group Management & Student Roster\n\n### 📱 Mobile UI Screens Covered:\n* `Teacher_Group Screen` (Browse teacher groups, active student count, schedule tags)\n* `Addd Group Screen` (Create study group with cover photo, capacity, default monthly price)\n* `Teacher_Group_Students Screen` (Student roster with payment badge `مدفوع` / `غير مدفوع`, attendance rate)\n* `Addd Student Screen` (Find-or-create student with auto credential dispatch)\n* `Student Details Modal` (Attendance stats, exam scores, homework history, and payment ledger)",
+      "item": [
+        {
+          "name": "11.1 List Teacher Groups",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.groups && res.data.groups.length > 0) {",
+                  "    pm.collectionVariables.set('teacherGroupId', res.data.groups[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/groups", "host": ["{{baseUrl}}"], "path": ["teacher", "groups"] }
+          }
+        },
+        {
+          "name": "11.2 Create Group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('teacherGroupId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة - الصف الأول الثانوي\",\n  \"subjectId\": \"{{subjectId}}\",\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"scheduleDays\": \"الأحد,الثلاثاء\",\n  \"scheduleTime\": \"05:30 PM\",\n  \"maxCapacity\": 45,\n  \"defaultPrice\": 300,\n  \"description\": \"مجموعة الشرح النظري وحل المسائل الشاملة\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/groups", "host": ["{{baseUrl}}"], "path": ["teacher", "groups"] }
+          }
+        },
+        {
+          "name": "11.3 Get Group by ID",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}"] }
+          }
+        },
+        {
+          "name": "11.4 Update Group Details",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة (معدلة)\",\n  \"defaultPrice\": 350,\n  \"maxCapacity\": 50\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}"] }
+          }
+        },
+        {
+          "name": "11.5 Get Group QR Invite Code",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/qr-code", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "qr-code"] }
+          }
+        },
+        {
+          "name": "11.6 Add Student to Group (Find-or-Create)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.student && res.data.student.id) {",
+                  "    pm.collectionVariables.set('teacherStudentId', res.data.student.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"كريم مصطفى محمود\",\n  \"phone\": \"01020924779\",\n  \"email\": \"karim.mustafa@eureka-test.com\",\n  \"parentPhone\": \"01011223344\",\n  \"enrollmentPrice\": 300\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "students"] }
+          }
+        },
+        {
+          "name": "11.7 Get Group Student Roster",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "students"] }
+          }
+        },
+        {
+          "name": "11.8 Get Student Details Modal",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "students", "{{teacherStudentId}}"] }
+          }
+        },
+        {
+          "name": "11.9 Update Student Price / Status",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enrollmentPrice\": 250\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "students", "{{teacherStudentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 12: Attendance & QR Roll-Call",
+      "description": "## ⏱️ Phase 12: Attendance & QR Roll-Call\n\n### 📱 Mobile UI Screens Covered:\n* `Attendance Screen` (Overview metrics, top attendance groups, recent sessions)\n* `رمز QR Code Screen` (Live QR code generator + 6-digit session PIN with 10-min countdown timer)\n* `Record Manual Screen` (Batch roll-call toggles: PRESENT, LATE, ABSENT)\n* `Student QR Scanner Screen` (Scan QR or enter 6-digit PIN to mark attendance)",
+      "item": [
+        {
+          "name": "12.1 Create Attendance Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('sessionId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"حصة الفيزياء - الحركة التوافقية البسيطة\",\n  \"sessionDate\": \"2026-08-26T10:00:00.000Z\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions"] }
+          }
+        },
+        {
+          "name": "12.2 Generate Live QR & 6-Digit PIN (10-min TTL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "    if (res.data.qrToken) pm.collectionVariables.set('sessionQrToken', res.data.qrToken);",
+                  "    if (res.data.sessionCode) pm.collectionVariables.set('sessionCode', res.data.sessionCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/qr", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}", "qr"] }
+          }
+        },
+        {
+          "name": "12.3 Student Record Attendance (Via Live QR or 6-digit Code)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrToken\": \"{{sessionQrToken}}\",\n  \"sessionCode\": \"{{sessionCode}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/students/attendance/record", "host": ["{{baseUrl}}"], "path": ["students", "attendance", "record"] }
+          }
+        },
+        {
+          "name": "12.4 Manual Roll-Call Batching",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attendances\": [\n    {\n      \"studentId\": \"{{teacherStudentId}}\",\n      \"status\": \"PRESENT\"\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/manual", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}", "manual"] }
+          }
+        },
+        {
+          "name": "12.5 Get Session Attendance Details & Roster",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}"] }
+          }
+        },
+        {
+          "name": "12.6 Get Attendance Dashboard Overview",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/overview", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "overview"] }
+          }
+        },
+        {
+          "name": "12.7 Get Attendance Calendar",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/attendance/calendar?month=8&year=2026", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "calendar"], "query": [{ "key": "month", "value": "8" }, { "key": "year", "value": "2026" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 13: Curriculum Content CRUD",
+      "description": "## 📚 Phase 13: Curriculum Content Management\n\n### 📱 Mobile UI Screens Covered:\n* `Subjects List & Add Subject` (Private subjects for teacher)\n* `Units & Lessons Management` (Re-ordering, editing titles)\n* `Lesson Media Attachments` (Upload 500MB video, 10MB PDF study materials with audience group restrictions)",
+      "item": [
+        {
+          "name": "13.1 Create Private Subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('teacherSubjectId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nameAr\": \"الكيمياء الحيوية المتقدمة\",\n  \"nameEn\": \"Advanced Biochemistry\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/subjects", "host": ["{{baseUrl}}"], "path": ["teacher", "subjects"] }
+          }
+        },
+        {
+          "name": "13.2 List Teacher Subjects",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/subjects", "host": ["{{baseUrl}}"], "path": ["teacher", "subjects"] }
+          }
+        },
+        {
+          "name": "13.3 Create Curriculum Unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('unitId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"title\": \"الوحدة الأولى: التركيب الذري والروابط الكيميائية\",\n  \"order\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/units", "host": ["{{baseUrl}}"], "path": ["teacher", "units"] }
+          }
+        },
+        {
+          "name": "13.4 Update Unit",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"الوحدة الأولى: التركيب الذري (محدثة)\",\n  \"order\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/units/{{unitId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "units", "{{unitId}}"] }
+          }
+        },
+        {
+          "name": "13.5 Create Lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('lessonId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم\",\n  \"description\": \"شرح مفصل لمستويات الطاقة الرئيسية والفرعية\",\n  \"order\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/lessons", "host": ["{{baseUrl}}"], "path": ["teacher", "lessons"] }
+          }
+        },
+        {
+          "name": "13.6 Update Lesson",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم الأربعة\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/lessons/{{lessonId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "lessons", "{{lessonId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 18: Teacher Profile & Settings",
+      "description": "## ⚙️ Phase 18: Teacher Profile & Preferences\n\n### 📱 Mobile UI Screens Covered:\n* `Profile Screen` (View teacher details, assigned groups, student count)\n* `Settings Screen` (Language, dark mode, notification toggles)",
+      "item": [
+        {
+          "name": "18.1 Get Teacher Profile",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/profile", "host": ["{{baseUrl}}"], "path": ["teacher", "profile"] }
+          }
+        },
+        {
+          "name": "18.2 Update Teacher Settings",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appLanguage\": \"ar\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/settings", "host": ["{{baseUrl}}"], "path": ["teacher", "settings"] }
+          }
+        }
+      ]
     }
   ]
 }
+

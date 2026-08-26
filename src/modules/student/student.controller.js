@@ -62,4 +62,15 @@ export class StudentController {
       next(error);
     }
   }
+
+  static async recordAttendance(req, res, next) {
+    try {
+      const { TeacherService } = await import('../teacher/teacher.service.js');
+      const result = await TeacherService.recordStudentAttendance(req.user.id, req.body);
+      return ApiResponse.success(res, result, result.message);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

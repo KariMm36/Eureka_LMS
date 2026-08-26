@@ -29,22 +29,35 @@ export class AcademicService {
   }
 
   /**
-   * 2. Get all subjects with In-Memory Caching
+   * 2. Get all subjects with In-Memory Caching (supports global and optional teacherId/gradeLevelId)
    */
-  static async getSubjects(gradeLevelId = null) {
+  static async getSubjects(gradeLevelId = null, teacherId = null) {
+    const where = {
+      OR: [
+        { isGlobal: true },
+        ...(teacherId ? [{ createdById: teacherId }] : []),
+      ],
+    };
+
     if (!gradeLevelId) {
-      const cached = CacheUtil.get(CACHE_KEYS.SUBJECTS_ALL);
-      if (cached) return cached;
+      if (!teacherId) {
+        const cached = CacheUtil.get(CACHE_KEYS.SUBJECTS_ALL);
+        if (cached) return cached;
+      }
 
       const subjects = await prisma.subject.findMany({
+        where,
         orderBy: { nameAr: 'asc' },
       });
 
-      CacheUtil.set(CACHE_KEYS.SUBJECTS_ALL, subjects, 7200);
+      if (!teacherId) {
+        CacheUtil.set(CACHE_KEYS.SUBJECTS_ALL, subjects, 7200);
+      }
       return subjects;
     }
 
     return prisma.subject.findMany({
+      where,
       orderBy: { nameAr: 'asc' },
       include: {
         units: {

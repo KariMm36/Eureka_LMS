@@ -293,5 +293,22 @@ describe('Auth Module Integration Tests', () => {
 
       expect(refreshRes.status).toBe(401);
     });
+
+    it('should delete authenticated user account (DELETE /api/v1/auth/account)', async () => {
+      const deleteRes = await request(app)
+        .delete('/api/v1/auth/account')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ password: 'BrandNewPassword123!' });
+
+      expect(deleteRes.status).toBe(200);
+      expect(deleteRes.body.success).toBe(true);
+
+      // Verify user no longer exists in DB
+      const userInDb = await prisma.user.findUnique({
+        where: { id: studentUserId },
+      });
+      expect(userInDb).toBeNull();
+    });
   });
 });
+

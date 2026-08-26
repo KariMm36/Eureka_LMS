@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { HomeworkController } from './homework.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { authorize } from '../../middlewares/role.middleware.js';
 
 const router = Router();
 
-// All homework routes require student authentication
-router.use(authenticate);
+// Student homework taking/submission routes — student-only
+router.use(authenticate, authorize('STUDENT', 'ADMIN'));
 
 
 /**

@@ -22,6 +22,7 @@ import homeRoutes from './modules/home/home.routes.js';
 import homeworkRoutes from './modules/homework/homework.routes.js';
 import examRoutes from './modules/exams/exam.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
+import teacherRoutes from './modules/teacher/teacher.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,10 +79,11 @@ app.use(
 app.use('/docs', (req, res) => res.redirect('/api-docs'));
 
 
-// Health Check API
-app.get('/health', (req, res) => {
+// Health Check API (accessible at both /health and /api/v1/health)
+app.get(['/health', '/api/v1/health'], (req, res) => {
   return ApiResponse.success(res, { status: 'healthy', timestamp: new Date() }, 'خادم يوريكا يعمل بنجاح');
 });
+
 
 // API Routes (v1)
 app.use('/api/v1/auth', authRoutes);
@@ -92,6 +94,7 @@ app.use('/api/v1/home', homeRoutes);
 app.use('/api/v1/homework', homeworkRoutes);
 app.use('/api/v1/exams', examRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/teacher', teacherRoutes);
 
 // 404 Route Handler
 app.use('*', (req, res) => {

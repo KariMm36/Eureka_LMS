@@ -103,4 +103,14 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async deleteAccount(req, res, next) {
+    try {
+      const result = await AuthService.deleteAccount(req.user.id, req.body?.password);
+      return ApiResponse.success(res, result, result.message);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

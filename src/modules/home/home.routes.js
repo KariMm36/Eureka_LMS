@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { HomeController } from './home.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { authorize } from '../../middlewares/role.middleware.js';
 
 const router = Router();
 
-// Home routes require authentication
-router.use(authenticate);
+// Home dashboard is student-only
+router.use(authenticate, authorize('STUDENT', 'ADMIN'));
 
 
 /**
