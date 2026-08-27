@@ -4,7 +4,6 @@ import { validateEssayMinWords } from '../../utils/essay.util.js';
 import { computeHomeworkPercentile } from '../../utils/percentile.util.js';
 import { sendPushNotification } from '../../utils/pushNotification.util.js';
 
-
 export class HomeworkService {
   /**
    * 1. Get student homework feed with tabs (pending / completed)
@@ -147,6 +146,20 @@ export class HomeworkService {
       throw ApiError.notFound('الواجب غير موجود');
     }
 
+    // Verify student has an ACTIVE enrollment in the homework's group
+    const enrollment = await prisma.groupEnrollment.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId: homework.groupId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.status !== 'ACTIVE') {
+      throw ApiError.forbidden('أنت لست مسجلاً في مجموعة هذا الواجب');
+    }
+
     // Parse JSON options for MCQ
     const sanitizedQuestions = homework.questions.map((q) => ({
       ...q,
@@ -189,6 +202,20 @@ export class HomeworkService {
 
     if (!homework) {
       throw ApiError.notFound('الواجب غير موجود');
+    }
+
+    // Verify student has an ACTIVE enrollment in the homework's group
+    const enrollment = await prisma.groupEnrollment.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId: homework.groupId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.status !== 'ACTIVE') {
+      throw ApiError.forbidden('أنت لست مسجلاً في مجموعة هذا الواجب');
     }
 
     // Check existing submission
@@ -299,7 +326,6 @@ export class HomeworkService {
       body: notifBody,
       data: { type: 'HOMEWORK', referenceId: homeworkId },
     }).catch((err) => console.error('[Push Notification] Error sending homework push:', err.message));
-
 
     return {
       submissionId: submission.id,

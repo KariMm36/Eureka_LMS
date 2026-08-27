@@ -2,10 +2,9 @@ import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
 import { parseScheduleDays, isGroupScheduledOn } from '../../utils/schedule.util.js';
 
-
 export class HomeService {
   /**
-   * Aggregates all widgets for the student home dashboard in a single fast query
+   * Aggregates all widgets for the student home dashboard
    */
   static async getHomeDashboard(userId) {
     const student = await prisma.user.findUnique({
@@ -114,7 +113,6 @@ export class HomeService {
         };
       }
     }
-
 
     return {
       studentInfo: {

@@ -1,10 +1,13 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import QRCode from 'qrcode';
+import { Prisma } from '@prisma/client';
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
 import { OwnershipUtil } from '../../utils/ownership.util.js';
 import { parseScheduleDays, isGroupScheduledOn } from '../../utils/schedule.util.js';
+import { NotificationService } from '../notifications/notification.service.js';
+import { handleFileUpload, CLOUDINARY_FOLDERS } from '../../config/cloudinary.config.js';
 
 export class TeacherService {
   /**
@@ -15,8 +18,8 @@ export class TeacherService {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // 1. Fetch teacher groups
-    const teacherGroups = await prisma.group.findMany({
+      // 1. Fetch teacher groups
+      const teacherGroups = await prisma.group.findMany({
       where: { teacherId, isActive: true },
       include: {
         subject: true,
@@ -36,35 +39,39 @@ export class TeacherService {
       uniqueStudentsCount,
       activeExams,
       monthlyPayments,
-      allActiveEnrollments,
+      expectedRevenueResult,
     ] = await Promise.all([
       // Distinct active students across all teacher's groups
-      prisma.groupEnrollment.findMany({
-        where: {
-          groupId: { in: groupIds },
-          status: 'ACTIVE',
-        },
-        distinct: ['studentId'],
-        select: { studentId: true },
-      }),
+      groupIds.length > 0
+        ? prisma.groupEnrollment.findMany({
+            where: {
+              groupId: { in: groupIds },
+              status: 'ACTIVE',
+            },
+            distinct: ['studentId'],
+            select: { studentId: true },
+          })
+        : Promise.resolve([]),
 
       // Active exams in teacher's groups (still ongoing or upcoming today)
-      prisma.exam.findMany({
-        where: {
-          groupId: { in: groupIds },
-          endTime: { gte: now },
-        },
-        include: {
-          group: {
-            include: { subject: true, gradeLevel: true },
-          },
-          _count: {
-            select: { submissions: true },
-          },
-        },
-        orderBy: { startTime: 'asc' },
-        take: 5,
-      }),
+      groupIds.length > 0
+        ? prisma.exam.findMany({
+            where: {
+              groupId: { in: groupIds },
+              endTime: { gte: now },
+            },
+            include: {
+              group: {
+                include: { subject: true, gradeLevel: true },
+              },
+              _count: {
+                select: { submissions: true },
+              },
+            },
+            orderBy: { startTime: 'asc' },
+            take: 5,
+          })
+        : Promise.resolve([]),
 
       // Monthly payments received this month
       prisma.studentPayment.aggregate({
@@ -76,24 +83,19 @@ export class TeacherService {
         _count: { id: true },
       }),
 
-      // All active enrollments to compute expected revenue & collection rate
-      prisma.groupEnrollment.findMany({
-        where: {
-          groupId: { in: groupIds },
-          status: 'ACTIVE',
-        },
-        select: {
-          enrollmentPrice: true,
-          group: { select: { defaultPrice: true } },
-        },
-      }),
+      // Database-side expected revenue aggregation across all teacher groups
+      groupIds.length > 0
+        ? prisma.$queryRaw`
+            SELECT COALESCE(SUM(CASE WHEN ge.enrollmentPrice > 0 THEN ge.enrollmentPrice ELSE g.defaultPrice END), 0) AS totalExpected
+            FROM group_enrollments ge
+            JOIN groups g ON ge.groupId = g.id
+            WHERE ge.groupId IN (${Prisma.join(groupIds)}) AND ge.status = 'ACTIVE'
+          `
+        : Promise.resolve([{ totalExpected: 0 }]),
     ]);
 
     // Compute expected monthly revenue and collection rate %
-    const totalExpectedRevenue = allActiveEnrollments.reduce((acc, curr) => {
-      const price = Number(curr.enrollmentPrice) > 0 ? Number(curr.enrollmentPrice) : Number(curr.group.defaultPrice);
-      return acc + price;
-    }, 0);
+    const totalExpectedRevenue = Number(expectedRevenueResult[0]?.totalExpected || 0);
 
     const actualCollectedRevenue = Number(monthlyPayments._sum.amount || 0);
     const collectionRatePercentage = totalExpectedRevenue > 0
@@ -260,7 +262,13 @@ export class TeacherService {
       groupCode = `${groupCode}_${Math.floor(10 + Math.random() * 90)}`;
     }
 
-    const coverImageUrl = coverFile ? `/uploads/${coverFile.filename}` : null;
+    const coverImageUrl = coverFile
+      ? await handleFileUpload({
+          file: coverFile,
+          folder: CLOUDINARY_FOLDERS.GROUP_COVERS,
+          resourceType: 'image',
+        })
+      : null;
 
     const group = await prisma.group.create({
       data: {
@@ -368,7 +376,13 @@ export class TeacherService {
     if (data.defaultPrice !== undefined) updatePayload.defaultPrice = parseFloat(data.defaultPrice);
     if (data.description !== undefined) updatePayload.description = data.description;
     if (data.isActive !== undefined) updatePayload.isActive = Boolean(data.isActive);
-    if (coverFile) updatePayload.coverImageUrl = `/uploads/${coverFile.filename}`;
+    if (coverFile) {
+      updatePayload.coverImageUrl = await handleFileUpload({
+        file: coverFile,
+        folder: CLOUDINARY_FOLDERS.GROUP_COVERS,
+        resourceType: 'image',
+      });
+    }
 
     const updated = await prisma.group.update({
       where: { id: groupId },
@@ -403,7 +417,7 @@ export class TeacherService {
   static async deleteGroup(teacherId, groupId) {
     await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
 
-    await prisma.group.update({
+    const deleted = await prisma.group.update({
       where: { id: groupId },
       data: { isActive: false },
     });
@@ -896,7 +910,13 @@ export class TeacherService {
     const updateData = {};
     if (data.fullName) updateData.fullName = data.fullName;
     if (data.phone) updateData.phone = data.phone;
-    if (avatarFile) updateData.avatarUrl = `/uploads/${avatarFile.filename}`;
+    if (avatarFile) {
+      updateData.avatarUrl = await handleFileUpload({
+        file: avatarFile,
+        folder: CLOUDINARY_FOLDERS.TEACHER_AVATARS,
+        resourceType: 'image',
+      });
+    }
 
     const updated = await prisma.user.update({
       where: { id: teacherId },
@@ -1121,6 +1141,23 @@ export class TeacherService {
    */
   static async manualAttendance(teacherId, sessionId, attendances) {
     const session = await OwnershipUtil.verifySessionOwnership(teacherId, sessionId);
+
+    // Verify that all student IDs are actively enrolled in this group
+    const incomingStudentIds = attendances.map((a) => a.studentId);
+    const activeEnrollments = await prisma.groupEnrollment.findMany({
+      where: {
+        groupId: session.groupId,
+        studentId: { in: incomingStudentIds },
+        status: 'ACTIVE',
+      },
+      select: { studentId: true },
+    });
+
+    const activeSet = new Set(activeEnrollments.map((e) => e.studentId));
+    const unenrolled = incomingStudentIds.find((id) => !activeSet.has(id));
+    if (unenrolled) {
+      throw ApiError.badRequest('أحد الطلاب المحددين غير مسجل في هذه المجموعة أو حسابه غير نشط');
+    }
 
     // Run batch upsert in a transaction
     const operations = attendances.map((att) =>
@@ -1393,7 +1430,13 @@ export class TeacherService {
    */
   static async createSubject(teacherId, data, iconFile = null) {
     const { nameAr, nameEn } = data;
-    const iconUrl = iconFile ? `/uploads/${iconFile.filename}` : data.iconUrl || 'default-subject.png';
+    const iconUrl = iconFile
+      ? await handleFileUpload({
+          file: iconFile,
+          folder: CLOUDINARY_FOLDERS.SUBJECT_ICONS,
+          resourceType: 'image',
+        })
+      : data.iconUrl || 'default-subject.png';
 
     const subject = await prisma.subject.create({
       data: {
@@ -1548,13 +1591,19 @@ export class TeacherService {
 
     const { title, description, durationSeconds, groupId } = data;
 
+    const videoUrl = await handleFileUpload({
+      file: videoFile,
+      folder: CLOUDINARY_FOLDERS.LESSON_VIDEOS,
+      resourceType: 'video',
+    });
+
     const video = await prisma.lessonVideo.create({
       data: {
         lessonId,
         title,
         description: description || null,
         durationSeconds: durationSeconds ? parseInt(durationSeconds, 10) : 0,
-        videoUrl: `/uploads/${videoFile.filename}`,
+        videoUrl,
         createdById: teacherId,
         groupId: groupId || null,
       },
@@ -1575,11 +1624,17 @@ export class TeacherService {
 
     const { title, fileType, groupId } = data;
 
+    const fileUrl = await handleFileUpload({
+      file: materialFile,
+      folder: CLOUDINARY_FOLDERS.LESSON_MATERIALS,
+      resourceType: 'auto',
+    });
+
     const material = await prisma.lessonMaterial.create({
       data: {
         lessonId,
         title,
-        fileUrl: `/uploads/${materialFile.filename}`,
+        fileUrl,
         fileType: fileType || 'PDF',
         fileSizeBytes: materialFile.size,
         createdById: teacherId,
@@ -1614,5 +1669,1467 @@ export class TeacherService {
 
     return { message: 'تم حذف الملف المرفق بنجاح' };
   }
+
+  // ----------------------------------------------------
+  // Milestone 3: Assessment Authoring Wizards & Grading Engine
+  // ----------------------------------------------------
+
+  // ====================================================
+  // 14. Homework Authoring Wizard (Screen: "Add Homework")
+  // ====================================================
+
+  /**
+   * 33. Create Homework Assignment
+   */
+  static async createHomework(teacherId, data) {
+    const { groupId, lessonId, title, unitName, durationMinutes, dueDate, questions } = data;
+    await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
+
+    const totalScore = questions.reduce((acc, q) => acc + (parseInt(q.score, 10) || 1), 0);
+
+    const homework = await prisma.$transaction(async (tx) => {
+      const createdHw = await tx.homework.create({
+        data: {
+          groupId,
+          lessonId: lessonId || null,
+          createdById: teacherId,
+          title,
+          unitName: unitName || null,
+          durationMinutes: durationMinutes ? parseInt(durationMinutes, 10) : 30,
+          totalScore,
+          dueDate: new Date(dueDate),
+        },
+      });
+
+      const questionCreations = questions.map((q, idx) => ({
+        homeworkId: createdHw.id,
+        type: q.type || 'MCQ',
+        questionText: q.questionText,
+        options: q.options ? (Array.isArray(q.options) ? JSON.stringify(q.options) : q.options) : null,
+        correctOptionIndex: q.correctOptionIndex !== undefined ? parseInt(q.correctOptionIndex, 10) : null,
+        explanation: q.explanation || null,
+        modelAnswer: q.modelAnswer || null,
+        minWords: q.minWords ? parseInt(q.minWords, 10) : 0,
+        score: parseInt(q.score, 10) || 1,
+        order: q.order !== undefined ? parseInt(q.order, 10) : idx + 1,
+      }));
+
+      await tx.homeworkQuestion.createMany({
+        data: questionCreations,
+      });
+
+      return tx.homework.findUnique({
+        where: { id: createdHw.id },
+        include: {
+          group: { select: { id: true, name: true, subject: { select: { nameAr: true } } } },
+          questions: { orderBy: { order: 'asc' } },
+        },
+      });
+    });
+
+    // Notify students asynchronously
+    NotificationService.notifyNewHomework(homework.id).catch((err) =>
+      console.error('[Homework Notification Error]:', err.message)
+    );
+
+    return homework;
+  }
+
+  /**
+   * 34. List Teacher's Homework Assignments
+   */
+  static async getTeacherHomeworks(teacherId, query = {}) {
+    const { groupId, search, page = 1, limit = 10 } = query;
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const pageSize = Math.max(1, parseInt(limit, 10));
+    const skip = (pageNum - 1) * pageSize;
+
+    const where = {
+      group: { teacherId, isActive: true },
+      ...(groupId && { groupId }),
+      ...(search && { title: { contains: search } }),
+    };
+
+    const [totalCount, homeworks] = await prisma.$transaction([
+      prisma.homework.count({ where }),
+      prisma.homework.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          group: {
+            select: {
+              id: true,
+              name: true,
+              subject: { select: { nameAr: true } },
+              _count: { select: { enrollments: { where: { status: 'ACTIVE' } } } },
+            },
+          },
+          _count: {
+            select: {
+              questions: true,
+              submissions: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      pagination: {
+        totalCount,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+      },
+      homeworks: homeworks.map((hw) => ({
+        id: hw.id,
+        title: hw.title,
+        unitName: hw.unitName,
+        groupId: hw.groupId,
+        groupName: hw.group.name,
+        subjectName: hw.group.subject.nameAr,
+        totalScore: hw.totalScore,
+        durationMinutes: hw.durationMinutes,
+        dueDate: hw.dueDate,
+        questionsCount: hw._count.questions,
+        totalEnrolled: hw.group._count.enrollments,
+        submissionsCount: hw._count.submissions,
+        submissionRatePercentage: hw.group._count.enrollments > 0
+          ? Math.round((hw._count.submissions / hw.group._count.enrollments) * 100)
+          : 0,
+        createdAt: hw.createdAt,
+      })),
+    };
+  }
+
+  /**
+   * 35. Get Homework Details with Questions
+   */
+  static async getHomeworkDetails(teacherId, homeworkId) {
+    await OwnershipUtil.verifyHomeworkOwnership(teacherId, homeworkId);
+
+    const homework = await prisma.homework.findUnique({
+      where: { id: homeworkId },
+      include: {
+        group: {
+          select: {
+            id: true,
+            name: true,
+            subject: { select: { nameAr: true } },
+            _count: { select: { enrollments: { where: { status: 'ACTIVE' } } } },
+          },
+        },
+        lesson: { select: { id: true, title: true } },
+        questions: { orderBy: { order: 'asc' } },
+        _count: { select: { submissions: true } },
+      },
+    });
+
+    return {
+      ...homework,
+      questions: homework.questions.map((q) => ({
+        ...q,
+        options: q.options ? JSON.parse(q.options) : [],
+      })),
+    };
+  }
+
+  /**
+   * 36. Update Homework
+   */
+  static async updateHomework(teacherId, homeworkId, data) {
+    await OwnershipUtil.verifyHomeworkOwnership(teacherId, homeworkId);
+    const { title, unitName, durationMinutes, dueDate, questions } = data;
+
+    return prisma.$transaction(async (tx) => {
+      const updateData = {};
+      if (title !== undefined) updateData.title = title;
+      if (unitName !== undefined) updateData.unitName = unitName;
+      if (durationMinutes !== undefined) updateData.durationMinutes = parseInt(durationMinutes, 10);
+      if (dueDate !== undefined) updateData.dueDate = new Date(dueDate);
+
+      if (questions && Array.isArray(questions)) {
+        updateData.totalScore = questions.reduce((acc, q) => acc + (parseInt(q.score, 10) || 1), 0);
+
+        // Replace questions
+        await tx.homeworkQuestion.deleteMany({ where: { homeworkId } });
+        const questionCreations = questions.map((q, idx) => ({
+          homeworkId,
+          type: q.type || 'MCQ',
+          questionText: q.questionText,
+          options: q.options ? (Array.isArray(q.options) ? JSON.stringify(q.options) : q.options) : null,
+          correctOptionIndex: q.correctOptionIndex !== undefined ? parseInt(q.correctOptionIndex, 10) : null,
+          explanation: q.explanation || null,
+          modelAnswer: q.modelAnswer || null,
+          minWords: q.minWords ? parseInt(q.minWords, 10) : 0,
+          score: parseInt(q.score, 10) || 1,
+          order: q.order !== undefined ? parseInt(q.order, 10) : idx + 1,
+        }));
+        await tx.homeworkQuestion.createMany({ data: questionCreations });
+      }
+
+      return tx.homework.update({
+        where: { id: homeworkId },
+        data: updateData,
+        include: { questions: { orderBy: { order: 'asc' } } },
+      });
+    });
+  }
+
+  /**
+   * 37. Delete Homework
+   */
+  static async deleteHomework(teacherId, homeworkId) {
+    await OwnershipUtil.verifyHomeworkOwnership(teacherId, homeworkId);
+
+    await prisma.homework.delete({
+      where: { id: homeworkId },
+    });
+
+    return { message: 'تم حذف الواجب بنجاح' };
+  }
+
+  /**
+   * 38. Get Homework Submissions Roster
+   */
+  static async getHomeworkSubmissions(teacherId, homeworkId) {
+    await OwnershipUtil.verifyHomeworkOwnership(teacherId, homeworkId);
+
+    const submissions = await prisma.homeworkSubmission.findMany({
+      where: { homeworkId },
+      orderBy: { submittedAt: 'desc' },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                phone: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return submissions.map((sub) => ({
+      submissionId: sub.id,
+      studentId: sub.student.id,
+      fullName: sub.student.user.fullName,
+      phone: sub.student.user.phone,
+      avatarUrl: sub.student.user.avatarUrl,
+      totalScoreObtained: sub.totalScoreObtained,
+      correctCount: sub.correctCount,
+      underReviewCount: sub.underReviewCount,
+      wrongCount: sub.wrongCount,
+      status: sub.status,
+      submittedAt: sub.submittedAt,
+    }));
+  }
+
+  // ====================================================
+  // 15. Timed Exam Authoring Wizard (Screen: "Add Exam")
+  // ====================================================
+
+  /**
+   * 39. Create Timed Exam
+   */
+  static async createExam(teacherId, data) {
+    const {
+      groupId,
+      lessonId,
+      title,
+      durationMinutes,
+      passingScorePercentage,
+      guidelinesJson,
+      startTime,
+      endTime,
+      questions,
+    } = data;
+    await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
+
+    const totalScore = questions.reduce((acc, q) => acc + (parseInt(q.score, 10) || 1), 0);
+
+    const exam = await prisma.$transaction(async (tx) => {
+      const createdExam = await tx.exam.create({
+        data: {
+          groupId,
+          lessonId: lessonId || null,
+          createdById: teacherId,
+          title,
+          durationMinutes: parseInt(durationMinutes, 10),
+          passingScorePercentage: passingScorePercentage ? parseInt(passingScorePercentage, 10) : 60,
+          guidelinesJson: guidelinesJson ? (typeof guidelinesJson === 'object' ? JSON.stringify(guidelinesJson) : guidelinesJson) : null,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          totalScore,
+        },
+      });
+
+      const questionCreations = questions.map((q, idx) => ({
+        examId: createdExam.id,
+        type: q.type || 'MCQ',
+        questionText: q.questionText,
+        options: q.options ? (Array.isArray(q.options) ? JSON.stringify(q.options) : q.options) : null,
+        correctOptionIndex: q.correctOptionIndex !== undefined ? parseInt(q.correctOptionIndex, 10) : null,
+        explanation: q.explanation || null,
+        modelAnswer: q.modelAnswer || null,
+        minWords: q.minWords ? parseInt(q.minWords, 10) : 0,
+        score: parseInt(q.score, 10) || 1,
+        order: q.order !== undefined ? parseInt(q.order, 10) : idx + 1,
+      }));
+
+      await tx.examQuestion.createMany({
+        data: questionCreations,
+      });
+
+      return tx.exam.findUnique({
+        where: { id: createdExam.id },
+        include: {
+          group: { select: { id: true, name: true, subject: { select: { nameAr: true } } } },
+          questions: { orderBy: { order: 'asc' } },
+        },
+      });
+    });
+
+    // Notify students asynchronously
+    NotificationService.notifyNewExam(exam.id).catch((err) =>
+      console.error('[Exam Notification Error]:', err.message)
+    );
+
+    return exam;
+  }
+
+  /**
+   * 40. List Teacher's Exams
+   */
+  static async getTeacherExams(teacherId, query = {}) {
+    const { groupId, search, page = 1, limit = 10 } = query;
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const pageSize = Math.max(1, parseInt(limit, 10));
+    const skip = (pageNum - 1) * pageSize;
+
+    const where = {
+      group: { teacherId, isActive: true },
+      ...(groupId && { groupId }),
+      ...(search && { title: { contains: search } }),
+    };
+
+    const [totalCount, exams] = await prisma.$transaction([
+      prisma.exam.count({ where }),
+      prisma.exam.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          group: {
+            select: {
+              id: true,
+              name: true,
+              subject: { select: { nameAr: true } },
+              _count: { select: { enrollments: { where: { status: 'ACTIVE' } } } },
+            },
+          },
+          _count: {
+            select: {
+              questions: true,
+              submissions: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      pagination: {
+        totalCount,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+      },
+      exams: exams.map((ex) => ({
+        id: ex.id,
+        title: ex.title,
+        groupId: ex.groupId,
+        groupName: ex.group.name,
+        subjectName: ex.group.subject.nameAr,
+        durationMinutes: ex.durationMinutes,
+        passingScorePercentage: ex.passingScorePercentage,
+        totalScore: ex.totalScore,
+        startTime: ex.startTime,
+        endTime: ex.endTime,
+        questionsCount: ex._count.questions,
+        totalEnrolled: ex.group._count.enrollments,
+        submissionsCount: ex._count.submissions,
+        submissionRatePercentage: ex.group._count.enrollments > 0
+          ? Math.round((ex._count.submissions / ex.group._count.enrollments) * 100)
+          : 0,
+        createdAt: ex.createdAt,
+      })),
+    };
+  }
+
+  /**
+   * 41. Get Exam Details with Questions
+   */
+  static async getExamDetails(teacherId, examId) {
+    await OwnershipUtil.verifyExamOwnership(teacherId, examId);
+
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      include: {
+        group: {
+          select: {
+            id: true,
+            name: true,
+            subject: { select: { nameAr: true } },
+            _count: { select: { enrollments: { where: { status: 'ACTIVE' } } } },
+          },
+        },
+        lesson: { select: { id: true, title: true } },
+        questions: { orderBy: { order: 'asc' } },
+        _count: { select: { submissions: true } },
+      },
+    });
+
+    return {
+      ...exam,
+      guidelines: exam.guidelinesJson ? JSON.parse(exam.guidelinesJson) : [],
+      questions: exam.questions.map((q) => ({
+        ...q,
+        options: q.options ? JSON.parse(q.options) : [],
+      })),
+    };
+  }
+
+  /**
+   * 42. Update Exam
+   */
+  static async updateExam(teacherId, examId, data) {
+    await OwnershipUtil.verifyExamOwnership(teacherId, examId);
+    const { title, durationMinutes, passingScorePercentage, guidelinesJson, startTime, endTime, questions } = data;
+
+    return prisma.$transaction(async (tx) => {
+      const updateData = {};
+      if (title !== undefined) updateData.title = title;
+      if (durationMinutes !== undefined) updateData.durationMinutes = parseInt(durationMinutes, 10);
+      if (passingScorePercentage !== undefined) updateData.passingScorePercentage = parseInt(passingScorePercentage, 10);
+      if (guidelinesJson !== undefined) updateData.guidelinesJson = typeof guidelinesJson === 'object' ? JSON.stringify(guidelinesJson) : guidelinesJson;
+      if (startTime !== undefined) updateData.startTime = new Date(startTime);
+      if (endTime !== undefined) updateData.endTime = new Date(endTime);
+
+      if (questions && Array.isArray(questions)) {
+        updateData.totalScore = questions.reduce((acc, q) => acc + (parseInt(q.score, 10) || 1), 0);
+
+        // Replace questions
+        await tx.examQuestion.deleteMany({ where: { examId } });
+        const questionCreations = questions.map((q, idx) => ({
+          examId,
+          type: q.type || 'MCQ',
+          questionText: q.questionText,
+          options: q.options ? (Array.isArray(q.options) ? JSON.stringify(q.options) : q.options) : null,
+          correctOptionIndex: q.correctOptionIndex !== undefined ? parseInt(q.correctOptionIndex, 10) : null,
+          explanation: q.explanation || null,
+          modelAnswer: q.modelAnswer || null,
+          minWords: q.minWords ? parseInt(q.minWords, 10) : 0,
+          score: parseInt(q.score, 10) || 1,
+          order: q.order !== undefined ? parseInt(q.order, 10) : idx + 1,
+        }));
+        await tx.examQuestion.createMany({ data: questionCreations });
+      }
+
+      return tx.exam.update({
+        where: { id: examId },
+        data: updateData,
+        include: { questions: { orderBy: { order: 'asc' } } },
+      });
+    });
+  }
+
+  /**
+   * 43. Delete Exam
+   */
+  static async deleteExam(teacherId, examId) {
+    await OwnershipUtil.verifyExamOwnership(teacherId, examId);
+
+    await prisma.exam.delete({
+      where: { id: examId },
+    });
+
+    return { message: 'تم حذف الامتحان بنجاح' };
+  }
+
+  /**
+   * 44. Get Exam Attempts Roster
+   */
+  static async getExamAttempts(teacherId, examId) {
+    await OwnershipUtil.verifyExamOwnership(teacherId, examId);
+
+    const submissions = await prisma.examSubmission.findMany({
+      where: { examId },
+      orderBy: { scorePercentage: 'desc' },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                phone: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return submissions.map((sub, index) => ({
+      rank: index + 1,
+      submissionId: sub.id,
+      studentId: sub.student.id,
+      fullName: sub.student.user.fullName,
+      phone: sub.student.user.phone,
+      avatarUrl: sub.student.user.avatarUrl,
+      totalScoreObtained: sub.totalScoreObtained,
+      scorePercentage: sub.scorePercentage,
+      passed: sub.passed,
+      correctCount: sub.correctCount,
+      underReviewCount: sub.underReviewCount,
+      wrongCount: sub.wrongCount,
+      submittedAt: sub.submittedAt,
+    }));
+  }
+
+  // ====================================================
+  // 16. Manual Essay Grading Queue (Screen: "Grading")
+  // ====================================================
+
+  /**
+   * 45. Get Pending Essay Submissions Queue
+   */
+  static async getPendingEssayGrading(teacherId) {
+    // 1. Fetch pending exam submissions
+    const examSubmissions = await prisma.examSubmission.findMany({
+      where: {
+        underReviewCount: { gt: 0 },
+        exam: { group: { teacherId } },
+      },
+      include: {
+        exam: {
+          select: {
+            id: true,
+            title: true,
+            totalScore: true,
+            group: { select: { name: true } },
+            questions: { where: { type: 'ESSAY' } },
+          },
+        },
+        student: {
+          include: {
+            user: { select: { id: true, fullName: true, phone: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: { submittedAt: 'asc' },
+    });
+
+    // 2. Fetch pending homework submissions
+    const homeworkSubmissions = await prisma.homeworkSubmission.findMany({
+      where: {
+        underReviewCount: { gt: 0 },
+        homework: { group: { teacherId } },
+      },
+      include: {
+        homework: {
+          select: {
+            id: true,
+            title: true,
+            totalScore: true,
+            group: { select: { name: true } },
+            questions: { where: { type: 'ESSAY' } },
+          },
+        },
+        student: {
+          include: {
+            user: { select: { id: true, fullName: true, phone: true, avatarUrl: true } },
+          },
+        },
+      },
+      orderBy: { submittedAt: 'asc' },
+    });
+
+    const pendingQueue = [];
+
+    // Parse Exam Submissions
+    for (const sub of examSubmissions) {
+      let answers = [];
+      try {
+        answers = JSON.parse(sub.answersJson || '[]');
+      } catch (e) {
+        answers = [];
+      }
+
+      for (const q of sub.exam.questions) {
+        const studentAnsObj = answers.find((a) => a.questionId === q.id);
+        if (studentAnsObj && !studentAnsObj.isGraded) {
+          pendingQueue.push({
+            id: `${sub.id}_${q.id}`,
+            submissionType: 'EXAM',
+            submissionId: sub.id,
+            assessmentId: sub.exam.id,
+            assessmentTitle: sub.exam.title,
+            groupName: sub.exam.group.name,
+            studentId: sub.student.id,
+            studentUserId: sub.student.user.id,
+            studentName: sub.student.user.fullName,
+            studentPhone: sub.student.user.phone,
+            studentAvatar: sub.student.user.avatarUrl,
+            questionId: q.id,
+            questionText: q.questionText,
+            studentAnswer: studentAnsObj.answerText || studentAnsObj.answer || '',
+            modelAnswer: q.modelAnswer || 'لا توجد إجابة نموذجية مسجلة',
+            maxScore: q.score,
+            submittedAt: sub.submittedAt,
+          });
+        }
+      }
+    }
+
+    // Parse Homework Submissions
+    for (const sub of homeworkSubmissions) {
+      let answers = [];
+      try {
+        answers = JSON.parse(sub.answersJson || '[]');
+      } catch (e) {
+        answers = [];
+      }
+
+      for (const q of sub.homework.questions) {
+        const studentAnsObj = answers.find((a) => a.questionId === q.id);
+        if (studentAnsObj && !studentAnsObj.isGraded) {
+          pendingQueue.push({
+            id: `${sub.id}_${q.id}`,
+            submissionType: 'HOMEWORK',
+            submissionId: sub.id,
+            assessmentId: sub.homework.id,
+            assessmentTitle: sub.homework.title,
+            groupName: sub.homework.group.name,
+            studentId: sub.student.id,
+            studentUserId: sub.student.user.id,
+            studentName: sub.student.user.fullName,
+            studentPhone: sub.student.user.phone,
+            studentAvatar: sub.student.user.avatarUrl,
+            questionId: q.id,
+            questionText: q.questionText,
+            studentAnswer: studentAnsObj.answerText || studentAnsObj.answer || '',
+            modelAnswer: q.modelAnswer || 'لا توجد إجابة نموذجية مسجلة',
+            maxScore: q.score,
+            submittedAt: sub.submittedAt,
+          });
+        }
+      }
+    }
+
+    return {
+      pendingCount: pendingQueue.length,
+      queue: pendingQueue,
+    };
+  }
+
+  /**
+   * 46. Grade Essay Question & Push Notification
+   */
+  static async gradeEssay(teacherId, data) {
+    const { submissionType = 'EXAM', submissionId, questionId, scoreAwarded, feedback } = data;
+    const scoreNum = parseFloat(scoreAwarded);
+
+    if (submissionType === 'EXAM') {
+      const submission = await prisma.examSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          exam: {
+            include: {
+              group: true,
+              questions: true,
+            },
+          },
+          student: {
+            include: {
+              user: { select: { id: true, fullName: true } },
+            },
+          },
+        },
+      });
+
+      if (!submission) {
+        throw ApiError.notFound('تسليم الامتحان غير موجود');
+      }
+
+      await OwnershipUtil.verifyGroupOwnership(teacherId, submission.exam.groupId);
+
+      const targetQuestion = submission.exam.questions.find((q) => q.id === questionId);
+      if (!targetQuestion) {
+        throw ApiError.notFound('سؤال المقال غير موجود في هذا الامتحان');
+      }
+
+      if (scoreNum > targetQuestion.score) {
+        throw ApiError.badRequest(`الدرجة المدخلة (${scoreNum}) تتجاوز الدرجة القصوى للسؤال (${targetQuestion.score})`);
+      }
+
+      let answers = [];
+      try {
+        answers = JSON.parse(submission.answersJson || '[]');
+      } catch (e) {
+        answers = [];
+      }
+
+      // Update or insert question grade in answersJson
+      let found = false;
+      answers = answers.map((ans) => {
+        if (ans.questionId === questionId) {
+          found = true;
+          return {
+            ...ans,
+            scoreObtained: scoreNum,
+            isGraded: true,
+            feedback: feedback || null,
+          };
+        }
+        return ans;
+      });
+
+      if (!found) {
+        answers.push({
+          questionId,
+          scoreObtained: scoreNum,
+          isGraded: true,
+          feedback: feedback || null,
+        });
+      }
+
+      // Recalculate totals
+      const totalScoreObtained = answers.reduce((acc, a) => acc + (parseFloat(a.scoreObtained) || 0), 0);
+      const scorePercentage = submission.exam.totalScore > 0
+        ? parseFloat(((totalScoreObtained / submission.exam.totalScore) * 100).toFixed(1))
+        : 0;
+      const passed = scorePercentage >= (submission.exam.passingScorePercentage || 50);
+
+      const remainingEssayUnderReview = answers.filter((a) => {
+        const q = submission.exam.questions.find((x) => x.id === a.questionId);
+        return q && q.type === 'ESSAY' && !a.isGraded;
+      }).length;
+
+      const updated = await prisma.examSubmission.update({
+        where: { id: submissionId },
+        data: {
+          answersJson: JSON.stringify(answers),
+          totalScoreObtained: Math.round(totalScoreObtained),
+          scorePercentage,
+          passed,
+          underReviewCount: remainingEssayUnderReview,
+        },
+      });
+
+      // Dispatch FCM Push Notification to Student
+      NotificationService.notifyEssayGraded({
+        userId: submission.student.user.id,
+        title: submission.exam.title,
+        submissionType: 'EXAM',
+        referenceId: submission.exam.id,
+        scoreObtained: Math.round(totalScoreObtained),
+        totalScore: submission.exam.totalScore,
+      }).catch((err) => console.error('[Push Error]:', err.message));
+
+      return {
+        message: 'تم رصد وتصحيح درجة سؤال المقال بنجاح',
+        submissionId: updated.id,
+        scoreObtained: updated.totalScoreObtained,
+        scorePercentage: updated.scorePercentage,
+        passed: updated.passed,
+        remainingUnderReview: remainingEssayUnderReview,
+      };
+    } else {
+      // Homework Submission
+      const submission = await prisma.homeworkSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          homework: {
+            include: {
+              group: true,
+              questions: true,
+            },
+          },
+          student: {
+            include: {
+              user: { select: { id: true, fullName: true } },
+            },
+          },
+        },
+      });
+
+      if (!submission) {
+        throw ApiError.notFound('تسليم الواجب غير موجود');
+      }
+
+      await OwnershipUtil.verifyGroupOwnership(teacherId, submission.homework.groupId);
+
+      const targetQuestion = submission.homework.questions.find((q) => q.id === questionId);
+      if (!targetQuestion) {
+        throw ApiError.notFound('سؤال المقال غير موجود في هذا الواجب');
+      }
+
+      if (scoreNum > targetQuestion.score) {
+        throw ApiError.badRequest(`الدرجة المدخلة (${scoreNum}) تتجاوز الدرجة القصوى للسؤال (${targetQuestion.score})`);
+      }
+
+      let answers = [];
+      try {
+        answers = JSON.parse(submission.answersJson || '[]');
+      } catch (e) {
+        answers = [];
+      }
+
+      answers = answers.map((ans) => {
+        if (ans.questionId === questionId) {
+          return {
+            ...ans,
+            scoreObtained: scoreNum,
+            isGraded: true,
+            feedback: feedback || null,
+          };
+        }
+        return ans;
+      });
+
+      const totalScoreObtained = answers.reduce((acc, a) => acc + (parseFloat(a.scoreObtained) || 0), 0);
+      const remainingEssayUnderReview = answers.filter((a) => {
+        const q = submission.homework.questions.find((x) => x.id === a.questionId);
+        return q && q.type === 'ESSAY' && !a.isGraded;
+      }).length;
+
+      const updated = await prisma.homeworkSubmission.update({
+        where: { id: submissionId },
+        data: {
+          answersJson: JSON.stringify(answers),
+          totalScoreObtained: Math.round(totalScoreObtained),
+          underReviewCount: remainingEssayUnderReview,
+          status: remainingEssayUnderReview === 0 ? 'GRADED' : 'SUBMITTED',
+        },
+      });
+
+      // Dispatch Push Notification
+      NotificationService.notifyEssayGraded({
+        userId: submission.student.user.id,
+        title: submission.homework.title,
+        submissionType: 'HOMEWORK',
+        referenceId: submission.homework.id,
+        scoreObtained: Math.round(totalScoreObtained),
+        totalScore: submission.homework.totalScore,
+      }).catch((err) => console.error('[Push Error]:', err.message));
+
+      return {
+        message: 'تم تصحيح الواجب بنجاح',
+        submissionId: updated.id,
+        scoreObtained: updated.totalScoreObtained,
+        remainingUnderReview: remainingEssayUnderReview,
+      };
+    }
+  }
+
+  // ====================================================
+  // 17. Comprehensive Grade Sheet (Screen: "كشف درجات الطلاب")
+  // ====================================================
+
+  /**
+   * 47. Get Exam Grade Sheet Leaderboard Roster
+   */
+  static async getExamGradeSheet(teacherId, examId) {
+    const exam = await OwnershipUtil.verifyExamOwnership(teacherId, examId);
+
+    const fullExam = await prisma.exam.findUnique({
+      where: { id: exam.id },
+      include: {
+        group: {
+          include: {
+            subject: true,
+            enrollments: {
+              where: { status: 'ACTIVE' },
+              include: {
+                student: {
+                  include: {
+                    user: { select: { id: true, fullName: true, phone: true, avatarUrl: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        submissions: true,
+      },
+    });
+
+    const submissionMap = new Map();
+    fullExam.submissions.forEach((sub) => {
+      submissionMap.set(sub.studentId, sub);
+    });
+
+    let presentCount = 0;
+    let absentCount = 0;
+    let passedCount = 0;
+    let totalScoreSum = 0;
+
+    const studentScorecards = fullExam.group.enrollments.map((en) => {
+      const student = en.student;
+      const sub = submissionMap.get(student.id);
+
+      if (sub) {
+        presentCount++;
+        if (sub.passed) passedCount++;
+        totalScoreSum += sub.scorePercentage;
+
+        return {
+          studentId: student.id,
+          fullName: student.user.fullName,
+          phone: student.user.phone,
+          avatarUrl: student.user.avatarUrl,
+          status: 'PRESENT',
+          scoreObtained: sub.totalScoreObtained,
+          scorePercentage: sub.scorePercentage,
+          passed: sub.passed,
+          correctCount: sub.correctCount,
+          wrongCount: sub.wrongCount,
+          underReviewCount: sub.underReviewCount,
+          submittedAt: sub.submittedAt,
+        };
+      } else {
+        absentCount++;
+        return {
+          studentId: student.id,
+          fullName: student.user.fullName,
+          phone: student.user.phone,
+          avatarUrl: student.user.avatarUrl,
+          status: 'ABSENT',
+          scoreObtained: 0,
+          scorePercentage: 0,
+          passed: false,
+          correctCount: 0,
+          wrongCount: 0,
+          underReviewCount: 0,
+          submittedAt: null,
+        };
+      }
+    });
+
+    // Sort: Present by scorePercentage DESC, then Absent
+    studentScorecards.sort((a, b) => {
+      if (a.status === 'PRESENT' && b.status === 'ABSENT') return -1;
+      if (a.status === 'ABSENT' && b.status === 'PRESENT') return 1;
+      return b.scorePercentage - a.scorePercentage;
+    });
+
+    // Assign Rank
+    const rankedScorecards = studentScorecards.map((sc, idx) => ({
+      rank: sc.status === 'PRESENT' ? idx + 1 : '-',
+      ...sc,
+    }));
+
+    const totalEnrolled = fullExam.group.enrollments.length;
+    const averagePercentage = presentCount > 0 ? Math.round(totalScoreSum / presentCount) : 0;
+    const passRatePercentage = presentCount > 0 ? Math.round((passedCount / presentCount) * 100) : 0;
+
+    return {
+      exam: {
+        id: fullExam.id,
+        title: fullExam.title,
+        totalScore: fullExam.totalScore,
+        passingScorePercentage: fullExam.passingScorePercentage,
+        groupId: fullExam.groupId,
+        groupName: fullExam.group.name,
+        subjectName: fullExam.group.subject.nameAr,
+        startTime: fullExam.startTime,
+        endTime: fullExam.endTime,
+      },
+      summary: {
+        totalEnrolled,
+        totalPresent: presentCount,
+        totalAbsent: absentCount,
+        totalPassed: passedCount,
+        passRatePercentage,
+        classAveragePercentage: averagePercentage,
+      },
+      gradeSheet: rankedScorecards,
+    };
+  }
+
+  // ----------------------------------------------------
+  // Milestone 4: Finance Ledger & Broadcast Announcements
+  // ----------------------------------------------------
+
+  // ====================================================
+  // 16. Income & Payment Ledger (Screen: "Finance")
+  // ====================================================
+
+  /**
+   * 48. Get Financial Overview & Revenue KPIs
+   */
+  static async getFinanceSummary(teacherId, query = {}) {
+    const d = new Date();
+    const currentMonthLabel = query.monthLabel || `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    // 1. Get all active teacher groups with active enrollments
+    const groups = await prisma.group.findMany({
+      where: { teacherId, isActive: true },
+      include: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+        },
+      },
+    });
+
+    let totalExpectedMonthly = 0;
+    let totalEnrolledStudents = 0;
+
+    for (const g of groups) {
+      for (const en of g.enrollments) {
+        totalEnrolledStudents++;
+        const price = parseFloat(en.enrollmentPrice) > 0 ? parseFloat(en.enrollmentPrice) : parseFloat(g.defaultPrice || 0);
+        totalExpectedMonthly += price;
+      }
+    }
+
+    // 2. Fetch payments for the given month
+    const payments = await prisma.studentPayment.findMany({
+      where: {
+        teacherId,
+        monthLabel: currentMonthLabel,
+      },
+    });
+
+    const totalCollectedCurrentMonth = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    const totalPendingCurrentMonth = Math.max(0, totalExpectedMonthly - totalCollectedCurrentMonth);
+    const collectionRatePercentage = totalExpectedMonthly > 0
+      ? Math.round((totalCollectedCurrentMonth / totalExpectedMonthly) * 100)
+      : 0;
+
+    // Distinct paid student IDs
+    const paidStudentIds = new Set(payments.map((p) => p.studentId));
+
+    // 3. Recent 5 payments across all groups
+    const recentPayments = await prisma.studentPayment.findMany({
+      where: { teacherId },
+      take: 5,
+      orderBy: { paidAt: 'desc' },
+      include: {
+        group: { select: { id: true, name: true } },
+        student: {
+          include: {
+            user: { select: { fullName: true, avatarUrl: true } },
+          },
+        },
+      },
+    });
+
+    return {
+      monthLabel: currentMonthLabel,
+      kpis: {
+        totalExpectedMonthly,
+        totalCollectedCurrentMonth,
+        totalPendingCurrentMonth,
+        collectionRatePercentage,
+        totalEnrolledStudents,
+        totalStudentsPaid: paidStudentIds.size,
+        totalStudentsPending: Math.max(0, totalEnrolledStudents - paidStudentIds.size),
+      },
+      recentPayments: recentPayments.map((p) => ({
+        id: p.id,
+        studentName: p.student.user.fullName,
+        studentAvatar: p.student.user.avatarUrl,
+        groupName: p.group.name,
+        amount: parseFloat(p.amount),
+        paymentMethod: p.paymentMethod,
+        monthLabel: p.monthLabel,
+        paidAt: p.paidAt,
+      })),
+    };
+  }
+
+  /**
+   * 49. Get Group Financial Roster (Paid/Unpaid Status for Month)
+   */
+  static async getGroupFinanceRoster(teacherId, groupId, query = {}) {
+    const group = await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
+    const d = new Date();
+    const currentMonthLabel = query.monthLabel || `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    const [enrollments, payments] = await prisma.$transaction([
+      prisma.groupEnrollment.findMany({
+        where: { groupId, status: 'ACTIVE' },
+        include: {
+          student: {
+            select: {
+              id: true,
+              parentPhone: true,
+              user: { select: { id: true, fullName: true, phone: true, avatarUrl: true } },
+            },
+          },
+        },
+        orderBy: { joinedAt: 'asc' },
+      }),
+      prisma.studentPayment.findMany({
+        where: { groupId, teacherId, monthLabel: currentMonthLabel },
+      }),
+    ]);
+
+    const paymentMap = new Map();
+    payments.forEach((p) => paymentMap.set(p.studentId, p));
+
+    let paidCount = 0;
+    let unpaidCount = 0;
+    let expectedTotal = 0;
+    let collectedTotal = 0;
+
+    const studentList = enrollments.map((en) => {
+      const student = en.student;
+      const expectedPrice = parseFloat(en.enrollmentPrice) > 0 ? parseFloat(en.enrollmentPrice) : parseFloat(group.defaultPrice || 0);
+      expectedTotal += expectedPrice;
+
+      const p = paymentMap.get(student.id);
+      if (p) {
+        paidCount++;
+        collectedTotal += parseFloat(p.amount);
+        return {
+          studentId: student.id,
+          fullName: student.user.fullName,
+          phone: student.user.phone,
+          parentPhone: student.parentPhone || null,
+          avatarUrl: student.user.avatarUrl,
+          enrollmentPrice: expectedPrice,
+          paymentStatus: 'PAID',
+          paidAmount: parseFloat(p.amount),
+          paymentMethod: p.paymentMethod,
+          paidAt: p.paidAt,
+          paymentId: p.id,
+          receiptUrl: p.receiptUrl,
+        };
+      } else {
+        unpaidCount++;
+        return {
+          studentId: student.id,
+          fullName: student.user.fullName,
+          phone: student.user.phone,
+          parentPhone: student.parentPhone || null,
+          avatarUrl: student.user.avatarUrl,
+          enrollmentPrice: expectedPrice,
+          paymentStatus: 'UNPAID',
+          paidAmount: 0,
+          paymentMethod: null,
+          paidAt: null,
+          paymentId: null,
+          receiptUrl: null,
+        };
+      }
+    });
+
+    return {
+      group: {
+        id: group.id,
+        name: group.name,
+        defaultPrice: parseFloat(group.defaultPrice || 0),
+      },
+      monthLabel: currentMonthLabel,
+      summary: {
+        totalEnrolled: enrollments.length,
+        paidCount,
+        unpaidCount,
+        expectedTotal,
+        collectedTotal,
+        pendingTotal: Math.max(0, expectedTotal - collectedTotal),
+        collectionRatePercentage: expectedTotal > 0 ? Math.round((collectedTotal / expectedTotal) * 100) : 0,
+      },
+      students: studentList,
+    };
+  }
+
+  /**
+   * 50. Record Student Payment Receipt
+   */
+  static async recordStudentPayment(teacherId, data, receiptFile = null) {
+    const { studentId, groupId, amount, paymentMethod = 'CASH', monthLabel, notes } = data;
+    await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
+
+    const enrollment = await prisma.groupEnrollment.findFirst({
+      where: {
+        groupId,
+        studentId,
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          include: {
+            user: { select: { id: true, fullName: true } },
+          },
+        },
+        group: { select: { name: true } },
+      },
+    });
+
+    if (!enrollment) {
+      throw ApiError.notFound('هذا الطالب غير مسجل في هذه المجموعة');
+    }
+
+    let receiptUrl = data.receiptUrl || null;
+    if (receiptFile) {
+      receiptUrl = await handleFileUpload({
+        file: receiptFile,
+        folder: CLOUDINARY_FOLDERS.PAYMENT_RECEIPTS,
+        resourceType: 'auto',
+      });
+    }
+
+    const d = new Date();
+    const finalMonthLabel = monthLabel || `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    const payment = await prisma.studentPayment.create({
+      data: {
+        teacherId,
+        studentId,
+        groupId,
+        amount: parseFloat(amount),
+        paymentMethod,
+        monthLabel: finalMonthLabel,
+        receiptUrl,
+        notes: notes || null,
+      },
+      include: {
+        group: { select: { name: true } },
+        student: {
+          include: {
+            user: { select: { fullName: true } },
+          },
+        },
+      },
+    });
+
+    // Notify student in-app
+    prisma.notification.create({
+      data: {
+        userId: enrollment.student.user.id,
+        title: '🧾 إيصال سداد مصروفات',
+        body: `تم استلام دفعة مالية بقيمة ${amount} ج.م لمجموعة "${enrollment.group.name}" لشهر ${finalMonthLabel}.`,
+        type: 'ANNOUNCEMENT',
+        referenceId: payment.id,
+      },
+    }).catch((err) => console.error('[Payment Notification Error]:', err.message));
+
+    return {
+      id: payment.id,
+      studentId: payment.studentId,
+      studentName: payment.student.user.fullName,
+      groupId: payment.groupId,
+      groupName: payment.group.name,
+      amount: parseFloat(payment.amount),
+      paymentMethod: payment.paymentMethod,
+      monthLabel: payment.monthLabel,
+      receiptUrl: payment.receiptUrl,
+      notes: payment.notes,
+      paidAt: payment.paidAt,
+    };
+  }
+
+  /**
+   * 51. Get Payment Ledger History
+   */
+  static async getPaymentLedger(teacherId, query = {}) {
+    const { groupId, studentId, monthLabel, paymentMethod, page = 1, limit = 20 } = query;
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * pageSize;
+
+    const where = {
+      teacherId,
+      ...(groupId && { groupId }),
+      ...(studentId && { studentId }),
+      ...(monthLabel && { monthLabel }),
+      ...(paymentMethod && { paymentMethod }),
+    };
+
+    const [totalCount, payments, totalSum] = await prisma.$transaction([
+      prisma.studentPayment.count({ where }),
+      prisma.studentPayment.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { paidAt: 'desc' },
+        include: {
+          group: { select: { id: true, name: true } },
+          student: {
+            include: {
+              user: { select: { fullName: true, phone: true, avatarUrl: true } },
+            },
+          },
+        },
+      }),
+      prisma.studentPayment.aggregate({
+        where,
+        _sum: { amount: true },
+      }),
+    ]);
+
+    return {
+      pagination: {
+        totalCount,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+      },
+      totalCollected: parseFloat(totalSum._sum.amount || 0),
+      payments: payments.map((p) => ({
+        id: p.id,
+        studentId: p.studentId,
+        studentName: p.student.user.fullName,
+        studentPhone: p.student.user.phone,
+        studentAvatar: p.student.user.avatarUrl,
+        groupId: p.groupId,
+        groupName: p.group.name,
+        amount: parseFloat(p.amount),
+        paymentMethod: p.paymentMethod,
+        monthLabel: p.monthLabel,
+        receiptUrl: p.receiptUrl,
+        notes: p.notes,
+        paidAt: p.paidAt,
+      })),
+    };
+  }
+
+  /**
+   * 52. Delete / Revert Payment Receipt
+   */
+  static async deletePaymentReceipt(teacherId, paymentId) {
+    const payment = await prisma.studentPayment.findFirst({
+      where: { id: paymentId, teacherId },
+    });
+
+    if (!payment) {
+      throw ApiError.notFound('إيصال الدفع غير موجود أو ليس لديك الصلاحية لحذفه');
+    }
+
+    await prisma.studentPayment.delete({
+      where: { id: paymentId },
+    });
+
+    return { message: 'تم إلغاء وحذف إيصال الدفع بنجاح' };
+  }
+
+  // ====================================================
+  // 17. Teacher Broadcast Notifications (Screen: "Broadcast")
+  // ====================================================
+
+  /**
+   * 53. Dispatch Broadcast Announcement (In-App + FCM Push)
+   */
+  static async broadcastNotification(teacherId, data) {
+    const { targetType = 'GROUP', groupId, stageId, gradeLevelId, title, body, attachments } = data;
+
+    let targetGroups = [];
+
+    if (targetType === 'GROUP') {
+      if (!groupId) throw ApiError.badRequest('معرف المجموعة مطلوب');
+      const g = await OwnershipUtil.verifyGroupOwnership(teacherId, groupId);
+      targetGroups = [g];
+    } else if (targetType === 'STAGE') {
+      if (!stageId) throw ApiError.badRequest('معرف المرحلة مطلوب');
+      targetGroups = await prisma.group.findMany({
+        where: { teacherId, stageId, isActive: true },
+      });
+    } else if (targetType === 'GRADE_LEVEL') {
+      if (!gradeLevelId) throw ApiError.badRequest('معرف الصف مطلوب');
+      targetGroups = await prisma.group.findMany({
+        where: { teacherId, gradeLevelId, isActive: true },
+      });
+    } else {
+      // ALL_MY_STUDENTS
+      targetGroups = await prisma.group.findMany({
+        where: { teacherId, isActive: true },
+      });
+    }
+
+    if (targetGroups.length === 0) {
+      throw ApiError.notFound('لم يتم العثور على مجموعات دراسية مطابقة للهدف المحدد');
+    }
+
+    const groupIds = targetGroups.map((g) => g.id);
+
+    // Fetch all active enrolled students
+    const enrollments = await prisma.groupEnrollment.findMany({
+      where: {
+        groupId: { in: groupIds },
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          include: {
+            user: { select: { id: true, fcmToken: true, notifyAnnouncements: true } },
+          },
+        },
+      },
+    });
+
+    const userMap = new Map();
+    for (const en of enrollments) {
+      const user = en.student?.user;
+      if (user && !userMap.has(user.id)) {
+        userMap.set(user.id, user);
+      }
+    }
+
+    const userIds = Array.from(userMap.keys());
+    if (userIds.length === 0) {
+      return { message: 'لا يوجد طلاب مسجلين في المجموعات المحددة', recipientCount: 0 };
+    }
+
+    const attachmentsStr = attachments && Array.isArray(attachments) ? JSON.stringify(attachments) : null;
+
+    // 1. Batch Create In-App Notifications
+    await prisma.notification.createMany({
+      data: userIds.map((uid) => ({
+        userId: uid,
+        title: `📢 ${title}`,
+        body,
+        type: 'ANNOUNCEMENT',
+        referenceId: teacherId,
+        attachments: attachmentsStr,
+      })),
+    });
+
+    // 2. Dispatch FCM Push Notifications
+    const fcmTokens = Array.from(userMap.values())
+      .filter((u) => u.notifyAnnouncements !== false && u.fcmToken)
+      .map((u) => u.fcmToken);
+
+    if (fcmTokens.length > 0) {
+      NotificationService.notifyGroupStudents({
+        groupId: groupIds[0],
+        title: `📢 ${title}`,
+        body,
+        type: 'ANNOUNCEMENT',
+        referenceId: teacherId,
+      }).catch((err) => console.error('[Broadcast FCM Error]:', err.message));
+    }
+
+    return {
+      message: 'تم إرسال الإشعار الجماعي بنجاح إلى جميع الطلاب المستهدفين',
+      recipientCount: userIds.length,
+      targetType,
+      targetGroupsCount: groupIds.length,
+    };
+  }
 }
+
+
 

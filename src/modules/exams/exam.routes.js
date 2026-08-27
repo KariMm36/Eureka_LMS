@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { ExamController } from './exam.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { authorize } from '../../middlewares/role.middleware.js';
+import { validate } from '../../middlewares/validate.middleware.js';
+import { submitExamSchema } from './exam.validation.js';
 
 const router = Router();
 
@@ -100,7 +102,7 @@ router.post('/:examId/start', ExamController.startExam);
  *       409:
  *         description: Exam already submitted
  */
-router.post('/:examId/submit', ExamController.submitExam);
+router.post('/:examId/submit', validate(submitExamSchema), ExamController.submitExam);
 
 /**
  * @swagger

@@ -20,7 +20,12 @@
     { "key": "notificationId", "value": "", "type": "string" },
     { "key": "teacherToken", "value": "", "type": "string" },
     { "key": "teacherGroupId", "value": "", "type": "string" },
-    { "key": "teacherStudentId", "value": "", "type": "string" }
+    { "key": "teacherStudentId", "value": "", "type": "string" },
+    { "key": "teacherHomeworkId", "value": "", "type": "string" },
+    { "key": "teacherExamId", "value": "", "type": "string" },
+    { "key": "essayQuestionId", "value": "", "type": "string" },
+    { "key": "essaySubmissionId", "value": "", "type": "string" },
+    { "key": "paymentId", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -1086,11 +1091,304 @@
       ]
     },
     {
-      "name": "Step 18: Teacher Profile & Settings",
-      "description": "## ⚙️ Phase 18: Teacher Profile & Preferences\n\n### 📱 Mobile UI Screens Covered:\n* `Profile Screen` (View teacher details, assigned groups, student count)\n* `Settings Screen` (Language, dark mode, notification toggles)",
+      "name": "Step 14: Homework Authoring Wizard",
+      "description": "## 📝 Phase 14: Homework Authoring Wizard\n\n### 📱 Mobile UI Screens Covered:\n* `Add Homework Screen` (Title, Group, Due Date, Duration)\n* `Question Builder` (MCQ & Essay questions, choices, correct key, model answer)\n* `Submissions Screen` (Student submission progress)",
       "item": [
         {
-          "name": "18.1 Get Teacher Profile",
+          "name": "14.1 Create Homework Assignment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('teacherHomeworkId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"واجب الكيمياء - أعداد الكم\",\n  \"unitName\": \"الوحدة الأولى\",\n  \"durationMinutes\": 30,\n  \"dueDate\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"ما هو عدد الكم الذي يحدد شكل السحابة الإلكترونية؟\",\n      \"options\": [\"الرئيسي\", \"الثانوي\", \"المغناطيسي\", \"المغزلي\"],\n      \"correctOptionIndex\": 1,\n      \"score\": 2,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"اشرح قاعدة هوند في توزيع الإلكترونات داخل الأوربيتالات بالتفصيل\",\n      \"modelAnswer\": \"لا يحدث ازدواج بين إلكترونين في مستوى فرعي معين إلا بعد أن تشغل أوربيتالاته فرادى أولاً\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/homework", "host": ["{{baseUrl}}"], "path": ["teacher", "homework"] }
+          }
+        },
+        {
+          "name": "14.2 List Teacher Homeworks",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/homework", "host": ["{{baseUrl}}"], "path": ["teacher", "homework"] }
+          }
+        },
+        {
+          "name": "14.3 Get Homework Details",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}"] }
+          }
+        },
+        {
+          "name": "14.4 Update Homework",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"واجب الكيمياء المحدث - أعداد الكم وقاعدة هوند\",\n  \"durationMinutes\": 45\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}"] }
+          }
+        },
+        {
+          "name": "14.5 Get Homework Submissions Roster",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}/submissions", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}", "submissions"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 15: Exam Authoring Wizard",
+      "description": "## ⏱️ Phase 15: Timed Exam Authoring Wizard\n\n### 📱 Mobile UI Screens Covered:\n* `Add Exam Screen` (Title, duration, passing %, start/end time window)\n* `Exam Question Builder` (MCQ & Essay questions, score allocation)\n* `Attempts Screen` (Student submission and completion ranks)",
+      "item": [
+        {
+          "name": "15.1 Create Timed Exam",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('teacherExamId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"امتحان الكيمياء الشامل الشهري\",\n  \"durationMinutes\": 45,\n  \"passingScorePercentage\": 50,\n  \"startTime\": \"2026-01-01T00:00:00.000Z\",\n  \"endTime\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"عدد أوربيتالات المستوى الفرعي d يساوي:\",\n      \"options\": [\"1\", \"3\", \"5\", \"7\"],\n      \"correctOptionIndex\": 2,\n      \"score\": 5,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"قارن بين طيف الانبعاث الخطي وطيف الامتصاص مع ذكر مثال\",\n      \"modelAnswer\": \"طيف الانبعاث خطوط ملونة مضيئة تفصل بينها مسافات معتمة، أما طيف الامتصاص خطوط سوداء معتمة في خلفية مضيئة\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] }
+          }
+        },
+        {
+          "name": "15.2 List Teacher Exams",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] }
+          }
+        },
+        {
+          "name": "15.3 Get Exam Details",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}"] }
+          }
+        },
+        {
+          "name": "15.4 Update Exam",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"امتحان الكيمياء الشامل المعدل\",\n  \"durationMinutes\": 60\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}"] }
+          }
+        },
+        {
+          "name": "15.5 Get Exam Attempts Roster",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/attempts", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}", "attempts"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 16: Manual Essay Grading Queue",
+      "description": "## ✍️ Phase 16: Manual Essay Grading Queue\n\n### 📱 Mobile UI Screens Covered:\n* `Grading Screen` (Pending queue of student essay answers, student name, model answer, mark input, feedback note)\n* `Push Notification` (Instant FCM alert dispatched to student upon scoring)",
+      "item": [
+        {
+          "name": "16.1 Get Pending Essay Submissions Queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.queue && res.data.queue.length > 0) {",
+                  "    pm.collectionVariables.set('essaySubmissionId', res.data.queue[0].submissionId);",
+                  "    pm.collectionVariables.set('essayQuestionId', res.data.queue[0].questionId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/grading/pending", "host": ["{{baseUrl}}"], "path": ["teacher", "grading", "pending"] }
+          }
+        },
+        {
+          "name": "16.2 Grade Essay Question & Push Notification",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"submissionType\": \"EXAM\",\n  \"submissionId\": \"{{essaySubmissionId}}\",\n  \"questionId\": \"{{essayQuestionId}}\",\n  \"scoreAwarded\": 5,\n  \"feedback\": \"إجابة نموذجية وممتازة!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/grading/essay", "host": ["{{baseUrl}}"], "path": ["teacher", "grading", "essay"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 17: Comprehensive Grade Sheet",
+      "description": "## 📊 Phase 17: Comprehensive Grade Sheet (كشف درجات الطلاب)\n\n### 📱 Mobile UI Screens Covered:\n* `Students_Grade Screen` (Full tabular scorecard for all enrolled group students, rank, score %, present/absent status, and summary metrics)",
+      "item": [
+        {
+          "name": "17.1 Get Exam Grade Sheet Leaderboard",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/grade-sheet", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}", "grade-sheet"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 18: Income & Payment Ledger",
+      "description": "## 💰 Phase 18: Income & Payment Ledger\n\n### 📱 Mobile UI Screens Covered:\n* `Finance Summary Screen` (Expected vs Collected vs Pending revenue, collection rate %)\n* `Group Finance Roster` (Paid vs Unpaid student list, custom pricing)\n* `Record Payment Receipt` (Cash, InstaPay, Vodafone Cash)\n* `Payment Ledger History` (Filtered transaction logs)",
+      "item": [
+        {
+          "name": "18.1 Get Financial Overview & KPIs",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/finance/summary", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "summary"] }
+          }
+        },
+        {
+          "name": "18.2 Get Group Financial Roster",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/finance/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "groups", "{{teacherGroupId}}"] }
+          }
+        },
+        {
+          "name": "18.3 Record Student Payment Receipt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('paymentId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{teacherStudentId}}\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"amount\": 350,\n  \"paymentMethod\": \"INSTAPAY\",\n  \"notes\": \"تم التحويل بنجاح\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/finance/payments", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments"] }
+          }
+        },
+        {
+          "name": "18.4 Get Payment Ledger History",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teacher/finance/payments?groupId={{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments"], "query": [{ "key": "groupId", "value": "{{teacherGroupId}}" }] }
+          }
+        },
+        {
+          "name": "18.5 Delete / Revert Payment Receipt",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/teacher/finance/payments/{{paymentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments", "{{paymentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 19: Teacher Broadcast Notifications",
+      "description": "## 📢 Phase 19: Teacher Broadcast Notifications\n\n### 📱 Mobile UI Screens Covered:\n* `Broadcast Screen` (Send announcements to individual groups, grade levels, or all students with FCM push notifications)",
+      "item": [
+        {
+          "name": "19.1 Dispatch Broadcast to Group",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"GROUP\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"تنبيه هام بخصوص موعد الحصة القادمة\",\n  \"body\": \"يرجى العلم بأنه تم تأجيل موعد حصة المراجعة نصف ساعة.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/broadcast", "host": ["{{baseUrl}}"], "path": ["teacher", "broadcast"] }
+          }
+        },
+        {
+          "name": "19.2 Dispatch Broadcast to All My Students",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"ALL_MY_STUDENTS\",\n  \"title\": \"تهنئة بالعام الدراسي الجديد\",\n  \"body\": \"نتمنى لجميع طلابنا الأعزاء عاماً دراسياً مليئاً بالتفوق والنجاح!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teacher/broadcast", "host": ["{{baseUrl}}"], "path": ["teacher", "broadcast"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 20: Teacher Profile & Settings",
+      "description": "## ⚙️ Phase 20: Teacher Profile & Preferences\n\n### 📱 Mobile UI Screens Covered:\n* `Profile Screen` (View teacher details, assigned groups, student count)\n* `Settings Screen` (Language, dark mode, notification toggles)",
+      "item": [
+        {
+          "name": "20.1 Get Teacher Profile",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
             "method": "GET",
@@ -1098,7 +1396,7 @@
           }
         },
         {
-          "name": "18.2 Update Teacher Settings",
+          "name": "20.2 Update Teacher Settings",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
             "method": "PUT",

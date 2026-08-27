@@ -4,8 +4,8 @@ import { ApiResponse } from '../../utils/apiResponse.js';
 export class NotificationController {
   static async getNotifications(req, res, next) {
     try {
-      const { filter, search } = req.query;
-      const result = await NotificationService.getNotifications(req.user.id, filter, search);
+      const { filter, search, page, limit } = req.query;
+      const result = await NotificationService.getNotifications(req.user.id, { filter, search, page, limit });
       return ApiResponse.success(res, result, 'قائمة الإشعارات');
     } catch (error) {
       next(error);

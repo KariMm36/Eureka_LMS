@@ -1,11 +1,13 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
-import { signToken, verifyToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.util.js';
+import { signToken, verifyToken, signRefreshToken, verifyRefreshToken, hashRefreshToken } from '../../utils/jwt.util.js';
 import { generateOTP } from '../../utils/otp.util.js';
 import { sendEmail } from '../../config/mailer.config.js';
 import { ENV } from '../../config/env.config.js';
 import { getWelcomeEmailTemplate, getOtpEmailTemplate, getVerifyEmailTemplate } from '../../utils/emailTemplates.js';
+import { logger } from '../../config/logger.config.js';
 
 export class AuthService {
   static async register({ fullName, email, phone, password, role = 'STUDENT' }) {
@@ -44,8 +46,8 @@ export class AuthService {
     const token = signToken({ id: user.id, role: user.role, email: user.email });
     const refreshToken = signRefreshToken({ id: user.id });
 
-    // Store hashed refresh token
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 8);
+    // Store hashed refresh token (SHA256 pre-hashed to prevent bcrypt 72-byte truncation)
+    const refreshTokenHash = await bcrypt.hash(hashRefreshToken(refreshToken), 8);
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshTokenHash },
@@ -116,8 +118,8 @@ export class AuthService {
     const token = signToken({ id: user.id, role: user.role, email: user.email });
     const refreshToken = signRefreshToken({ id: user.id });
 
-    // Hash & store refresh token in DB (allows server-side invalidation on logout)
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 8);
+    // Hash & store refresh token in DB (SHA256 pre-hashed to prevent bcrypt 72-byte truncation)
+    const refreshTokenHash = await bcrypt.hash(hashRefreshToken(refreshToken), 8);
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshTokenHash },
@@ -138,7 +140,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw ApiError.notFound('لم يتم العثور على حساب مرتبط بهذا البريد الإلكتروني');
+      // Anti-enumeration: return uniform success response without disclosing account presence
+      return {
+        email: email.toLowerCase(),
+        expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
+        message: 'إذا كان البريد الإلكتروني مسجلاً لدينا، فسيتم إرسال رمز التحقق إليه',
+      };
     }
 
     const otpCode = generateOTP(6);
@@ -159,17 +166,24 @@ export class AuthService {
       },
     });
 
-    // Send styled OTP Email
-    await sendEmail({
-      to: email,
-      subject: 'رمز التحقق لإعادة تعيين كلمة المرور - تطبيق يوريكا',
-      text: `رمز التحقق الخاص بك هو: ${otpCode}. ينتهي الرمز خلال ${ENV.OTP_EXPIRES_MINUTES} دقائق.`,
-      html: getOtpEmailTemplate({
-        fullName: user.fullName,
-        otpCode,
-        expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
-      }),
-    });
+    // Send styled OTP Email with resilient error handling to preserve anti-enumeration
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'رمز التحقق لإعادة تعيين كلمة المرور - تطبيق يوريكا',
+        text: `رمز التحقق الخاص بك هو: ${otpCode}. ينتهي الرمز خلال ${ENV.OTP_EXPIRES_MINUTES} دقائق.`,
+        html: getOtpEmailTemplate({
+          fullName: user.fullName,
+          otpCode,
+          expiresInMinutes: ENV.OTP_EXPIRES_MINUTES,
+        }),
+      });
+    } catch (mailError) {
+      logger.error({
+        err: mailError,
+        email: email.toLowerCase(),
+      }, `[ForgotPassword] Failed to dispatch OTP email to ${email}`);
+    }
 
     return {
       email,
@@ -194,15 +208,17 @@ export class AuthService {
       throw ApiError.badRequest('الرمز غير صحيح أو انتهت صلاحيته. حاول مرة أخرى');
     }
 
-    // Mark as used
+    // Mark OTP as used
     await prisma.oTP.update({
       where: { id: otpRecord.id },
-      data: { isUsed: true },
+      data: {
+        isUsed: true,
+      },
     });
 
-    // Generate short-lived reset token (15 mins)
+    // Generate short-lived reset token bound to this otpRecord.id session
     const resetToken = signToken(
-      { email: email.toLowerCase(), purpose: 'RESET_PASSWORD' },
+      { email: email.toLowerCase(), purpose: 'RESET_PASSWORD', resetSessionId: otpRecord.id },
       '15m'
     );
 
@@ -213,7 +229,7 @@ export class AuthService {
   }
 
   static async resetPassword({ email, resetToken, newPassword }) {
-    // Verify the resetToken is valid, not expired, and was issued for THIS email
+    // Verify the resetToken is structurally valid and was issued for THIS email
     let decoded;
     try {
       decoded = verifyToken(resetToken);
@@ -229,6 +245,24 @@ export class AuthService {
       throw ApiError.badRequest('البريد الإلكتروني لا يتطابق مع رمز إعادة التعيين');
     }
 
+    if (!decoded.resetSessionId) {
+      throw ApiError.badRequest('رمز إعادة التعيين غير صالح أو قديم');
+    }
+
+    // Verify single-use: check that the active reset session exists in the DB
+    const activeOtpSession = await prisma.oTP.findFirst({
+      where: {
+        id: decoded.resetSessionId,
+        email: email.toLowerCase(),
+        type: 'FORGOT_PASSWORD',
+        isUsed: true,
+      },
+    });
+
+    if (!activeOtpSession) {
+      throw ApiError.badRequest('رمز إعادة التعيين تم استخدامه مسبقاً أو غير صالح. يرجى طلب رمز جديد');
+    }
+
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
@@ -240,10 +274,16 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(newPassword, salt);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: passwordHash },
-    });
+    // Atomically update password AND revoke the reset session by deleting it (prevents replay)
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { password: passwordHash },
+      }),
+      prisma.oTP.deleteMany({
+        where: { email: email.toLowerCase(), type: 'FORGOT_PASSWORD' },
+      }),
+    ]);
 
     return {
       message: 'تم تحديث كلمة المرور بنجاح، يمكنك الآن تسجيل الدخول',
@@ -306,16 +346,25 @@ export class AuthService {
     }
 
     // Compare the incoming token against the stored hash
-    const isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    const isValid = await bcrypt.compare(hashRefreshToken(refreshToken), user.refreshTokenHash);
     if (!isValid) {
       throw ApiError.unauthorized('رمز التحديث غير مطابق. يرجى تسجيل الدخول مجدداً');
     }
 
-    // Issue a new short-lived access token
+    // Issue a new short-lived access token + new refresh token (Rotation)
     const newAccessToken = signToken({ id: user.id, role: user.role, email: user.email });
+    const newRefreshToken = signRefreshToken({ id: user.id });
+
+    // Store new hashed refresh token in DB, immediately revoking the old token
+    const newRefreshTokenHash = await bcrypt.hash(hashRefreshToken(newRefreshToken), 8);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshTokenHash: newRefreshTokenHash },
+    });
 
     return {
       token: newAccessToken,
+      refreshToken: newRefreshToken,
       expiresIn: ENV.JWT_EXPIRES_IN,
     };
   }
@@ -436,7 +485,11 @@ export class AuthService {
   /**
    * Delete Account (Self-service account deletion)
    */
-  static async deleteAccount(userId, password = null) {
+  static async deleteAccount(userId, password) {
+    if (!password) {
+      throw ApiError.badRequest('كلمة المرور مطلوبة لتأكيد حذف الحساب');
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -445,11 +498,9 @@ export class AuthService {
       throw ApiError.notFound('المستخدم غير موجود');
     }
 
-    if (password) {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        throw ApiError.badRequest('كلمة المرور غير صحيحة');
-      }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw ApiError.badRequest('كلمة المرور غير صحيحة');
     }
 
     // Delete user (Prisma cascade relations will clean up StudentProfile, OTPs, Notifications)

@@ -16,9 +16,18 @@ export const authenticate = async (req, res, next) => {
     }
 
     const decoded = verifyToken(token);
+    
+    // Direct database lookup for authenticated user session
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        fullName: true,
+        role: true,
+        avatarUrl: true,
+        isVerified: true,
         studentProfile: {
           include: {
             stage: true,

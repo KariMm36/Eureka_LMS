@@ -1,21 +1,12 @@
 import prisma from '../../config/prisma.js';
 import { ApiError } from '../../utils/apiError.js';
-import { CacheUtil } from '../../utils/cache.util.js';
-
-const CACHE_KEYS = {
-  STAGES: 'academic:stages',
-  SUBJECTS_ALL: 'academic:subjects:all',
-};
 
 export class AcademicService {
   /**
-   * 1. Get all stages and grades with In-Memory Caching (1ms latency)
+   * 1. Get all stages and grades
    */
   static async getAllStages() {
-    const cached = CacheUtil.get(CACHE_KEYS.STAGES);
-    if (cached) return cached;
-
-    const stages = await prisma.stage.findMany({
+    return prisma.stage.findMany({
       orderBy: { order: 'asc' },
       include: {
         grades: {
@@ -23,15 +14,19 @@ export class AcademicService {
         },
       },
     });
-
-    CacheUtil.set(CACHE_KEYS.STAGES, stages, 7200); // Cache for 2 hours
-    return stages;
   }
 
   /**
-   * 2. Get all subjects with In-Memory Caching (supports global and optional teacherId/gradeLevelId)
+   * 2. Get all subjects
    */
   static async getSubjects(gradeLevelId = null, teacherId = null) {
+    if (!gradeLevelId && !teacherId) {
+      return prisma.subject.findMany({
+        where: { isGlobal: true },
+        orderBy: { nameAr: 'asc' },
+      });
+    }
+
     const where = {
       OR: [
         { isGlobal: true },
@@ -40,20 +35,10 @@ export class AcademicService {
     };
 
     if (!gradeLevelId) {
-      if (!teacherId) {
-        const cached = CacheUtil.get(CACHE_KEYS.SUBJECTS_ALL);
-        if (cached) return cached;
-      }
-
-      const subjects = await prisma.subject.findMany({
+      return prisma.subject.findMany({
         where,
         orderBy: { nameAr: 'asc' },
       });
-
-      if (!teacherId) {
-        CacheUtil.set(CACHE_KEYS.SUBJECTS_ALL, subjects, 7200);
-      }
-      return subjects;
     }
 
     return prisma.subject.findMany({

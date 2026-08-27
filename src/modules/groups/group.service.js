@@ -28,19 +28,19 @@ export class GroupService {
       }),
     };
 
-    const [totalCount, groups] = await prisma.$transaction([
+    const [total, groups] = await Promise.all([
       prisma.group.count({ where }),
       prisma.group.findMany({
         where,
         skip,
         take: pageSize,
+        orderBy: { createdAt: 'desc' },
         include: {
           teacher: {
             select: {
               id: true,
               fullName: true,
               avatarUrl: true,
-              phone: true,
             },
           },
           subject: true,
@@ -50,7 +50,6 @@ export class GroupService {
             select: { enrollments: true },
           },
         },
-        orderBy: { createdAt: 'desc' },
       }),
     ]);
 
@@ -60,9 +59,11 @@ export class GroupService {
       groupCode: g.groupCode,
       scheduleDays: parseScheduleDays(g.scheduleDays),
       scheduleTime: g.scheduleTime,
-      maxCapacity: g.maxCapacity,
       studentCount: g._count.enrollments,
+      maxCapacity: g.maxCapacity,
       isFull: g._count.enrollments >= g.maxCapacity,
+      defaultPrice: g.defaultPrice,
+      coverImageUrl: g.coverImageUrl,
       teacher: g.teacher,
       subject: g.subject,
       stage: g.stage,
@@ -71,11 +72,10 @@ export class GroupService {
 
     return {
       pagination: {
-        totalCount,
         page: pageNumber,
-        pageSize,
-        totalPages: Math.ceil(totalCount / pageSize),
-        hasNextPage: pageNumber * pageSize < totalCount,
+        limit: pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
       },
       groups: formattedGroups,
     };
@@ -140,23 +140,20 @@ export class GroupService {
       throw ApiError.notFound('الملف الشخصي للطالب غير موجود');
     }
 
-    // Atomic transaction to ensure maxCapacity is never violated concurrently
+    // Atomic transaction with exclusive row-level locking to ensure maxCapacity is never violated under concurrency
     return prisma.$transaction(async (tx) => {
       const group = await tx.group.findUnique({
         where: { groupCode: cleanCode },
-        include: {
-          _count: { select: { enrollments: true } },
-        },
       });
 
       if (!group || !group.isActive) {
         throw ApiError.notFound('كود المجموعة غير صحيح أو المجموعة غير مفعلة');
       }
 
-      if (group._count.enrollments >= group.maxCapacity) {
-        throw ApiError.badRequest('عذراً، المجموعة ممتلئة بالكامل');
-      }
+      // Lock group row for update to serialize concurrent seat allocations
+      await tx.$queryRaw`SELECT id FROM groups WHERE id = ${group.id} FOR UPDATE`;
 
+      // 1. Check existing enrollment first
       const existingEnrollment = await tx.groupEnrollment.findUnique({
         where: {
           groupId_studentId: {
@@ -166,10 +163,24 @@ export class GroupService {
         },
       });
 
+      if (existingEnrollment && existingEnrollment.status === 'ACTIVE') {
+        throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+      }
+
+      // 2. Perform a locking read on active enrollments to get the latest committed count
+      const activeCountRaw = await tx.$queryRaw`
+        SELECT COUNT(*) AS activeCount 
+        FROM group_enrollments 
+        WHERE groupId = ${group.id} AND status = 'ACTIVE' 
+        FOR UPDATE
+      `;
+      const activeEnrollmentCount = Number(activeCountRaw[0]?.activeCount || 0);
+
+      if (activeEnrollmentCount >= group.maxCapacity) {
+        throw ApiError.badRequest('عذراً، المجموعة ممتلئة بالكامل');
+      }
+
       if (existingEnrollment) {
-        if (existingEnrollment.status === 'ACTIVE') {
-          throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
-        }
         // Re-activate a previously left/inactive enrollment
         const reactivated = await tx.groupEnrollment.update({
           where: { id: existingEnrollment.id },
@@ -216,6 +227,8 @@ export class GroupService {
         enrollment,
       };
     });
+
+    return result;
   }
 
   /**
@@ -230,22 +243,20 @@ export class GroupService {
       throw ApiError.notFound('الملف الشخصي للطالب غير موجود');
     }
 
+    // Atomic transaction with exclusive row-level locking to ensure maxCapacity is never violated under concurrency
     return prisma.$transaction(async (tx) => {
       const group = await tx.group.findUnique({
         where: { id: groupId },
-        include: {
-          _count: { select: { enrollments: true } },
-        },
       });
 
       if (!group || !group.isActive) {
         throw ApiError.notFound('المجموعة غير موجودة أو غير مفعلة');
       }
 
-      if (group._count.enrollments >= group.maxCapacity) {
-        throw ApiError.badRequest('عذراً، المجموعة ممتلئة بالكامل');
-      }
+      // Lock group row for update to serialize concurrent seat allocations
+      await tx.$queryRaw`SELECT id FROM groups WHERE id = ${group.id} FOR UPDATE`;
 
+      // 1. Check existing enrollment first
       const existingEnrollment = await tx.groupEnrollment.findUnique({
         where: {
           groupId_studentId: {
@@ -255,10 +266,24 @@ export class GroupService {
         },
       });
 
+      if (existingEnrollment && existingEnrollment.status === 'ACTIVE') {
+        throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
+      }
+
+      // 2. Perform a locking read on active enrollments to get the latest committed count
+      const activeCountRaw = await tx.$queryRaw`
+        SELECT COUNT(*) AS activeCount 
+        FROM group_enrollments 
+        WHERE groupId = ${group.id} AND status = 'ACTIVE' 
+        FOR UPDATE
+      `;
+      const activeEnrollmentCount = Number(activeCountRaw[0]?.activeCount || 0);
+
+      if (activeEnrollmentCount >= group.maxCapacity) {
+        throw ApiError.badRequest('عذراً، المجموعة ممتلئة بالكامل');
+      }
+
       if (existingEnrollment) {
-        if (existingEnrollment.status === 'ACTIVE') {
-          throw ApiError.conflict('أنت منضم بالفعل إلى هذه المجموعة');
-        }
         // Re-activate a previously left/inactive enrollment
         const reactivated = await tx.groupEnrollment.update({
           where: { id: existingEnrollment.id },
@@ -305,6 +330,8 @@ export class GroupService {
         enrollment,
       };
     });
+
+    return result;
   }
 
   /**

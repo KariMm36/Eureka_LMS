@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { HomeworkController } from './homework.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { authorize } from '../../middlewares/role.middleware.js';
+import { validate } from '../../middlewares/validate.middleware.js';
+import { submitHomeworkSchema } from './homework.validation.js';
 
 const router = Router();
 
@@ -80,7 +82,7 @@ router.get('/:homeworkId', HomeworkController.getHomeworkForTaking);
  *       409:
  *         description: Already submitted
  */
-router.post('/:homeworkId/submit', HomeworkController.submitHomework);
+router.post('/:homeworkId/submit', validate(submitHomeworkSchema), HomeworkController.submitHomework);
 
 /**
  * @swagger

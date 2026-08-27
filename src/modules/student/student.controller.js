@@ -1,5 +1,6 @@
 import { StudentService } from './student.service.js';
 import { ApiResponse } from '../../utils/apiResponse.js';
+import { handleFileUpload, CLOUDINARY_FOLDERS } from '../../config/cloudinary.config.js';
 
 export class StudentController {
   static async completeOnboarding(req, res, next) {
@@ -22,7 +23,13 @@ export class StudentController {
 
   static async updateProfile(req, res, next) {
     try {
-      const avatarUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+      const avatarUrl = req.file
+        ? await handleFileUpload({
+            file: req.file,
+            folder: CLOUDINARY_FOLDERS.STUDENT_AVATARS,
+            resourceType: 'image',
+          })
+        : undefined;
       const payload = { ...req.body, ...(avatarUrl && { avatarUrl }) };
       const result = await StudentService.updateProfile(req.user.id, payload);
       return ApiResponse.success(res, result, 'تم تحديث البيانات الشخصية بنجاح');

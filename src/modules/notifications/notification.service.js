@@ -4,10 +4,14 @@ import { sendPushNotificationToTokens, sendPushNotification } from '../../utils/
 
 export class NotificationService {
   /**
-   * 1. Get notifications list with filters (all / read / unread)
+   * 1. Get notifications list with filters (all / read / unread) and pagination
    * Matches Screen 4 in UI
    */
-  static async getNotifications(userId, filter = 'all', search = '') {
+  static async getNotifications(userId, { filter = 'all', search = '', page = 1, limit = 20 } = {}) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const pageSize = Math.min(50, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * pageSize;
+
     const where = {
       userId,
       ...(filter === 'read' && { isRead: true }),
@@ -20,16 +24,27 @@ export class NotificationService {
       }),
     };
 
-    const notifications = await prisma.notification.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const unreadCount = await prisma.notification.count({
-      where: { userId, isRead: false },
-    });
+    const [totalCount, notifications, unreadCount] = await prisma.$transaction([
+      prisma.notification.count({ where }),
+      prisma.notification.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.notification.count({
+        where: { userId, isRead: false },
+      }),
+    ]);
 
     return {
+      pagination: {
+        totalCount,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+        hasNextPage: pageNum * pageSize < totalCount,
+      },
       unreadCount,
       notifications: notifications.map((n) => ({
         id: n.id,

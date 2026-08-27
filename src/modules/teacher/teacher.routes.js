@@ -3,7 +3,7 @@ import { TeacherController } from './teacher.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { uploadImage, uploadDocument, uploadVideo } from '../../config/multer.config.js';
+import { uploadImage, uploadDocument, uploadVideo, uploadReceipt } from '../../config/multer.config.js';
 import {
   createGroupSchema,
   updateGroupSchema,
@@ -20,6 +20,13 @@ import {
   updateLessonSchema,
   uploadVideoSchema,
   uploadMaterialSchema,
+  createHomeworkSchema,
+  updateHomeworkSchema,
+  createExamSchema,
+  updateExamSchema,
+  gradeEssaySchema,
+  recordPaymentSchema,
+  broadcastNotificationSchema,
 } from './teacher.validation.js';
 
 const router = Router();
@@ -671,7 +678,502 @@ router.post('/lessons/:lessonId/materials', uploadDocument.single('document'), v
 router.delete('/lessons/:lessonId/media/:mediaType/:mediaId', TeacherController.deleteLessonMedia);
 
 // ----------------------------------------------------
-// 18. Teacher Profile & Settings
+// 14. Homework Authoring Wizard
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/homework:
+ *   post:
+ *     summary: Create homework with MCQ and Essay questions (Add Homework Screen)
+ *     tags: [14. Homework Authoring Wizard]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [groupId, title, dueDate, questions]
+ *             properties:
+ *               groupId: { type: string, format: uuid }
+ *               lessonId: { type: string, format: uuid }
+ *               title: { type: string, example: "واجب درس قوانين نيوتن" }
+ *               unitName: { type: string, example: "الوحدة الأولى: الميكانيكا" }
+ *               durationMinutes: { type: integer, default: 30 }
+ *               dueDate: { type: string, format: date-time }
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [questionText, score]
+ *                   properties:
+ *                     type: { type: string, enum: [MCQ, ESSAY], default: MCQ }
+ *                     questionText: { type: string }
+ *                     options: { type: array, items: { type: string } }
+ *                     correctOptionIndex: { type: integer }
+ *                     explanation: { type: string }
+ *                     modelAnswer: { type: string }
+ *                     score: { type: integer, default: 1 }
+ *     responses:
+ *       201:
+ *         description: Homework created and assigned
+ */
+router.post('/homework', validate(createHomeworkSchema), TeacherController.createHomework);
+
+/**
+ * @swagger
+ * /teacher/homework:
+ *   get:
+ *     summary: List teacher's homeworks with submission progress
+ *     tags: [14. Homework Authoring Wizard]
+ *     parameters:
+ *       - in: query
+ *         name: groupId
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *     responses:
+ *       200:
+ *         description: Homework list
+ */
+router.get('/homework', TeacherController.getTeacherHomeworks);
+
+/**
+ * @swagger
+ * /teacher/homework/{homeworkId}:
+ *   get:
+ *     summary: Get homework details with full question breakdown
+ *     tags: [14. Homework Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: homeworkId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Homework details
+ */
+router.get('/homework/:homeworkId', TeacherController.getHomeworkDetails);
+
+/**
+ * @swagger
+ * /teacher/homework/{homeworkId}:
+ *   put:
+ *     summary: Update homework details and questions
+ *     tags: [14. Homework Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: homeworkId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string }
+ *               unitName: { type: string }
+ *               durationMinutes: { type: integer }
+ *               dueDate: { type: string, format: date-time }
+ *               questions: { type: array, items: { type: object } }
+ *     responses:
+ *       200:
+ *         description: Homework updated
+ */
+router.put('/homework/:homeworkId', validate(updateHomeworkSchema), TeacherController.updateHomework);
+
+/**
+ * @swagger
+ * /teacher/homework/{homeworkId}:
+ *   delete:
+ *     summary: Delete homework assignment
+ *     tags: [14. Homework Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: homeworkId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Homework deleted
+ */
+router.delete('/homework/:homeworkId', TeacherController.deleteHomework);
+
+/**
+ * @swagger
+ * /teacher/homework/{homeworkId}/submissions:
+ *   get:
+ *     summary: Get student homework submissions roster
+ *     tags: [14. Homework Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: homeworkId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Submissions roster
+ */
+router.get('/homework/:homeworkId/submissions', TeacherController.getHomeworkSubmissions);
+
+// ----------------------------------------------------
+// 15. Exam Authoring Wizard
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/exams:
+ *   post:
+ *     summary: Create timed exam with MCQ and Essay questions (Add Exam Screen)
+ *     tags: [15. Exam Authoring Wizard]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [groupId, title, durationMinutes, startTime, endTime, questions]
+ *             properties:
+ *               groupId: { type: string, format: uuid }
+ *               lessonId: { type: string, format: uuid }
+ *               title: { type: string, example: "امتحان شامل على الفصل الأول" }
+ *               durationMinutes: { type: integer, example: 45 }
+ *               passingScorePercentage: { type: integer, default: 60 }
+ *               startTime: { type: string, format: date-time }
+ *               endTime: { type: string, format: date-time }
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [questionText, score]
+ *                   properties:
+ *                     type: { type: string, enum: [MCQ, ESSAY], default: MCQ }
+ *                     questionText: { type: string }
+ *                     options: { type: array, items: { type: string } }
+ *                     correctOptionIndex: { type: integer }
+ *                     explanation: { type: string }
+ *                     modelAnswer: { type: string }
+ *                     score: { type: integer, default: 1 }
+ *     responses:
+ *       201:
+ *         description: Exam created and scheduled
+ */
+router.post('/exams', validate(createExamSchema), TeacherController.createExam);
+
+/**
+ * @swagger
+ * /teacher/exams:
+ *   get:
+ *     summary: List teacher's exams with attempt statistics
+ *     tags: [15. Exam Authoring Wizard]
+ *     parameters:
+ *       - in: query
+ *         name: groupId
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *     responses:
+ *       200:
+ *         description: Exam list
+ */
+router.get('/exams', TeacherController.getTeacherExams);
+
+/**
+ * @swagger
+ * /teacher/exams/{examId}:
+ *   get:
+ *     summary: Get exam details with question list
+ *     tags: [15. Exam Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Exam details
+ */
+router.get('/exams/:examId', TeacherController.getExamDetails);
+
+/**
+ * @swagger
+ * /teacher/exams/{examId}:
+ *   put:
+ *     summary: Update exam details and questions
+ *     tags: [15. Exam Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string }
+ *               durationMinutes: { type: integer }
+ *               passingScorePercentage: { type: integer }
+ *               startTime: { type: string, format: date-time }
+ *               endTime: { type: string, format: date-time }
+ *               questions: { type: array, items: { type: object } }
+ *     responses:
+ *       200:
+ *         description: Exam updated
+ */
+router.put('/exams/:examId', validate(updateExamSchema), TeacherController.updateExam);
+
+/**
+ * @swagger
+ * /teacher/exams/{examId}:
+ *   delete:
+ *     summary: Delete exam
+ *     tags: [15. Exam Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Exam deleted
+ */
+router.delete('/exams/:examId', TeacherController.deleteExam);
+
+/**
+ * @swagger
+ * /teacher/exams/{examId}/attempts:
+ *   get:
+ *     summary: Get exam student attempts with scores and pass/fail rankings
+ *     tags: [15. Exam Authoring Wizard]
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Attempts roster
+ */
+router.get('/exams/:examId/attempts', TeacherController.getExamAttempts);
+
+// ----------------------------------------------------
+// 16. Manual Essay Grading Queue
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/grading/pending:
+ *   get:
+ *     summary: Get pending essay answers queue waiting for teacher scoring (Grading Screen)
+ *     tags: [16. Manual Essay Grading Queue]
+ *     responses:
+ *       200:
+ *         description: Pending essay questions queue
+ */
+router.get('/grading/pending', TeacherController.getPendingEssayGrading);
+
+/**
+ * @swagger
+ * /teacher/grading/essay:
+ *   post:
+ *     summary: Score student essay question, add feedback note, and trigger instant FCM push notification
+ *     tags: [16. Manual Essay Grading Queue]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [submissionId, questionId, scoreAwarded]
+ *             properties:
+ *               submissionType: { type: string, enum: [HOMEWORK, EXAM], default: EXAM }
+ *               submissionId: { type: string, format: uuid }
+ *               questionId: { type: string, format: uuid }
+ *               scoreAwarded: { type: number, example: 4.5 }
+ *               feedback: { type: string, example: "إجابة ممتازة لكن ينقصها ذكر القانون الرياضي" }
+ *     responses:
+ *       200:
+ *         description: Essay graded and score recalculated
+ */
+router.post('/grading/essay', validate(gradeEssaySchema), TeacherController.gradeEssay);
+
+// ----------------------------------------------------
+// 17. Comprehensive Grade Sheet
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/exams/{examId}/grade-sheet:
+ *   get:
+ *     summary: Get tabular grade sheet leaderboard for all enrolled students (Grade Sheet Screen)
+ *     tags: [17. Comprehensive Grade Sheet]
+ *     parameters:
+ *       - in: path
+ *         name: examId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Full grade sheet scorecard
+ */
+router.get('/exams/:examId/grade-sheet', TeacherController.getExamGradeSheet);
+
+// ----------------------------------------------------
+// 18. Income & Payment Ledger
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/finance/summary:
+ *   get:
+ *     summary: Get revenue overview, collection rate %, and recent payments
+ *     tags: [18. Income & Payment Ledger]
+ *     parameters:
+ *       - in: query
+ *         name: monthLabel
+ *         schema: { type: string, example: "2026-08" }
+ *     responses:
+ *       200:
+ *         description: Financial summary KPIs
+ */
+router.get('/finance/summary', TeacherController.getFinanceSummary);
+
+/**
+ * @swagger
+ * /teacher/finance/groups/{groupId}:
+ *   get:
+ *     summary: Get group financial roster with paid/unpaid status for current month
+ *     tags: [18. Income & Payment Ledger]
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: monthLabel
+ *         schema: { type: string, example: "2026-08" }
+ *     responses:
+ *       200:
+ *         description: Group financial roster
+ */
+router.get('/finance/groups/:groupId', TeacherController.getGroupFinanceRoster);
+
+/**
+ * @swagger
+ * /teacher/finance/payments:
+ *   post:
+ *     summary: Record student fee payment receipt
+ *     tags: [18. Income & Payment Ledger]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [studentId, groupId, amount]
+ *             properties:
+ *               studentId: { type: string, format: uuid }
+ *               groupId: { type: string, format: uuid }
+ *               amount: { type: number, example: 350 }
+ *               paymentMethod: { type: string, enum: [CASH, VODAFONE_CASH, INSTAPAY, CARD, OTHER], default: CASH }
+ *               monthLabel: { type: string, example: "2026-08" }
+ *               receiptUrl: { type: string }
+ *               notes: { type: string }
+ *     responses:
+ *       201:
+ *         description: Payment recorded
+ */
+router.post('/finance/payments', uploadReceipt.single('receipt'), validate(recordPaymentSchema), TeacherController.recordStudentPayment);
+
+/**
+ * @swagger
+ * /teacher/finance/payments:
+ *   get:
+ *     summary: Get payment ledger history with filters
+ *     tags: [18. Income & Payment Ledger]
+ *     parameters:
+ *       - in: query
+ *         name: groupId
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: studentId
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: monthLabel
+ *         schema: { type: string }
+ *       - in: query
+ *         name: paymentMethod
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *     responses:
+ *       200:
+ *         description: Payment history
+ */
+router.get('/finance/payments', TeacherController.getPaymentLedger);
+
+/**
+ * @swagger
+ * /teacher/finance/payments/{paymentId}:
+ *   delete:
+ *     summary: Cancel and delete payment receipt
+ *     tags: [18. Income & Payment Ledger]
+ *     parameters:
+ *       - in: path
+ *         name: paymentId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Payment receipt deleted
+ */
+router.delete('/finance/payments/:paymentId', TeacherController.deletePaymentReceipt);
+
+// ----------------------------------------------------
+// 19. Teacher Broadcast Notifications
+// ----------------------------------------------------
+
+/**
+ * @swagger
+ * /teacher/broadcast:
+ *   post:
+ *     summary: Dispatch announcement to whole group, stage, or grade with FCM Push
+ *     tags: [19. Teacher Broadcast Notifications]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, body]
+ *             properties:
+ *               targetType: { type: string, enum: [GROUP, STAGE, GRADE_LEVEL, ALL_MY_STUDENTS], default: GROUP }
+ *               groupId: { type: string, format: uuid }
+ *               stageId: { type: string, format: uuid }
+ *               gradeLevelId: { type: string, format: uuid }
+ *               title: { type: string, example: "تنبيه هام بخصوص موعد الحصة القادمة" }
+ *               body: { type: string, example: "يرجى العلم بأنه تم تأجيل موعد حصة المراجعة نصف ساعة" }
+ *               attachments: { type: array, items: { type: string } }
+ *     responses:
+ *       200:
+ *         description: Broadcast sent
+ */
+router.post('/broadcast', validate(broadcastNotificationSchema), TeacherController.broadcastNotification);
+
+// ----------------------------------------------------
+// 20. Teacher Profile & Settings
 // ----------------------------------------------------
 
 /**
@@ -679,7 +1181,7 @@ router.delete('/lessons/:lessonId/media/:mediaType/:mediaId', TeacherController.
  * /teacher/profile:
  *   get:
  *     summary: Get teacher profile with assigned groups and stats
- *     tags: [18. Teacher Profile & Settings]
+ *     tags: [20. Teacher Profile & Settings]
  *     responses:
  *       200:
  *         description: Teacher profile
@@ -691,7 +1193,7 @@ router.get('/profile', TeacherController.getProfile);
  * /teacher/profile:
  *   put:
  *     summary: Update teacher personal info and avatar photo
- *     tags: [18. Teacher Profile & Settings]
+ *     tags: [20. Teacher Profile & Settings]
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -712,7 +1214,7 @@ router.put('/profile', uploadImage.single('avatar'), validate(updateTeacherProfi
  * /teacher/settings:
  *   put:
  *     summary: Update teacher preferences (Language, Dark mode, Notification toggles)
- *     tags: [18. Teacher Profile & Settings]
+ *     tags: [20. Teacher Profile & Settings]
  *     requestBody:
  *       content:
  *         application/json:
@@ -732,3 +1234,4 @@ router.put('/profile', uploadImage.single('avatar'), validate(updateTeacherProfi
 router.put('/settings', validate(updateTeacherSettingsSchema), TeacherController.updateSettings);
 
 export default router;
+

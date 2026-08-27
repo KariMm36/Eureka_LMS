@@ -4,7 +4,6 @@ import { validateEssayMinWords } from '../../utils/essay.util.js';
 import { computeExamPercentile } from '../../utils/percentile.util.js';
 import { sendPushNotification } from '../../utils/pushNotification.util.js';
 
-
 export class ExamService {
   /**
    * 1. Get student exams feed with filter tabs (all / available / completed / upcoming)
@@ -119,6 +118,14 @@ export class ExamService {
    * Matches Screen 6 (instructions)
    */
   static async getExamInstructions(userId, examId) {
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!studentProfile) {
+      throw ApiError.notFound('الملف الشخصي للطالب غير موجود');
+    }
+
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
       include: {
@@ -131,6 +138,20 @@ export class ExamService {
 
     if (!exam) {
       throw ApiError.notFound('الامتحان غير موجود');
+    }
+
+    // Verify student has an ACTIVE enrollment in the exam's group
+    const enrollment = await prisma.groupEnrollment.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId: exam.groupId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.status !== 'ACTIVE') {
+      throw ApiError.forbidden('أنت لست مسجلاً في مجموعة هذا الامتحان');
     }
 
     const guidelines = exam.guidelinesJson ? JSON.parse(exam.guidelinesJson) : [
@@ -191,6 +212,20 @@ export class ExamService {
 
     if (!exam) {
       throw ApiError.notFound('الامتحان غير موجود');
+    }
+
+    // Verify student has an ACTIVE enrollment in the exam's group
+    const enrollment = await prisma.groupEnrollment.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId: exam.groupId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.status !== 'ACTIVE') {
+      throw ApiError.forbidden('أنت لست مسجلاً في مجموعة هذا الامتحان');
     }
 
     // Enforce time window using server time (ignores client clock drift)
@@ -259,6 +294,20 @@ export class ExamService {
       throw ApiError.notFound('الامتحان غير موجود');
     }
 
+    // Verify student has an ACTIVE enrollment in the exam's group
+    const enrollment = await prisma.groupEnrollment.findUnique({
+      where: {
+        groupId_studentId: {
+          groupId: exam.groupId,
+          studentId: studentProfile.id,
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.status !== 'ACTIVE') {
+      throw ApiError.forbidden('أنت لست مسجلاً في مجموعة هذا الامتحان');
+    }
+
     // Check previous submission
     const existing = await prisma.examSubmission.findUnique({
       where: {
@@ -273,6 +322,13 @@ export class ExamService {
       throw ApiError.conflict('لقد قمت بإنهاء هذا الامتحان مسبقاً');
     }
 
+    // Enforce server-side exam deadline (allowing 5-minute network latency grace period)
+    const now = new Date();
+    const allowedEndTime = new Date(new Date(exam.endTime).getTime() + 5 * 60 * 1000);
+    if (now > allowedEndTime) {
+      throw ApiError.badRequest('انتهت فترة تسليم الامتحان المسموح بها');
+    }
+
     let totalScoreObtained = 0;
     let correctCount = 0;
     let wrongCount = 0;
@@ -284,7 +340,8 @@ export class ExamService {
       if (!question) return ans;
 
       if (question.type === 'MCQ') {
-        const isCorrect = ans.selectedOption === question.correctOptionIndex;
+        const selectedOpt = ans.selectedOption !== undefined ? ans.selectedOption : ans.selectedOptionIndex;
+        const isCorrect = selectedOpt === question.correctOptionIndex;
         const scoreObtained = isCorrect ? question.score : 0;
         if (isCorrect) correctCount++;
         else wrongCount++;
@@ -294,7 +351,7 @@ export class ExamService {
           questionId: question.id,
           questionOrder: question.order,
           questionText: question.questionText,
-          selectedOption: ans.selectedOption,
+          selectedOption: selectedOpt,
           correctOptionIndex: question.correctOptionIndex,
           explanation: question.explanation,
           isCorrect,
@@ -305,14 +362,16 @@ export class ExamService {
         };
       } else {
         // Essay Question — validate minWords before accepting
-        validateEssayMinWords(ans.essayText, question.minWords, question.order);
+        const essayContent = ans.essayText !== undefined ? ans.essayText : (ans.answerText || ans.answer || '');
+        validateEssayMinWords(essayContent, question.minWords, question.order);
         underReviewCount++;
         return {
           questionId: question.id,
           questionOrder: question.order,
           questionText: question.questionText,
-          essayText: ans.essayText,
-          wordCount: ans.essayText ? ans.essayText.trim().split(/\s+/).filter(Boolean).length : 0,
+          essayText: essayContent,
+          answerText: essayContent,
+          wordCount: essayContent ? essayContent.trim().split(/\s+/).filter(Boolean).length : 0,
           isUnderReview: true,
           scoreObtained: 0,
           maxScore: question.score,
@@ -366,7 +425,6 @@ export class ExamService {
       body: notifBody,
       data: { type: 'EXAM', referenceId: examId },
     }).catch((err) => console.error('[Push Notification] Error sending exam push:', err.message));
-
 
     return {
       submissionId: submission.id,

@@ -275,6 +275,7 @@ model Group {
   lessonMaterials LessonMaterial[]
 
   @@index([isActive, stageId, subjectId])
+  @@index([teacherId, isActive, createdAt])
   @@map("groups")
 }
 
@@ -315,6 +316,7 @@ model Homework {
   questions   HomeworkQuestion[]
   submissions HomeworkSubmission[]
 
+  @@index([groupId, dueDate])
   @@map("homeworks")
 }
 
@@ -332,6 +334,7 @@ model HomeworkQuestion {
   score              Int
   order              Int          @default(1)
 
+  @@index([homeworkId, order])
   @@map("homework_questions")
 }
 
@@ -355,6 +358,7 @@ model HomeworkSubmission {
 
   @@unique([homeworkId, studentId])
   @@index([homeworkId, status])
+  @@index([homeworkId, totalScoreObtained])
   @@map("homework_submissions")
 }
 
@@ -381,6 +385,7 @@ model Exam {
   questions   ExamQuestion[]
   submissions ExamSubmission[]
 
+  @@index([groupId, startTime, endTime])
   @@map("exams")
 }
 
@@ -398,6 +403,7 @@ model ExamQuestion {
   score              Int
   order              Int          @default(1)
 
+  @@index([examId, order])
   @@map("exam_questions")
 }
 
@@ -421,6 +427,7 @@ model ExamSubmission {
 
   @@unique([examId, studentId])
   @@index([examId, scorePercentage])
+  @@index([examId, totalScoreObtained])
   @@map("exam_submissions")
 }
 

@@ -33,6 +33,10 @@ export class ApiError extends Error {
     return new ApiError(409, message);
   }
 
+  static tooManyRequests(message = 'تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً') {
+    return new ApiError(429, message);
+  }
+
   static internal(message = 'حدث خطأ في الخادم') {
     return new ApiError(500, message);
   }

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { NotificationController } from './notification.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { validate } from '../../middlewares/validate.middleware.js';
+import { registerFcmTokenSchema } from './notification.validation.js';
 
 const router = Router();
 
@@ -12,15 +14,24 @@ router.use(authenticate);
  * @swagger
  * /notifications:
  *   get:
- *     summary: Get student notification feed with unread count
+ *     summary: Get student notification feed with unread count and pagination
  *     tags: [8. Notifications & Push]
  *     parameters:
  *       - in: query
  *         name: filter
  *         schema: { type: string, enum: [all, unread, read] }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
  *     responses:
  *       200:
- *         description: List of notifications and unread count
+ *         description: Paginated list of notifications and unread count
  */
 router.get('/', NotificationController.getNotifications);
 
@@ -91,6 +102,6 @@ router.patch('/read-all', NotificationController.markAllAsRead);
  *       200:
  *         description: FCM device token saved
  */
-router.post('/fcm-token', NotificationController.registerFCMToken);
+router.post('/fcm-token', validate(registerFcmTokenSchema), NotificationController.registerFCMToken);
 
 export default router;

@@ -9,9 +9,12 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerDocument } from './config/swagger.config.js';
 
 // Middlewares
+import { requestIdMiddleware } from './middlewares/requestId.middleware.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { ApiResponse } from './utils/apiResponse.js';
 import { ENV } from './config/env.config.js';
+import prisma from './config/prisma.js';
+import { logger } from './config/logger.config.js';
 
 // Feature Routes
 import authRoutes from './modules/auth/auth.routes.js';
@@ -28,6 +31,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Request Correlation ID Middleware (First in chain)
+app.use(requestIdMiddleware);
 
 // Global Middlewares
 app.use(helmet({ contentSecurityPolicy: false })); // allow Swagger UI assets
@@ -51,7 +57,7 @@ app.use(
       return callback(new Error(`CORS: Origin ${origin} is not allowed`));
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
     credentials: true,
   })
 );
@@ -79,9 +85,38 @@ app.use(
 app.use('/docs', (req, res) => res.redirect('/api-docs'));
 
 
-// Health Check API (accessible at both /health and /api/v1/health)
+// 1. Lightweight Liveness Probe (process is alive)
 app.get(['/health', '/api/v1/health'], (req, res) => {
-  return ApiResponse.success(res, { status: 'healthy', timestamp: new Date() }, 'خادم يوريكا يعمل بنجاح');
+  return ApiResponse.success(res, { status: 'healthy', timestamp: new Date() }, 'Eureka server is running successfully');
+});
+
+// 2. Comprehensive Readiness Probe (checks database connectivity)
+app.get(['/health/readiness', '/api/v1/health/readiness'], async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: 'خادم يوريكا وقاعدة البيانات في حالة جاهزية تامة',
+      data: {
+        status: 'ready',
+        database: 'connected',
+        timestamp: new Date(),
+      },
+    });
+  } catch (dbError) {
+    logger.error({ err: dbError, requestId: req.id }, '[Readiness Probe Failed] Database unavailable');
+    return res.status(503).json({
+      success: false,
+      statusCode: 503,
+      message: 'الخدمة غير متاحة حالياً - تعذر الاتصال بقاعدة البيانات',
+      data: {
+        status: 'unhealthy',
+        database: 'disconnected',
+        timestamp: new Date(),
+      },
+    });
+  }
 });
 
 

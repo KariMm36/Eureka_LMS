@@ -149,7 +149,7 @@ describe('Auth Module Integration Tests', () => {
   });
 
   describe('4. Token Refresh Flow (POST /api/v1/auth/refresh)', () => {
-    it('should issue new access token when provided valid refresh token', async () => {
+    it('should issue new access token and rotated refresh token when provided valid refresh token', async () => {
       const res = await request(app)
         .post('/api/v1/auth/refresh')
         .send({ refreshToken });
@@ -157,7 +157,11 @@ describe('Auth Module Integration Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.token).toBeDefined();
+      expect(res.body.data.refreshToken).toBeDefined();
       expect(res.body.data.expiresIn).toBeDefined();
+
+      // Update test refreshToken to the rotated token
+      refreshToken = res.body.data.refreshToken;
     });
 
     it('should reject refresh with malformed or tampered token (401 Unauthorized)', async () => {

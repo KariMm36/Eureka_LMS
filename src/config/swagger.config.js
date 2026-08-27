@@ -71,23 +71,31 @@ const swaggerOptions = {
         description: 'Teacher private subjects, units, lessons, 500MB video uploads, and 10MB study PDF materials.',
       },
       {
-        name: '14. Homework Authoring & Grading',
-        description: 'Homework authoring wizard with nested questions, model answers, submission roster, and essay manual grading.',
+        name: '14. Homework Authoring Wizard',
+        description: 'Homework authoring wizard with nested MCQ/Essay questions, model answers, and student submissions roster.',
       },
       {
-        name: '15. Exam Authoring & Grade Sheet',
-        description: 'Exam authoring wizard with time window, passing percentage, grade sheet (كشف درجات), and essay grading.',
+        name: '15. Exam Authoring Wizard',
+        description: 'Exam authoring wizard with time window, passing percentage, attempts tracker, and nested questions builder.',
       },
       {
-        name: '16. Income & Payment Ledger',
-        description: 'Financial KPI summary, paid/unpaid rosters, per-student pricing, and append-only receipt payment records.',
+        name: '16. Manual Essay Grading Queue',
+        description: 'Unified pending essay grading inbox with instant FCM push notification dispatch upon scoring.',
       },
       {
-        name: '17. Teacher Broadcast Notifications',
-        description: 'Group and grade-level broadcast announcements dispatched to students with FCM push notifications.',
+        name: '17. Comprehensive Grade Sheet',
+        description: 'Leaderboard scorecard (كشف درجات الطلاب) showing all enrolled students, rankings, and summary statistics.',
       },
       {
-        name: '18. Teacher Profile & Settings',
+        name: '18. Income & Payment Ledger',
+        description: 'Financial KPI summary, paid/unpaid rosters, per-student pricing, and receipt payment records.',
+      },
+      {
+        name: '19. Teacher Broadcast Notifications',
+        description: 'Group, stage, and grade-level broadcast announcements dispatched to students with FCM push notifications.',
+      },
+      {
+        name: '20. Teacher Profile & Settings',
         description: 'Teacher personal profile, avatar photo upload, language selection, and notification preference settings.',
       },
     ],

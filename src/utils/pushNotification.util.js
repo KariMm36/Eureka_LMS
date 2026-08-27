@@ -83,6 +83,8 @@ export const sendPushNotification = async ({ userId, title, body, data = {} }) =
 
 /**
  * Send push notifications to multiple FCM tokens in batch/multicast.
+ * Splits tokens into bounded chunks of maximum 500 tokens (FCM hard limit)
+ * and processes with bounded concurrency to prevent socket starvation.
  *
  * @param {Object} options
  * @param {string[]} options.tokens - Array of FCM registration tokens
@@ -91,11 +93,21 @@ export const sendPushNotification = async ({ userId, title, body, data = {} }) =
  * @param {Object} [options.data]   - Optional string key-value payload
  */
 export const sendPushNotificationToTokens = async ({ tokens = [], title, body, data = {} }) => {
-  if (!tokens.length) return { success: false, count: 0 };
+  if (!tokens || !tokens.length) return { success: false, count: 0, successCount: 0, failureCount: 0 };
+
+  const FCM_MAX_CHUNK_SIZE = 500;
+  const CONCURRENCY_LIMIT = 5;
 
   if (!isPushEnabled()) {
-    console.log(`[Push Multicast (Mock)] Tokens: ${tokens.length} | Title: "${title}"`);
-    return { success: true, mocked: true, count: tokens.length };
+    console.log(`[Push Multicast (Mock)] Tokens: ${tokens.length} (Chunks: ${Math.ceil(tokens.length / FCM_MAX_CHUNK_SIZE)}) | Title: "${title}"`);
+    return {
+      success: true,
+      mocked: true,
+      count: tokens.length,
+      successCount: tokens.length,
+      failureCount: 0,
+      totalChunks: Math.ceil(tokens.length / FCM_MAX_CHUNK_SIZE),
+    };
   }
 
   const stringifiedData = Object.entries(data).reduce((acc, [k, v]) => {
@@ -103,24 +115,48 @@ export const sendPushNotificationToTokens = async ({ tokens = [], title, body, d
     return acc;
   }, {});
 
-  const message = {
-    tokens,
-    notification: {
-      title,
-      body,
-    },
-    data: stringifiedData,
-  };
-
-  try {
-    const response = await admin.messaging().sendEachForMulticast(message);
-    return {
-      success: true,
-      successCount: response.successCount,
-      failureCount: response.failureCount,
-    };
-  } catch (error) {
-    console.error('[Push Multicast] Error:', error.message);
-    return { success: false, error: error.message };
+  // 1. Split tokens into chunks of max 500
+  const chunks = [];
+  for (let i = 0; i < tokens.length; i += FCM_MAX_CHUNK_SIZE) {
+    chunks.push(tokens.slice(i, i + FCM_MAX_CHUNK_SIZE));
   }
+
+  let totalSuccessCount = 0;
+  let totalFailureCount = 0;
+  const errors = [];
+
+  // 2. Process chunks in bounded batches (concurrency of 5)
+  for (let i = 0; i < chunks.length; i += CONCURRENCY_LIMIT) {
+    const activeBatch = chunks.slice(i, i + CONCURRENCY_LIMIT);
+    const batchPromises = activeBatch.map(async (chunk) => {
+      try {
+        const response = await admin.messaging().sendEachForMulticast({
+          tokens: chunk,
+          notification: { title, body },
+          data: stringifiedData,
+        });
+        return { success: true, successCount: response.successCount || 0, failureCount: response.failureCount || 0 };
+      } catch (err) {
+        console.error('[Push Multicast Chunk Error]:', err.message);
+        return { success: false, error: err.message, successCount: 0, failureCount: chunk.length };
+      }
+    });
+
+    const results = await Promise.all(batchPromises);
+    for (const res of results) {
+      totalSuccessCount += res.successCount;
+      totalFailureCount += res.failureCount;
+      if (!res.success && res.error) {
+        errors.push(res.error);
+      }
+    }
+  }
+
+  return {
+    success: totalFailureCount === 0 || totalSuccessCount > 0,
+    successCount: totalSuccessCount,
+    failureCount: totalFailureCount,
+    totalChunks: chunks.length,
+    ...(errors.length > 0 && { errors }),
+  };
 };

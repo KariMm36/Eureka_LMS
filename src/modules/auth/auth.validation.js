@@ -97,8 +97,9 @@ export const updatePasswordSchema = Joi.object({
 });
 
 export const deleteAccountSchema = Joi.object({
-  password: Joi.string().optional().messages({
+  password: Joi.string().required().messages({
     'string.empty': 'يرجى إدخال كلمة المرور لتأكيد الحذف',
+    'any.required': 'كلمة المرور مطلوبة لتأكيد حذف الحساب',
   }),
 });
 

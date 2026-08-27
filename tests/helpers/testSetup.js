@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../src/config/prisma.js';
-import { signToken, signRefreshToken } from '../../src/utils/jwt.util.js';
+import { signToken, signRefreshToken, hashRefreshToken } from '../../src/utils/jwt.util.js';
 
 /**
  * Shared Test Fixture Generator & Teardown Helper for Vitest
@@ -147,7 +147,7 @@ export class TestSetupHelper {
     const refreshToken = signRefreshToken({ id: user.id });
 
     // Store hashed refresh token
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 8);
+    const refreshTokenHash = await bcrypt.hash(hashRefreshToken(refreshToken), 8);
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshTokenHash },
@@ -172,7 +172,7 @@ export class TestSetupHelper {
   /**
    * 3. Create a Group with Teacher & Academic links
    */
-  async createGroup({ teacherId, maxCapacity = 50, groupCode } = {}) {
+  async createGroup({ teacherId, maxCapacity = 50, groupCode, defaultPrice = 0 } = {}) {
     if (!this.createdAcademicIds.subjectId) {
       await this.createAcademicHierarchy();
     }
@@ -197,6 +197,7 @@ export class TestSetupHelper {
         scheduleDays: 'الأحد,الثلاثاء,الخميس',
         scheduleTime: '05:00 PM',
         maxCapacity,
+        defaultPrice,
         isActive: true,
       },
       include: {
@@ -214,12 +215,13 @@ export class TestSetupHelper {
   /**
    * 4. Enroll Student in Group
    */
-  async enrollStudent(studentProfileId, groupId, status = 'ACTIVE') {
+  async enrollStudent(studentProfileId, groupId, status = 'ACTIVE', enrollmentPrice = 0) {
     return prisma.groupEnrollment.create({
       data: {
         studentId: studentProfileId,
         groupId,
         status,
+        enrollmentPrice,
       },
     });
   }
@@ -404,10 +406,15 @@ export class TestSetupHelper {
         });
       }
 
-      // 3. Delete Groups & Enrollments
+      // 3. Delete Payments, Class Sessions, Group Enrollments & Groups
       if (this.createdGroupIds.size > 0) {
+        const groupIds = Array.from(this.createdGroupIds);
+        await prisma.studentPayment.deleteMany({ where: { groupId: { in: groupIds } } });
+        await prisma.attendance.deleteMany({ where: { session: { groupId: { in: groupIds } } } });
+        await prisma.classSession.deleteMany({ where: { groupId: { in: groupIds } } });
+        await prisma.groupEnrollment.deleteMany({ where: { groupId: { in: groupIds } } });
         await prisma.group.deleteMany({
-          where: { id: { in: Array.from(this.createdGroupIds) } },
+          where: { id: { in: groupIds } },
         });
       }
 

@@ -29,7 +29,7 @@ export const createGroupSchema = Joi.object({
   }),
   scheduleTime: Joi.string().trim().max(50).optional().default('05:00 PM'),
   maxCapacity: Joi.number().integer().min(1).max(500).default(50),
-  defaultPrice: Joi.number().min(0).default(0),
+  defaultPrice: Joi.number().min(0).max(100000).default(0),
   description: Joi.string().allow('', null).optional(),
 });
 
@@ -46,7 +46,7 @@ export const updateGroupSchema = Joi.object({
   ).optional(),
   scheduleTime: Joi.string().trim().max(50).optional(),
   maxCapacity: Joi.number().integer().min(1).max(500).optional(),
-  defaultPrice: Joi.number().min(0).optional(),
+  defaultPrice: Joi.number().min(0).max(100000).optional(),
   description: Joi.string().allow('', null).optional(),
   isActive: Joi.boolean().optional(),
 });
@@ -68,7 +68,7 @@ export const addStudentToGroupSchema = Joi.object({
   parentPhone: Joi.string().trim().pattern(egyptianPhoneRegex).allow('', null).optional().messages({
     'string.pattern.base': 'يرجى إدخال رقم هاتف ولي أمر مصري صحيح',
   }),
-  enrollmentPrice: Joi.number().min(0).optional(),
+  enrollmentPrice: Joi.number().min(0).max(100000).optional(),
   stageId: Joi.string().uuid().optional(),
   gradeLevelId: Joi.string().uuid().optional(),
 });
@@ -76,7 +76,7 @@ export const addStudentToGroupSchema = Joi.object({
 // 4. Update Student Details in Group Schema
 export const updateStudentSchema = Joi.object({
   notes: Joi.string().allow('', null).optional(),
-  enrollmentPrice: Joi.number().min(0).optional(),
+  enrollmentPrice: Joi.number().min(0).max(100000).optional(),
   targetGroupId: Joi.string().uuid().optional(),
   status: Joi.string().valid('ACTIVE', 'SUSPENDED', 'LEFT').optional(),
 });
@@ -213,4 +213,176 @@ export const uploadMaterialSchema = Joi.object({
   fileType: Joi.string().valid('PDF', 'DOC', 'DOCX').default('PDF'),
   groupId: Joi.string().uuid().allow('', null).optional(),
 });
+
+// ----------------------------------------------------
+// Milestone 3: Assessment Authoring Wizards & Grading Schemas
+// ----------------------------------------------------
+
+const questionItemSchema = Joi.object({
+  id: Joi.string().uuid().optional(),
+  type: Joi.string().valid('MCQ', 'ESSAY').default('MCQ'),
+  questionText: Joi.string().trim().required().messages({
+    'string.empty': 'نص السؤال مطلوب',
+    'any.required': 'نص السؤال مطلوب',
+  }),
+  options: Joi.alternatives().try(
+    Joi.array().items(Joi.string().trim()),
+    Joi.string().trim()
+  ).optional(),
+  correctOptionIndex: Joi.number().integer().min(0).allow(null).optional(),
+  explanation: Joi.string().allow('', null).optional(),
+  modelAnswer: Joi.string().allow('', null).optional(),
+  minWords: Joi.number().integer().min(0).default(0),
+  score: Joi.number().integer().min(1).default(1),
+  order: Joi.number().integer().min(1).optional(),
+});
+
+// 17. Create Homework Schema (Screen: "Add Homework")
+export const createHomeworkSchema = Joi.object({
+  groupId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف المجموعة غير صالح',
+    'any.required': 'المجموعة مطلوبة',
+  }),
+  lessonId: Joi.string().uuid().allow('', null).optional(),
+  title: Joi.string().trim().min(2).max(191).required().messages({
+    'string.empty': 'عنوان الواجب مطلوب',
+    'any.required': 'عنوان الواجب مطلوب',
+  }),
+  unitName: Joi.string().trim().allow('', null).optional(),
+  durationMinutes: Joi.number().integer().min(1).default(30),
+  dueDate: Joi.date().iso().required().messages({
+    'any.required': 'موعد تسليم الواجب مطلوب',
+  }),
+  questions: Joi.array().items(questionItemSchema).min(1).required().messages({
+    'array.min': 'يجب إضافة سؤال واحد على الأقل للواجب',
+    'any.required': 'قائمة الأسئلة مطلوبة',
+  }),
+});
+
+// 18. Update Homework Schema
+export const updateHomeworkSchema = Joi.object({
+  title: Joi.string().trim().min(2).max(191).optional(),
+  unitName: Joi.string().trim().allow('', null).optional(),
+  durationMinutes: Joi.number().integer().min(1).optional(),
+  dueDate: Joi.date().iso().optional(),
+  questions: Joi.array().items(questionItemSchema).optional(),
+});
+
+// 19. Create Exam Schema (Screen: "Add Exam")
+export const createExamSchema = Joi.object({
+  groupId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف المجموعة غير صالح',
+    'any.required': 'المجموعة مطلوبة',
+  }),
+  lessonId: Joi.string().uuid().allow('', null).optional(),
+  title: Joi.string().trim().min(2).max(191).required().messages({
+    'string.empty': 'عنوان الامتحان مطلوب',
+    'any.required': 'عنوان الامتحان مطلوب',
+  }),
+  durationMinutes: Joi.number().integer().min(1).required().messages({
+    'any.required': 'مدة الامتحان بالدقائق مطلوبة',
+  }),
+  passingScorePercentage: Joi.number().integer().min(1).max(100).default(60),
+  guidelinesJson: Joi.alternatives().try(
+    Joi.string(),
+    Joi.array().items(Joi.string())
+  ).optional(),
+  startTime: Joi.date().iso().required().messages({
+    'any.required': 'تاريخ ووقت بدء الامتحان مطلوب',
+  }),
+  endTime: Joi.date().iso().greater(Joi.ref('startTime')).required().messages({
+    'date.greater': 'تاريخ انتهاء الامتحان يجب أن يكون بعد تاريخ البدء',
+    'any.required': 'تاريخ ووقت انتهاء الامتحان مطلوب',
+  }),
+  questions: Joi.array().items(questionItemSchema).min(1).required().messages({
+    'array.min': 'يجب إضافة سؤال واحد على الأقل للامتحان',
+    'any.required': 'قائمة الأسئلة مطلوبة',
+  }),
+});
+
+// 20. Update Exam Schema
+export const updateExamSchema = Joi.object({
+  title: Joi.string().trim().min(2).max(191).optional(),
+  durationMinutes: Joi.number().integer().min(1).optional(),
+  passingScorePercentage: Joi.number().integer().min(1).max(100).optional(),
+  guidelinesJson: Joi.alternatives().try(
+    Joi.string(),
+    Joi.array().items(Joi.string())
+  ).optional(),
+  startTime: Joi.date().iso().optional(),
+  endTime: Joi.date().iso().optional(),
+  questions: Joi.array().items(questionItemSchema).optional(),
+});
+
+// 21. Grade Essay Question Schema (Screen: "Grading")
+export const gradeEssaySchema = Joi.object({
+  submissionType: Joi.string().valid('HOMEWORK', 'EXAM').default('EXAM'),
+  submissionId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف التسليم غير صالح',
+    'any.required': 'معرف التسليم مطلوب',
+  }),
+  questionId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف السؤال غير صالح',
+    'any.required': 'معرف السؤال مطلوب',
+  }),
+  scoreAwarded: Joi.number().min(0).required().messages({
+    'any.required': 'الدرجة المستحقة مطلوبة',
+  }),
+  feedback: Joi.string().allow('', null).optional(),
+});
+
+// ----------------------------------------------------
+// Milestone 4: Finance Ledger & Broadcast Announcements
+// ----------------------------------------------------
+
+// 22. Record Student Payment Schema
+export const recordPaymentSchema = Joi.object({
+  studentId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف الطالب غير صالح',
+    'any.required': 'معرف الطالب مطلوب',
+  }),
+  groupId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف المجموعة غير صالح',
+    'any.required': 'معرف المجموعة مطلوب',
+  }),
+  amount: Joi.number().min(0).max(1000000).required().messages({
+    'number.base': 'المبلغ المدفوع يجب أن يكون رقماً',
+    'any.required': 'المبلغ المدفوع مطلوب',
+  }),
+  paymentMethod: Joi.string().valid('CASH', 'VODAFONE_CASH', 'INSTAPAY', 'CARD', 'OTHER').default('CASH'),
+  monthLabel: Joi.string().trim().max(50).optional(),
+  receiptUrl: Joi.string().uri().allow('', null).optional(),
+  notes: Joi.string().allow('', null).optional(),
+});
+
+// 23. Broadcast Announcement Schema
+export const broadcastNotificationSchema = Joi.object({
+  targetType: Joi.string().valid('GROUP', 'STAGE', 'GRADE_LEVEL', 'ALL_MY_STUDENTS').default('GROUP'),
+  groupId: Joi.string().uuid().when('targetType', {
+    is: 'GROUP',
+    then: Joi.required().messages({ 'any.required': 'معرف المجموعة مطلوب عند اختيار إرسال لمجموعة' }),
+    otherwise: Joi.optional().allow('', null),
+  }),
+  stageId: Joi.string().uuid().when('targetType', {
+    is: 'STAGE',
+    then: Joi.required().messages({ 'any.required': 'معرف المرحلة مطلوب عند اختيار إرسال لمرحلة' }),
+    otherwise: Joi.optional().allow('', null),
+  }),
+  gradeLevelId: Joi.string().uuid().when('targetType', {
+    is: 'GRADE_LEVEL',
+    then: Joi.required().messages({ 'any.required': 'معرف الصف مطلوب عند اختيار إرسال لصف دراسي' }),
+    otherwise: Joi.optional().allow('', null),
+  }),
+  title: Joi.string().trim().min(2).max(191).required().messages({
+    'string.empty': 'عنوان الإشعار مطلوب',
+    'any.required': 'عنوان الإشعار مطلوب',
+  }),
+  body: Joi.string().trim().min(2).required().messages({
+    'string.empty': 'محتوى الإشعار مطلوب',
+    'any.required': 'محتوى الإشعار مطلوب',
+  }),
+  attachments: Joi.array().items(Joi.string()).optional(),
+});
+
+
 

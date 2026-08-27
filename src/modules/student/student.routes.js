@@ -3,7 +3,7 @@ import { StudentController } from './student.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
 import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { upload } from '../../config/multer.config.js';
+import { uploadImage } from '../../config/multer.config.js';
 import {
   onboardingSchema,
   updateProfileSchema,
@@ -71,7 +71,7 @@ router.get('/profile', StudentController.getProfile);
  *       200:
  *         description: Profile updated successfully
  */
-router.put('/profile', upload.single('avatar'), validate(updateProfileSchema), StudentController.updateProfile);
+router.put('/profile', uploadImage.single('avatar'), validate(updateProfileSchema), StudentController.updateProfile);
 
 /**
  * @swagger
