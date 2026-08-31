@@ -74,7 +74,6 @@ async function startServer() {
         swaggerUrl: `http://localhost:${ENV.PORT}/api-docs`,
         apiBase: `http://localhost:${ENV.PORT}/api/v1`,
         health: `http://localhost:${ENV.PORT}/health`,
-        readiness: `http://localhost:${ENV.PORT}/health/readiness`,
       }, `Eureka LMS Server running on port ${ENV.PORT}`);
     });
   } catch (error) {
