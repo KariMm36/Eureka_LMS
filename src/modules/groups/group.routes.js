@@ -17,7 +17,7 @@ router.use(authenticate);
  * /groups/search:
  *   get:
  *     summary: Search active study groups with pagination and filters
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     parameters:
  *       - in: query
  *         name: page
@@ -45,7 +45,7 @@ router.get('/search', GroupController.searchGroups);
  * /groups/preview/{groupCode}:
  *   get:
  *     summary: Preview teacher group details before joining by invitation code
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     parameters:
  *       - in: path
  *         name: groupCode
@@ -64,7 +64,7 @@ router.get('/preview/:groupCode', groupJoinLimiter, GroupController.previewGroup
  * /groups/join-by-code:
  *   post:
  *     summary: Enroll student in group using secret teacher code
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     requestBody:
  *       required: true
  *       content:
@@ -89,7 +89,7 @@ router.post('/join-by-code', requireRole('STUDENT'), groupJoinLimiter, validate(
  * /groups/{groupId}/join:
  *   post:
  *     summary: Join an open group directly by ID
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -106,7 +106,7 @@ router.post('/:groupId/join', requireRole('STUDENT'), GroupController.joinGroupB
  * /groups/my-groups:
  *   get:
  *     summary: List all groups the student is actively enrolled in
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     responses:
  *       200:
  *         description: Enrolled groups list
@@ -118,7 +118,7 @@ router.get('/my-groups', requireRole('STUDENT'), GroupController.getMyGroups);
  * /groups/{groupId}:
  *   get:
  *     summary: Get detailed group information, schedules, and teacher info
- *     tags: [4. Groups & Enrollment]
+ *     tags: [04. Student - Groups & Enrollment]
  *     parameters:
  *       - in: path
  *         name: groupId

@@ -1,14 +1,14 @@
 import prisma from '../config/prisma.js';
 import { logger } from '../config/logger.config.js';
+import { ChatService } from '../modules/chat/chat.service.js';
 
 /**
  * Centralized Real-Time Event Handlers for Socket.IO
- * Primary Purpose: Student -> Teacher Communication with strict Server-Side Authorization
+ * Primary Purpose: Student ↔ Teacher 1-on-1 Real-Time Chat with Strict Authorization & DB Persistence
  */
 export const registerRealtimeEvents = (io, socket) => {
   /**
-   * Student -> Teacher Inquiry / Message Event
-   * Strict Authorization: Server determines teacher from active group enrollment in DB.
+   * 1. Student -> Teacher Message Event
    */
   socket.on('student:send_message', async (data, callback) => {
     try {
@@ -19,103 +19,192 @@ export const registerRealtimeEvents = (io, socket) => {
         return socket.emit('error', errorPayload);
       }
 
-      const { groupId, content } = data || {};
+      const { conversationId, groupId, content, attachmentUrl } = data || {};
 
-      // 2. Validate input payload
-      if (!groupId || !content || typeof content !== 'string' || !content.trim()) {
-        const errorPayload = { success: false, message: 'محتوى الرسالة ومعرف المجموعة مطلوبان' };
+      if (!content || typeof content !== 'string' || !content.trim()) {
+        const errorPayload = { success: false, message: 'محتوى الرسالة مطلوب' };
         if (typeof callback === 'function') callback(errorPayload);
         return socket.emit('error', errorPayload);
       }
 
-      const cleanContent = content.trim();
+      let targetConversationId = conversationId;
 
-      // 3. Database Authorization: Verify active student enrollment and resolve teacher
-      const enrollment = await prisma.groupEnrollment.findFirst({
-        where: {
-          groupId,
-          student: { userId: socket.user.id },
-          status: 'ACTIVE',
-        },
-        include: {
-          group: {
-            include: {
-              teacher: {
-                select: { id: true, fullName: true, email: true },
-              },
-              subject: { select: { id: true, nameAr: true } },
-            },
-          },
-          student: {
-            include: {
-              user: {
-                select: { id: true, fullName: true, avatarUrl: true },
-              },
-            },
-          },
-        },
+      // If conversationId not provided but groupId is provided, find or create conversation
+      if (!targetConversationId && groupId) {
+        const conv = await ChatService.createOrGetConversation(socket.user.id, groupId);
+        targetConversationId = conv.id;
+      }
+
+      if (!targetConversationId) {
+        const errorPayload = { success: false, message: 'معرف المحادثة أو معرف المجموعة مطلوب' };
+        if (typeof callback === 'function') callback(errorPayload);
+        return socket.emit('error', errorPayload);
+      }
+
+      // 2. Persist message and update conversation metadata
+      const result = await ChatService.sendMessage({
+        senderUser: socket.user,
+        conversationId: targetConversationId,
+        content,
+        attachmentUrl,
       });
 
-      // Reject unauthorized communication attempt (student not actively enrolled in this group)
-      if (!enrollment || !enrollment.group || !enrollment.group.teacher) {
-        const errorPayload = { success: false, message: 'غير مصرح لك بإرسال رسائل - لست مسجلاً كطالب نشط في هذه المجموعة' };
-        if (typeof callback === 'function') callback(errorPayload);
-        return socket.emit('error', errorPayload);
-      }
-
-      // 4. Server-Resolved Target Teacher ID (Client cannot tamper with this)
-      const targetTeacherUserId = enrollment.group.teacher.id;
-
-      // 5. Message Persistence: Save notification/message to MySQL before real-time emission
-      const persistedRecord = await prisma.notification.create({
+      // 3. Persist notification in MySQL for teacher offline alert and audit
+      const persistedNotification = await prisma.notification.create({
         data: {
-          userId: targetTeacherUserId,
-          title: `سؤال جديد من الطالب: ${enrollment.student.user.fullName}`,
-          body: cleanContent,
+          userId: result.recipientUserId,
+          title: `سؤال جديد من الطالب: ${socket.user.fullName}`,
+          body: result.message.content,
           type: 'ANNOUNCEMENT',
-          referenceId: groupId,
+          referenceId: result.conversation.groupId,
         },
       });
 
-      // 6. Real-Time Emission: Emit ONLY to the authorized teacher's personal room
-      io.to(`user:${targetTeacherUserId}`).emit('teacher:new_message', {
-        id: persistedRecord.id,
+      // 4. Emit real-time chat event to recipient teacher's room
+      io.to(`user:${result.recipientUserId}`).emit('chat:new_message', result.message);
+
+      // Also emit backward-compatible event teacher:new_message
+      io.to(`user:${result.recipientUserId}`).emit('teacher:new_message', {
+        id: persistedNotification.id,
+        conversationId: targetConversationId,
         student: {
-          id: enrollment.student.user.id,
-          fullName: enrollment.student.user.fullName,
-          avatarUrl: enrollment.student.user.avatarUrl,
+          id: socket.user.id,
+          fullName: socket.user.fullName,
+          avatarUrl: socket.user.avatarUrl,
         },
         group: {
-          id: enrollment.group.id,
-          name: enrollment.group.name,
-          subjectName: enrollment.group.subject?.nameAr || 'المادة الدراسية',
+          id: result.conversation.group.id,
+          name: result.conversation.group.name,
+          subjectName: result.conversation.group.subject?.nameAr || 'المادة الدراسية',
         },
-        content: cleanContent,
-        createdAt: persistedRecord.createdAt,
+        content: result.message.content,
+        createdAt: persistedNotification.createdAt,
       });
 
-      // 7. Acknowledge delivery to the student socket
+      // 5. Delivery Acknowledgment
       const successPayload = {
         success: true,
-        messageId: persistedRecord.id,
-        teacherName: enrollment.group.teacher.fullName,
-        deliveredAt: persistedRecord.createdAt,
+        messageId: persistedNotification.id,
+        chatMessageId: result.message.id,
+        conversationId: targetConversationId,
+        deliveredAt: result.message.createdAt,
       };
 
-      if (typeof callback === 'function') {
-        callback(successPayload);
-      }
+      if (typeof callback === 'function') callback(successPayload);
+      socket.emit('chat:message_delivered', successPayload);
       socket.emit('student:message_delivered', successPayload);
 
-      logger.info({
-        studentId: socket.user.id,
-        teacherId: targetTeacherUserId,
-        groupId,
-        messageId: persistedRecord.id,
-      }, `[Socket.IO] Real-time message delivered from student ${socket.user.id} to teacher ${targetTeacherUserId}`);
+      logger.info(
+        {
+          studentId: socket.user.id,
+          teacherId: result.recipientUserId,
+          conversationId: targetConversationId,
+          messageId: result.message.id,
+        },
+        `[Socket.IO Chat] Real-time message delivered from student ${socket.user.id} to teacher ${result.recipientUserId}`
+      );
     } catch (err) {
       logger.error({ err: err.message, userId: socket.user.id }, '[Socket.IO Error] student:send_message failed');
-      const errorPayload = { success: false, message: 'حدث خطأ أثناء معالجة الرسالة' };
+      const errorPayload = { success: false, message: err.message || 'حدث خطأ أثناء معالجة الرسالة' };
+      if (typeof callback === 'function') callback(errorPayload);
+      socket.emit('error', errorPayload);
+    }
+  });
+
+  /**
+   * 2. Teacher -> Student Message Event
+   */
+  socket.on('teacher:send_message', async (data, callback) => {
+    try {
+      // 1. Guard: Only authenticated teachers can emit this event
+      if (socket.user.role !== 'TEACHER') {
+        const errorPayload = { success: false, message: 'هذا الإجراء مخصص للمعلمين فقط' };
+        if (typeof callback === 'function') callback(errorPayload);
+        return socket.emit('error', errorPayload);
+      }
+
+      const { conversationId, content, attachmentUrl } = data || {};
+
+      if (!conversationId || !content || typeof content !== 'string' || !content.trim()) {
+        const errorPayload = { success: false, message: 'معرف المحادثة ومحتوى الرسالة مطلوبان' };
+        if (typeof callback === 'function') callback(errorPayload);
+        return socket.emit('error', errorPayload);
+      }
+
+      // 2. Persist message and update conversation metadata
+      const result = await ChatService.sendMessage({
+        senderUser: socket.user,
+        conversationId,
+        content,
+        attachmentUrl,
+      });
+
+      // 3. Emit real-time chat event to recipient student's room
+      io.to(`user:${result.recipientUserId}`).emit('chat:new_message', result.message);
+
+      // 4. Delivery Acknowledgment
+      const successPayload = {
+        success: true,
+        messageId: result.message.id,
+        conversationId,
+        deliveredAt: result.message.createdAt,
+      };
+
+      if (typeof callback === 'function') callback(successPayload);
+      socket.emit('chat:message_delivered', successPayload);
+
+      logger.info(
+        {
+          teacherId: socket.user.id,
+          studentId: result.recipientUserId,
+          conversationId,
+          messageId: result.message.id,
+        },
+        `[Socket.IO Chat] Real-time message delivered from teacher ${socket.user.id} to student ${result.recipientUserId}`
+      );
+    } catch (err) {
+      logger.error({ err: err.message, userId: socket.user.id }, '[Socket.IO Error] teacher:send_message failed');
+      const errorPayload = { success: false, message: err.message || 'حدث خطأ أثناء معالجة الرسالة' };
+      if (typeof callback === 'function') callback(errorPayload);
+      socket.emit('error', errorPayload);
+    }
+  });
+
+  /**
+   * 3. Real-Time Read Receipts (Mark Conversation as Read)
+   */
+  socket.on('chat:message_read', async (data, callback) => {
+    try {
+      const { conversationId } = data || {};
+
+      if (!conversationId) {
+        const errorPayload = { success: false, message: 'معرف المحادثة مطلوب' };
+        if (typeof callback === 'function') callback(errorPayload);
+        return socket.emit('error', errorPayload);
+      }
+
+      const result = await ChatService.markConversationAsRead({
+        user: socket.user,
+        conversationId,
+      });
+
+      // Emit read receipt event to the other participant
+      io.to(`user:${result.recipientUserId}`).emit('chat:messages_read', {
+        conversationId,
+        readBy: socket.user.id,
+      });
+
+      const successPayload = {
+        success: true,
+        conversationId,
+        readCount: result.readCount,
+      };
+
+      if (typeof callback === 'function') callback(successPayload);
+      socket.emit('chat:read_acknowledged', successPayload);
+    } catch (err) {
+      logger.error({ err: err.message, userId: socket.user.id }, '[Socket.IO Error] chat:message_read failed');
+      const errorPayload = { success: false, message: err.message || 'حدث خطأ أثناء تحديث حالة القراءة' };
       if (typeof callback === 'function') callback(errorPayload);
       socket.emit('error', errorPayload);
     }

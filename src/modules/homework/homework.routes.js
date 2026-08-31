@@ -16,7 +16,7 @@ router.use(authenticate, authorize('STUDENT', 'ADMIN'));
  * /homework:
  *   get:
  *     summary: Get student homework feed (filter by status pending / completed)
- *     tags: [6. Homework Engine]
+ *     tags: [06. Student - Homework Engine]
  *     parameters:
  *       - in: query
  *         name: status
@@ -32,7 +32,7 @@ router.get('/', HomeworkController.getHomeworkFeed);
  * /homework/{homeworkId}:
  *   get:
  *     summary: Get homework questions for taking (Hides correct answers and explanations)
- *     tags: [6. Homework Engine]
+ *     tags: [06. Student - Homework Engine]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -51,7 +51,7 @@ router.get('/:homeworkId', HomeworkController.getHomeworkForTaking);
  * /homework/{homeworkId}/submit:
  *   post:
  *     summary: Submit homework answers (Auto-grades MCQs, validates essay minWords, computes peer percentile)
- *     tags: [6. Homework Engine]
+ *     tags: [06. Student - Homework Engine]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -89,7 +89,7 @@ router.post('/:homeworkId/submit', validate(submitHomeworkSchema), HomeworkContr
  * /homework/{homeworkId}/result:
  *   get:
  *     summary: Get detailed homework result scorecard and reviewed answers
- *     tags: [6. Homework Engine]
+ *     tags: [06. Student - Homework Engine]
  *     parameters:
  *       - in: path
  *         name: homeworkId

@@ -1,31 +1,150 @@
 {
   "info": {
-    "name": "Eureka LMS — Complete Student Journey API",
+    "name": "Eureka LMS — Complete Platform API (Student, Teacher & Admin)",
     "description": "# 🎓 Eureka LMS — Student Mobile App API Collection\n\nWelcome to the complete, automated Postman test collection for **Eureka LMS (Student Experience)**.\n\n---\n\n## 🗺️ Student User Journey Overview\nThis collection takes a student from initial app installation and registration all the way to taking timed exams, submitting homework, and viewing dynamic peer ranking analytics.\n\n### ⚡ Zero-Manual-Config Automation\nEvery folder in this collection automatically extracts IDs, tokens, and response fields into collection variables:\n* `{{token}}` & `{{refreshToken}}` ➔ Generated on Register/Login\n* `{{stageId}}`, `{{gradeLevelId}}`, `{{subjectId}}`, `{{lessonId}}` ➔ Captured from Academic Discovery\n* `{{groupId}}` & `{{groupCode}}` ➔ Captured from Group Search\n* `{{homeworkId}}` & `{{examId}}` ➔ Captured from Homework/Exam feeds\n* `{{notificationId}}` ➔ Captured from Notifications feed\n\n---\n\n## 🏃 How to Run the Entire Suite\n1. Ensure MySQL and backend server are running (`npm run dev`).\n2. Click **Eureka LMS — Complete Student Journey API** in Postman.\n3. Click **Run Collection** ➔ **Run Eureka LMS**.\n4. All 28 requests will execute in sequential order with automated variable handoffs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000/api/v1", "type": "string" },
-    { "key": "token", "value": "", "type": "string" },
-    { "key": "refreshToken", "value": "", "type": "string" },
-    { "key": "resetToken", "value": "", "type": "string" },
-    { "key": "stageId", "value": "", "type": "string" },
-    { "key": "gradeLevelId", "value": "", "type": "string" },
-    { "key": "subjectId", "value": "", "type": "string" },
-    { "key": "lessonId", "value": "", "type": "string" },
-    { "key": "groupCode", "value": "", "type": "string" },
-    { "key": "groupId", "value": "", "type": "string" },
-    { "key": "homeworkId", "value": "", "type": "string" },
-    { "key": "examId", "value": "", "type": "string" },
-    { "key": "notificationId", "value": "", "type": "string" },
-    { "key": "teacherToken", "value": "", "type": "string" },
-    { "key": "teacherGroupId", "value": "", "type": "string" },
-    { "key": "teacherStudentId", "value": "", "type": "string" },
-    { "key": "teacherHomeworkId", "value": "", "type": "string" },
-    { "key": "teacherExamId", "value": "", "type": "string" },
-    { "key": "essayQuestionId", "value": "", "type": "string" },
-    { "key": "essaySubmissionId", "value": "", "type": "string" },
-    { "key": "paymentId", "value": "", "type": "string" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "stageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gradeLevelId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subjectId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "homeworkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "examId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherGroupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherStudentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherHomeworkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherExamId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "essayQuestionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "essaySubmissionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminTeacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminGroupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminStageId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminSubjectId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    }
   ],
   "item": [
     {
@@ -54,14 +173,21 @@
           ],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
           }
         }
       ]
     },
     {
       "name": "Step 1: Authentication & Verification",
-
       "description": "## 🔐 Phase 1: Authentication & Account Verification\n\n### 📱 Mobile UI Screens Covered:\n* `Register Screen` (Full name, Egyptian phone `01[0125]XXXXXXXX`, email, password)\n* `Email Verification OTP Screen` (6-digit code sent via SMTP)\n* `Login Screen` (Returns JWT access token + refresh token)\n* `Forgot Password & Reset Password Screens`\n\n### ⚙️ Automation Highlights:\n* Automatically captures `{{token}}` and `{{refreshToken}}` upon successful registration or login.\n* All subsequent requests inherit `Authorization: Bearer {{token}}` automatically.",
       "item": [
         {
@@ -83,33 +209,88 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"أحمد محمود علي\",\n  \"email\": \"student.journey@eureka-test.com\",\n  \"phone\": \"01012345678\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"STUDENT\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
           }
         },
         {
           "name": "1.2 Send Verification Email",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/auth/send-verification-email", "host": ["{{baseUrl}}"], "path": ["auth", "send-verification-email"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/send-verification-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "send-verification-email"
+              ]
+            }
           }
         },
         {
           "name": "1.3 Verify Email OTP",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"otpCode\": \"123456\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/verify-email", "host": ["{{baseUrl}}"], "path": ["auth", "verify-email"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            }
           }
         },
         {
@@ -131,12 +312,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"password\": \"Password123!\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
@@ -157,32 +352,78 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
           }
         },
         {
           "name": "1.6 Get Current User Profile (Me)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
           }
         },
         {
           "name": "1.7 Forgot Password (Request OTP)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"student.journey@eureka-test.com\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["auth", "forgot-password"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
           }
         },
         {
@@ -203,24 +444,52 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"otpCode\": \"123456\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/verify-otp", "host": ["{{baseUrl}}"], "path": ["auth", "verify-otp"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-otp"
+              ]
+            }
           }
         },
         {
           "name": "1.9 Reset Password",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["auth", "reset-password"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
           }
         },
         {
@@ -241,33 +510,88 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"الأستاذ طارق منصور\",\n  \"email\": \"teacher.journey@eureka-test.com\",\n  \"phone\": \"01098765432\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"TEACHER\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
           }
         },
         {
           "name": "1.11 Logout",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
           }
         },
         {
           "name": "1.12 Delete Account",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"password\": \"Password123!\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/auth/account", "host": ["{{baseUrl}}"], "path": ["auth", "account"] }
+            "url": {
+              "raw": "{{baseUrl}}/auth/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "account"
+              ]
+            }
           }
         }
       ]
@@ -296,9 +620,27 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/academic/stages", "host": ["{{baseUrl}}"], "path": ["academic", "stages"] }
+            "url": {
+              "raw": "{{baseUrl}}/academic/stages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "academic",
+                "stages"
+              ]
+            }
           }
         },
         {
@@ -318,13 +660,32 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/academic/subjects?gradeLevelId={{gradeLevelId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["academic", "subjects"],
-              "query": [{ "key": "gradeLevelId", "value": "{{gradeLevelId}}" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "academic",
+                "subjects"
+              ],
+              "query": [
+                {
+                  "key": "gradeLevelId",
+                  "value": "{{gradeLevelId}}"
+                }
+              ]
             }
           }
         },
@@ -348,25 +709,61 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/academic/subjects/{{subjectId}}/units?gradeLevelId={{gradeLevelId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["academic", "subjects", "{{subjectId}}", "units"],
-              "query": [{ "key": "gradeLevelId", "value": "{{gradeLevelId}}" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "academic",
+                "subjects",
+                "{{subjectId}}",
+                "units"
+              ],
+              "query": [
+                {
+                  "key": "gradeLevelId",
+                  "value": "{{gradeLevelId}}"
+                }
+              ]
             }
           }
         },
         {
           "name": "2.4 Get Lesson Details (Videos & PDFs)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/academic/lessons/{{lessonId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["academic", "lessons", "{{lessonId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "academic",
+                "lessons",
+                "{{lessonId}}"
+              ]
             }
           }
         }
@@ -379,35 +776,99 @@
         {
           "name": "3.1 Complete Student Onboarding",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"subjectIds\": [\"{{subjectId}}\"]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/students/onboarding", "host": ["{{baseUrl}}"], "path": ["students", "onboarding"] }
+            "url": {
+              "raw": "{{baseUrl}}/students/onboarding",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "onboarding"
+              ]
+            }
           }
         },
         {
           "name": "3.2 Get Student Full Profile",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/students/profile", "host": ["{{baseUrl}}"], "path": ["students", "profile"] }
+            "url": {
+              "raw": "{{baseUrl}}/students/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "profile"
+              ]
+            }
           }
         },
         {
           "name": "3.3 Update App Settings",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"appLanguage\": \"AR\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true,\n  \"notifyMessages\": true\n}"
             },
-            "url": { "raw": "{{baseUrl}}/students/settings", "host": ["{{baseUrl}}"], "path": ["students", "settings"] }
+            "url": {
+              "raw": "{{baseUrl}}/students/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "settings"
+              ]
+            }
           }
         }
       ]
@@ -434,16 +895,39 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/groups/search?page=1&limit=10&subjectId={{subjectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["groups", "search"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "search"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" },
-                { "key": "subjectId", "value": "{{subjectId}}" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "subjectId",
+                  "value": "{{subjectId}}"
+                }
               ]
             }
           }
@@ -451,38 +935,116 @@
         {
           "name": "4.2 Preview Group by Code",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/groups/preview/{{groupCode}}", "host": ["{{baseUrl}}"], "path": ["groups", "preview", "{{groupCode}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/groups/preview/{{groupCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "preview",
+                "{{groupCode}}"
+              ]
+            }
           }
         },
         {
           "name": "4.3 Join Group by Code",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"groupCode\": \"{{groupCode}}\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/groups/join-by-code", "host": ["{{baseUrl}}"], "path": ["groups", "join-by-code"] }
+            "url": {
+              "raw": "{{baseUrl}}/groups/join-by-code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "join-by-code"
+              ]
+            }
           }
         },
         {
           "name": "4.4 Get My Enrolled Groups",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/groups/my-groups", "host": ["{{baseUrl}}"], "path": ["groups", "my-groups"] }
+            "url": {
+              "raw": "{{baseUrl}}/groups/my-groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "my-groups"
+              ]
+            }
           }
         },
         {
           "name": "4.5 Get Group Details",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/groups/{{groupId}}", "host": ["{{baseUrl}}"], "path": ["groups", "{{groupId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
           }
         }
       ]
@@ -494,9 +1056,27 @@
         {
           "name": "5.1 Get Home Dashboard Feed",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/home/dashboard", "host": ["{{baseUrl}}"], "path": ["home", "dashboard"] }
+            "url": {
+              "raw": "{{baseUrl}}/home/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "home",
+                "dashboard"
+              ]
+            }
           }
         }
       ]
@@ -522,43 +1102,122 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/homework?status=pending",
-              "host": ["{{baseUrl}}"],
-              "path": ["homework"],
-              "query": [{ "key": "status", "value": "pending" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homework"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
             }
           }
         },
         {
           "name": "6.2 Get Homework Questions for Taking (Answers Stripped)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/homework/{{homeworkId}}", "host": ["{{baseUrl}}"], "path": ["homework", "{{homeworkId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/homework/{{homeworkId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homework",
+                "{{homeworkId}}"
+              ]
+            }
           }
         },
         {
           "name": "6.3 Submit Homework (MCQ Auto-Grading & Essay minWords)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"timeSpentSeconds\": 20\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"ينص قانون نيوتن الأول على أن الجسم الساكن يبقى ساكنا والمتحرك يستمر في حركته ما لم تؤثر عليه قوة خارجية\",\n      \"timeSpentSeconds\": 45\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 32,\n    \"fastestQuestionSec\": 20,\n    \"slowestQuestionSec\": 45\n  }\n}"
             },
-            "url": { "raw": "{{baseUrl}}/homework/{{homeworkId}}/submit", "host": ["{{baseUrl}}"], "path": ["homework", "{{homeworkId}}", "submit"] }
+            "url": {
+              "raw": "{{baseUrl}}/homework/{{homeworkId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homework",
+                "{{homeworkId}}",
+                "submit"
+              ]
+            }
           }
         },
         {
           "name": "6.4 Get Homework Result Scorecard & Peer Percentile",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/homework/{{homeworkId}}/result", "host": ["{{baseUrl}}"], "path": ["homework", "{{homeworkId}}", "result"] }
+            "url": {
+              "raw": "{{baseUrl}}/homework/{{homeworkId}}/result",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "homework",
+                "{{homeworkId}}",
+                "result"
+              ]
+            }
           }
         }
       ]
@@ -584,51 +1243,150 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/exams?tab=all",
-              "host": ["{{baseUrl}}"],
-              "path": ["exams"],
-              "query": [{ "key": "tab", "value": "all" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exams"
+              ],
+              "query": [
+                {
+                  "key": "tab",
+                  "value": "all"
+                }
+              ]
             }
           }
         },
         {
           "name": "7.2 Get Exam Instructions & 4-Color Palette Legend",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/instructions", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "instructions"] }
+            "url": {
+              "raw": "{{baseUrl}}/exams/{{examId}}/instructions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exams",
+                "{{examId}}",
+                "instructions"
+              ]
+            }
           }
         },
         {
           "name": "7.3 Start Live Exam Session (Server-Time Window Enforced)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/start", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "start"] }
+            "url": {
+              "raw": "{{baseUrl}}/exams/{{examId}}/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exams",
+                "{{examId}}",
+                "start"
+              ]
+            }
           }
         },
         {
           "name": "7.4 Submit Live Exam Answers",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 25\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"تسقط جميع الأجسام في الفراغ بنفس التسارع الثابت لعدم وجود أي مقاومة للهواء تؤثر على حركتها\",\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 50\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 37,\n    \"fastestQuestionSec\": 25,\n    \"slowestQuestionSec\": 50\n  }\n}"
             },
-            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/submit", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "submit"] }
+            "url": {
+              "raw": "{{baseUrl}}/exams/{{examId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exams",
+                "{{examId}}",
+                "submit"
+              ]
+            }
           }
         },
         {
           "name": "7.5 Get Exam Comprehensive Report Card",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/result", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "result"] }
+            "url": {
+              "raw": "{{baseUrl}}/exams/{{examId}}/result",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exams",
+                "{{examId}}",
+                "result"
+              ]
+            }
           }
         }
       ]
@@ -640,14 +1398,37 @@
         {
           "name": "8.1 Register Mobile FCM Device Token",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fcmToken\": \"fcm_device_sample_token_mobile_client_123456\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/notifications/fcm-token", "host": ["{{baseUrl}}"], "path": ["notifications", "fcm-token"] }
+            "url": {
+              "raw": "{{baseUrl}}/notifications/fcm-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "fcm-token"
+              ]
+            }
           }
         },
         {
@@ -667,30 +1448,84 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/notifications?filter=all",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications"],
-              "query": [{ "key": "filter", "value": "all" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "all"
+                }
+              ]
             }
           }
         },
         {
           "name": "8.3 Get Notification Details (Auto-Marks as Read)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/notifications/{{notificationId}}", "host": ["{{baseUrl}}"], "path": ["notifications", "{{notificationId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}"
+              ]
+            }
           }
         },
         {
           "name": "8.4 Mark All Notifications as Read",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["notifications", "read-all"] }
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
           }
         }
       ]
@@ -702,9 +1537,27 @@
         {
           "name": "9.1 Get Student Performance Analytics",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/students/analytics", "host": ["{{baseUrl}}"], "path": ["students", "analytics"] }
+            "url": {
+              "raw": "{{baseUrl}}/students/analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "analytics"
+              ]
+            }
           }
         }
       ]
@@ -716,9 +1569,27 @@
         {
           "name": "10.1 Get Teacher Dashboard KPIs",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/dashboard", "host": ["{{baseUrl}}"], "path": ["teacher", "dashboard"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "dashboard"
+              ]
+            }
           }
         }
       ]
@@ -744,9 +1615,27 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/groups", "host": ["{{baseUrl}}"], "path": ["teacher", "groups"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups"
+              ]
+            }
           }
         },
         {
@@ -766,43 +1655,129 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة - الصف الأول الثانوي\",\n  \"subjectId\": \"{{subjectId}}\",\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"scheduleDays\": \"الأحد,الثلاثاء\",\n  \"scheduleTime\": \"05:30 PM\",\n  \"maxCapacity\": 45,\n  \"defaultPrice\": 300,\n  \"description\": \"مجموعة الشرح النظري وحل المسائل الشاملة\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/groups", "host": ["{{baseUrl}}"], "path": ["teacher", "groups"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups"
+              ]
+            }
           }
         },
         {
           "name": "11.3 Get Group by ID",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups",
+                "{{teacherGroupId}}"
+              ]
+            }
           }
         },
         {
           "name": "11.4 Update Group Details",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة (معدلة)\",\n  \"defaultPrice\": 350,\n  \"maxCapacity\": 50\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups",
+                "{{teacherGroupId}}"
+              ]
+            }
           }
         },
         {
           "name": "11.5 Get Group QR Invite Code",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/qr-code", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "qr-code"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/qr-code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups",
+                "{{teacherGroupId}}",
+                "qr-code"
+              ]
+            }
           }
         },
         {
@@ -822,43 +1797,131 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"كريم مصطفى محمود\",\n  \"phone\": \"01020924779\",\n  \"email\": \"karim.mustafa@eureka-test.com\",\n  \"parentPhone\": \"01011223344\",\n  \"enrollmentPrice\": 300\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "students"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups",
+                "{{teacherGroupId}}",
+                "students"
+              ]
+            }
           }
         },
         {
           "name": "11.7 Get Group Student Roster",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students", "host": ["{{baseUrl}}"], "path": ["teacher", "groups", "{{teacherGroupId}}", "students"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "groups",
+                "{{teacherGroupId}}",
+                "students"
+              ]
+            }
           }
         },
         {
           "name": "11.8 Get Student Details Modal",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "students", "{{teacherStudentId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "students",
+                "{{teacherStudentId}}"
+              ]
+            }
           }
         },
         {
           "name": "11.9 Update Student Price / Status",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"enrollmentPrice\": 250\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "students", "{{teacherStudentId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "students",
+                "{{teacherStudentId}}"
+              ]
+            }
           }
         }
       ]
@@ -884,14 +1947,38 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"حصة الفيزياء - الحركة التوافقية البسيطة\",\n  \"sessionDate\": \"2026-08-26T10:00:00.000Z\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/sessions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "sessions"
+              ]
+            }
           }
         },
         {
@@ -912,59 +1999,198 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/qr", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}", "qr"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/qr",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "sessions",
+                "{{sessionId}}",
+                "qr"
+              ]
+            }
           }
         },
         {
           "name": "12.3 Student Record Attendance (Via Live QR or 6-digit Code)",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"qrToken\": \"{{sessionQrToken}}\",\n  \"sessionCode\": \"{{sessionCode}}\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/students/attendance/record", "host": ["{{baseUrl}}"], "path": ["students", "attendance", "record"] }
+            "url": {
+              "raw": "{{baseUrl}}/students/attendance/record",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "attendance",
+                "record"
+              ]
+            }
           }
         },
         {
           "name": "12.4 Manual Roll-Call Batching",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"attendances\": [\n    {\n      \"studentId\": \"{{teacherStudentId}}\",\n      \"status\": \"PRESENT\"\n    }\n  ]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/manual", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}", "manual"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "sessions",
+                "{{sessionId}}",
+                "manual"
+              ]
+            }
           }
         },
         {
           "name": "12.5 Get Session Attendance Details & Roster",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "sessions", "{{sessionId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "sessions",
+                "{{sessionId}}"
+              ]
+            }
           }
         },
         {
           "name": "12.6 Get Attendance Dashboard Overview",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/overview", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "overview"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "overview"
+              ]
+            }
           }
         },
         {
           "name": "12.7 Get Attendance Calendar",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/attendance/calendar?month=8&year=2026", "host": ["{{baseUrl}}"], "path": ["teacher", "attendance", "calendar"], "query": [{ "key": "month", "value": "8" }, { "key": "year", "value": "2026" }] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/attendance/calendar?month=8&year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "attendance",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "8"
+                },
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            }
           }
         }
       ]
@@ -990,22 +2216,63 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nameAr\": \"الكيمياء الحيوية المتقدمة\",\n  \"nameEn\": \"Advanced Biochemistry\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/subjects", "host": ["{{baseUrl}}"], "path": ["teacher", "subjects"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/subjects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "subjects"
+              ]
+            }
           }
         },
         {
           "name": "13.2 List Teacher Subjects",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/subjects", "host": ["{{baseUrl}}"], "path": ["teacher", "subjects"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/subjects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "subjects"
+              ]
+            }
           }
         },
         {
@@ -1025,27 +2292,74 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"title\": \"الوحدة الأولى: التركيب الذري والروابط الكيميائية\",\n  \"order\": 1\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/units", "host": ["{{baseUrl}}"], "path": ["teacher", "units"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/units",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "units"
+              ]
+            }
           }
         },
         {
           "name": "13.4 Update Unit",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"الوحدة الأولى: التركيب الذري (محدثة)\",\n  \"order\": 1\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/units/{{unitId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "units", "{{unitId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/units/{{unitId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "units",
+                "{{unitId}}"
+              ]
+            }
           }
         },
         {
@@ -1065,27 +2379,74 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم\",\n  \"description\": \"شرح مفصل لمستويات الطاقة الرئيسية والفرعية\",\n  \"order\": 1\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/lessons", "host": ["{{baseUrl}}"], "path": ["teacher", "lessons"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "lessons"
+              ]
+            }
           }
         },
         {
           "name": "13.6 Update Lesson",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم الأربعة\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/lessons/{{lessonId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "lessons", "{{lessonId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/lessons/{{lessonId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "lessons",
+                "{{lessonId}}"
+              ]
+            }
           }
         }
       ]
@@ -1111,51 +2472,155 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"واجب الكيمياء - أعداد الكم\",\n  \"unitName\": \"الوحدة الأولى\",\n  \"durationMinutes\": 30,\n  \"dueDate\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"ما هو عدد الكم الذي يحدد شكل السحابة الإلكترونية؟\",\n      \"options\": [\"الرئيسي\", \"الثانوي\", \"المغناطيسي\", \"المغزلي\"],\n      \"correctOptionIndex\": 1,\n      \"score\": 2,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"اشرح قاعدة هوند في توزيع الإلكترونات داخل الأوربيتالات بالتفصيل\",\n      \"modelAnswer\": \"لا يحدث ازدواج بين إلكترونين في مستوى فرعي معين إلا بعد أن تشغل أوربيتالاته فرادى أولاً\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/homework", "host": ["{{baseUrl}}"], "path": ["teacher", "homework"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/homework",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "homework"
+              ]
+            }
           }
         },
         {
           "name": "14.2 List Teacher Homeworks",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/homework", "host": ["{{baseUrl}}"], "path": ["teacher", "homework"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/homework",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "homework"
+              ]
+            }
           }
         },
         {
           "name": "14.3 Get Homework Details",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "homework",
+                "{{teacherHomeworkId}}"
+              ]
+            }
           }
         },
         {
           "name": "14.4 Update Homework",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"واجب الكيمياء المحدث - أعداد الكم وقاعدة هوند\",\n  \"durationMinutes\": 45\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "homework",
+                "{{teacherHomeworkId}}"
+              ]
+            }
           }
         },
         {
           "name": "14.5 Get Homework Submissions Roster",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}/submissions", "host": ["{{baseUrl}}"], "path": ["teacher", "homework", "{{teacherHomeworkId}}", "submissions"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}/submissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "homework",
+                "{{teacherHomeworkId}}",
+                "submissions"
+              ]
+            }
           }
         }
       ]
@@ -1181,51 +2646,155 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"امتحان الكيمياء الشامل الشهري\",\n  \"durationMinutes\": 45,\n  \"passingScorePercentage\": 50,\n  \"startTime\": \"2026-01-01T00:00:00.000Z\",\n  \"endTime\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"عدد أوربيتالات المستوى الفرعي d يساوي:\",\n      \"options\": [\"1\", \"3\", \"5\", \"7\"],\n      \"correctOptionIndex\": 2,\n      \"score\": 5,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"قارن بين طيف الانبعاث الخطي وطيف الامتصاص مع ذكر مثال\",\n      \"modelAnswer\": \"طيف الانبعاث خطوط ملونة مضيئة تفصل بينها مسافات معتمة، أما طيف الامتصاص خطوط سوداء معتمة في خلفية مضيئة\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams"
+              ]
+            }
           }
         },
         {
           "name": "15.2 List Teacher Exams",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/exams", "host": ["{{baseUrl}}"], "path": ["teacher", "exams"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams"
+              ]
+            }
           }
         },
         {
           "name": "15.3 Get Exam Details",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams",
+                "{{teacherExamId}}"
+              ]
+            }
           }
         },
         {
           "name": "15.4 Update Exam",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"امتحان الكيمياء الشامل المعدل\",\n  \"durationMinutes\": 60\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams",
+                "{{teacherExamId}}"
+              ]
+            }
           }
         },
         {
           "name": "15.5 Get Exam Attempts Roster",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/attempts", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}", "attempts"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/attempts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams",
+                "{{teacherExamId}}",
+                "attempts"
+              ]
+            }
           }
         }
       ]
@@ -1252,22 +2821,65 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/grading/pending", "host": ["{{baseUrl}}"], "path": ["teacher", "grading", "pending"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/grading/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "grading",
+                "pending"
+              ]
+            }
           }
         },
         {
           "name": "16.2 Grade Essay Question & Push Notification",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"submissionType\": \"EXAM\",\n  \"submissionId\": \"{{essaySubmissionId}}\",\n  \"questionId\": \"{{essayQuestionId}}\",\n  \"scoreAwarded\": 5,\n  \"feedback\": \"إجابة نموذجية وممتازة!\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/grading/essay", "host": ["{{baseUrl}}"], "path": ["teacher", "grading", "essay"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/grading/essay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "grading",
+                "essay"
+              ]
+            }
           }
         }
       ]
@@ -1279,9 +2891,29 @@
         {
           "name": "17.1 Get Exam Grade Sheet Leaderboard",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/grade-sheet", "host": ["{{baseUrl}}"], "path": ["teacher", "exams", "{{teacherExamId}}", "grade-sheet"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/grade-sheet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "exams",
+                "{{teacherExamId}}",
+                "grade-sheet"
+              ]
+            }
           }
         }
       ]
@@ -1293,17 +2925,56 @@
         {
           "name": "18.1 Get Financial Overview & KPIs",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/finance/summary", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "summary"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/finance/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "finance",
+                "summary"
+              ]
+            }
           }
         },
         {
           "name": "18.2 Get Group Financial Roster",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/finance/groups/{{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "groups", "{{teacherGroupId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/finance/groups/{{teacherGroupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "finance",
+                "groups",
+                "{{teacherGroupId}}"
+              ]
+            }
           }
         },
         {
@@ -1323,30 +2994,99 @@
             }
           ],
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"studentId\": \"{{teacherStudentId}}\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"amount\": 350,\n  \"paymentMethod\": \"INSTAPAY\",\n  \"notes\": \"تم التحويل بنجاح\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/finance/payments", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/finance/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "finance",
+                "payments"
+              ]
+            }
           }
         },
         {
           "name": "18.4 Get Payment Ledger History",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/finance/payments?groupId={{teacherGroupId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments"], "query": [{ "key": "groupId", "value": "{{teacherGroupId}}" }] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/finance/payments?groupId={{teacherGroupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "finance",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "groupId",
+                  "value": "{{teacherGroupId}}"
+                }
+              ]
+            }
           }
         },
         {
           "name": "18.5 Delete / Revert Payment Receipt",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/teacher/finance/payments/{{paymentId}}", "host": ["{{baseUrl}}"], "path": ["teacher", "finance", "payments", "{{paymentId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/finance/payments/{{paymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "finance",
+                "payments",
+                "{{paymentId}}"
+              ]
+            }
           }
         }
       ]
@@ -1358,27 +3098,73 @@
         {
           "name": "19.1 Dispatch Broadcast to Group",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"targetType\": \"GROUP\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"تنبيه هام بخصوص موعد الحصة القادمة\",\n  \"body\": \"يرجى العلم بأنه تم تأجيل موعد حصة المراجعة نصف ساعة.\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/broadcast", "host": ["{{baseUrl}}"], "path": ["teacher", "broadcast"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/broadcast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "broadcast"
+              ]
+            }
           }
         },
         {
           "name": "19.2 Dispatch Broadcast to All My Students",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"targetType\": \"ALL_MY_STUDENTS\",\n  \"title\": \"تهنئة بالعام الدراسي الجديد\",\n  \"body\": \"نتمنى لجميع طلابنا الأعزاء عاماً دراسياً مليئاً بالتفوق والنجاح!\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/broadcast", "host": ["{{baseUrl}}"], "path": ["teacher", "broadcast"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/broadcast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "broadcast"
+              ]
+            }
           }
         }
       ]
@@ -1390,26 +3176,1233 @@
         {
           "name": "20.1 Get Teacher Profile",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/teacher/profile", "host": ["{{baseUrl}}"], "path": ["teacher", "profile"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "profile"
+              ]
+            }
           }
         },
         {
           "name": "20.2 Update Teacher Settings",
           "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{teacherToken}}", "type": "string" }] },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"appLanguage\": \"ar\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true\n}"
             },
-            "url": { "raw": "{{baseUrl}}/teacher/settings", "host": ["{{baseUrl}}"], "path": ["teacher", "settings"] }
+            "url": {
+              "raw": "{{baseUrl}}/teacher/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teacher",
+                "settings"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 21: Student & Teacher 1-on-1 Chat",
+      "description": "## 💬 Phase 21: Real-time 1-on-1 Chat Engine\nDirect messaging between enrolled students and group teachers.",
+      "item": [
+        {
+          "name": "21.1 Get Inbox Conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) {",
+                  "    pm.collectionVariables.set('conversationId', res.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chat",
+                "conversations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21.2 Start or Retrieve Conversation by Group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.collectionVariables.set('conversationId', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupId\": \"{{groupId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chat",
+                "conversations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21.3 Get Conversation Message History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chat",
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "21.4 Send Text Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello teacher, I have a question regarding homework #1.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chat",
+                "conversations",
+                "{{conversationId}}",
+                "messages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21.5 Mark Conversation as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "chat",
+                "conversations",
+                "{{conversationId}}",
+                "read"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 22: Admin Management Portal",
+      "description": "## 🛡️ Phase 22: Platform Executive Administration\nComprehensive admin portal endpoints for system management, user lifecycle, finance, attendance, curriculum, and maintenance.",
+      "item": [
+        {
+          "name": "22.0 Admin Authentication & Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin login successful', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.expect(res.data.user.role).to.eql('ADMIN');",
+                  "pm.collectionVariables.set('adminToken', res.data.tokens.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"admin@eureka.com\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.1 Executive Dashboard KPIs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.expect(res.data.users).to.be.an('object');",
+                  "pm.expect(res.data.finance).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.2 Users Directory & Filtering",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.users && res.data.users.length > 0) {",
+                  "    pm.collectionVariables.set('adminUserId', res.data.users[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?role=STUDENT&page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "STUDENT"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.3 Export Users Roster (CSV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.4 Get User 360 Dossier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{adminUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{adminUserId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.5 Suspend / Reactivate User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin account verification\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{adminUserId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.6 Change User Platform Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"STUDENT\",\n  \"reason\": \"Role confirmation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{adminUserId}}",
+                "role"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.7 Force Logout User (Revoke Sessions & Disconnect Sockets)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/force-logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{adminUserId}}",
+                "force-logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.8 Admin Direct Password Reset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"NewAdminSetPassword@123\",\n  \"reason\": \"User requested manual reset\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{adminUserId}}",
+                "reset-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.9 Pending Teacher Applications Queue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.teachers && res.data.teachers.length > 0) {",
+                  "    pm.collectionVariables.set('adminTeacherId', res.data.teachers[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/teachers/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "teachers",
+                "pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.10 Teacher 360 Workload Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/teachers/{{adminTeacherId}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "teachers",
+                "{{adminTeacherId}}",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.11 Study Groups Platform Directory",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.groups && res.data.groups.length > 0) {",
+                  "    pm.collectionVariables.set('adminGroupId', res.data.groups[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.12 Group Details & Enrolled Roster",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/groups/{{adminGroupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "groups",
+                "{{adminGroupId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.13 Toggle Group Active Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin group toggle\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/groups/{{adminGroupId}}/toggle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "groups",
+                "{{adminGroupId}}",
+                "toggle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.14 Attendance Platform Overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/attendance/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "attendance",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.15 At-Risk Attendance Students (< 75%)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/attendance/at-risk?threshold=75",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "attendance",
+                "at-risk"
+              ],
+              "query": [
+                {
+                  "key": "threshold",
+                  "value": "75"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.16 Export Attendance Records (CSV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/attendance/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "attendance",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.17 Financial KPIs Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/finance/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.18 Payments Receipts Ledger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/finance/payments?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.19 Unpaid Students Roster",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/finance/unpaid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "unpaid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.20 Export Financial Ledger (CSV)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/finance/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.21 Multi-Channel Platform Broadcast",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Broadcast sent', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetAudience\": \"ALL\",\n  \"title\": \"إعلان هام من إدارة المنصة\",\n  \"message\": \"تم تحديث المنصة وتحسين سرعة استجابة الخوادم.\",\n  \"type\": \"ANNOUNCEMENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/broadcast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "broadcast"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.22 Get Platform Settings & Maintenance Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.23 Update Platform Settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintenanceMode\": false,\n  \"registrationOpen\": true,\n  \"supportEmail\": \"support@eureka-lms.com\",\n  \"supportPhone\": \"+201000000000\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22.24 Immutable Administrative Audit Logs Trail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.expect(res.data.logs).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
           }
         }
       ]
     }
   ]
 }
-

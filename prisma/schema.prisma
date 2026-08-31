@@ -51,6 +51,7 @@ model User {
   fcmToken            String?  @db.Text
   refreshTokenHash    String?  @db.VarChar(255)
   isVerified          Boolean  @default(false)
+  isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -67,7 +68,13 @@ model User {
   createdExams     Exam[]           @relation("CreatedExams")
   createdSessions  ClassSession[]   @relation("CreatedSessions")
   teacherPayments  StudentPayment[] @relation("TeacherPayments")
+  studentConversations Conversation[] @relation("StudentConversations")
+  teacherConversations Conversation[] @relation("TeacherConversations")
+  sentChatMessages     ChatMessage[]  @relation("SentChatMessages")
+  adminAuditLogs       AuditLog[]     @relation("AdminAuditLogs")
 
+  @@index([role, isActive, createdAt])
+  @@index([role, isVerified, createdAt])
   @@map("users")
 }
 
@@ -273,6 +280,7 @@ model Group {
   payments        StudentPayment[]
   lessonVideos    LessonVideo[]
   lessonMaterials LessonMaterial[]
+  conversations   Conversation[]
 
   @@index([isActive, stageId, subjectId])
   @@index([teacherId, isActive, createdAt])
@@ -508,4 +516,78 @@ model Notification {
   @@index([userId, isRead, createdAt])
   @@map("notifications")
 }
+
+// ----------------------------------------------------
+// 11. Student ↔ Teacher 1-on-1 Chat
+// ----------------------------------------------------
+model Conversation {
+  id              String        @id @default(uuid())
+  groupId         String
+  group           Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         User          @relation("StudentConversations", fields: [studentId], references: [id], onDelete: Cascade)
+  teacherId       String
+  teacher         User          @relation("TeacherConversations", fields: [teacherId], references: [id], onDelete: Cascade)
+  lastMessage     String?       @db.Text
+  lastMessageAt   DateTime?
+  unreadByTeacher Int           @default(0)
+  unreadByStudent Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  messages ChatMessage[]
+
+  @@unique([groupId, studentId, teacherId])
+  @@index([teacherId, lastMessageAt])
+  @@index([studentId, lastMessageAt])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentChatMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderRole     Role
+  content        String       @db.Text
+  attachmentUrl  String?      @db.VarChar(255)
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+// ----------------------------------------------------
+// 12. Administration & Platform Governance
+// ----------------------------------------------------
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  action     String   @db.VarChar(100)
+  resource   String   @db.VarChar(50)
+  resourceId String?  @db.VarChar(191)
+  reason     String?  @db.Text
+  metadata   String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([action, createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  id               String   @id @default("default")
+  maintenanceMode  Boolean  @default(false)
+  registrationOpen Boolean  @default(true)
+  supportEmail     String?  @default("support@eureka-lms.com") @db.VarChar(191)
+  supportPhone     String?  @default("+201000000000") @db.VarChar(50)
+  updatedAt        DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
 

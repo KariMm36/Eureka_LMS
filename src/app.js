@@ -26,6 +26,9 @@ import homeworkRoutes from './modules/homework/homework.routes.js';
 import examRoutes from './modules/exams/exam.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
 import teacherRoutes from './modules/teacher/teacher.routes.js';
+import chatRoutes from './modules/chat/chat.routes.js';
+import adminRoutes from './modules/admin/admin.routes.js';
+import { maintenanceMiddleware } from './middlewares/maintenance.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,10 +78,9 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocument, {
     swaggerOptions: {
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
       docExpansion: 'list',
       filter: true,
+      persistAuthorization: true,
     },
   })
 );
@@ -120,6 +122,9 @@ app.get(['/health/readiness', '/api/v1/health/readiness'], async (req, res) => {
 });
 
 
+// Global Maintenance Mode Guard
+app.use(maintenanceMiddleware);
+
 // API Routes (v1)
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/students', studentRoutes);
@@ -130,6 +135,8 @@ app.use('/api/v1/homework', homeworkRoutes);
 app.use('/api/v1/exams', examRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/teacher', teacherRoutes);
+app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // 404 Route Handler
 app.use('*', (req, res) => {

@@ -21,7 +21,7 @@ router.use(authenticate, authorize('STUDENT', 'ADMIN'));
  * /students/onboarding:
  *   post:
  *     summary: Complete student onboarding (Select stage, grade level, subjects)
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     requestBody:
  *       required: true
  *       content:
@@ -44,7 +44,7 @@ router.post('/onboarding', validate(onboardingSchema), StudentController.complet
  * /students/profile:
  *   get:
  *     summary: Get complete student profile
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     responses:
  *       200:
  *         description: Student profile details with enrolled groups and subjects
@@ -56,7 +56,7 @@ router.get('/profile', StudentController.getProfile);
  * /students/profile:
  *   put:
  *     summary: Update profile info and avatar
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -78,7 +78,7 @@ router.put('/profile', uploadImage.single('avatar'), validate(updateProfileSchem
  * /students/subjects:
  *   put:
  *     summary: Update student selected subjects
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     requestBody:
  *       required: true
  *       content:
@@ -99,7 +99,7 @@ router.put('/subjects', validate(updateSubjectsSchema), StudentController.update
  * /students/settings:
  *   put:
  *     summary: Update app settings (Language, Dark Mode, Notification Preferences)
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     requestBody:
  *       required: true
  *       content:
@@ -123,7 +123,7 @@ router.put('/settings', validate(updateSettingsSchema), StudentController.update
  * /students/analytics:
  *   get:
  *     summary: Get student performance analytics, completion rates, and dynamic peer ranking badge
- *     tags: [9. Student Analytics]
+ *     tags: [08. Student - Analytics & Badges]
  *     responses:
  *       200:
  *         description: Aggregated homework and exam statistics
@@ -135,7 +135,7 @@ router.get('/analytics', StudentController.getAnalytics);
  * /students/attendance/record:
  *   post:
  *     summary: Record student attendance by scanning live QR code or entering 6-digit session PIN
- *     tags: [3. Student Onboarding & Profile]
+ *     tags: [02. Student - Profile & Onboarding]
  *     requestBody:
  *       required: true
  *       content:
@@ -155,7 +155,38 @@ router.get('/analytics', StudentController.getAnalytics);
  *       404:
  *         description: Session not found
  */
+import { ChatController } from '../chat/chat.controller.js';
+import { createConversationSchema } from '../chat/chat.validation.js';
+
 router.post('/attendance/record', StudentController.recordAttendance);
+
+/**
+ * @swagger
+ * /students/chat/conversations:
+ *   get:
+ *     summary: Get student inbox conversations list
+ *     tags: [20. Student & Teacher 1-on-1 Chat]
+ *     responses:
+ *       200:
+ *         description: Student conversations list
+ *   post:
+ *     summary: Start or retrieve 1-on-1 conversation with a group teacher
+ *     tags: [20. Student & Teacher 1-on-1 Chat]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [groupId]
+ *             properties:
+ *               groupId: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Conversation retrieved or created
+ */
+router.get('/chat/conversations', ChatController.getStudentConversations);
+router.post('/chat/conversations', validate(createConversationSchema), ChatController.createOrGetConversation);
 
 export default router;
 

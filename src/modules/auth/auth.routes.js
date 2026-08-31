@@ -27,7 +27,7 @@ const router = Router();
  * /auth/register:
  *   post:
  *     summary: Register a new student
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -57,7 +57,7 @@ router.post('/register', authLimiter, validate(registerSchema), AuthController.r
  * /auth/login:
  *   post:
  *     summary: User login (Student / Teacher / Admin)
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -82,7 +82,7 @@ router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
  * /auth/refresh:
  *   post:
  *     summary: Refresh expired access token using valid refresh token
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -106,7 +106,7 @@ router.post('/refresh', authLimiter, validate(refreshTokenSchema), AuthControlle
  * /auth/forgot-password:
  *   post:
  *     summary: Send password reset OTP to email
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -130,7 +130,7 @@ router.post('/forgot-password', otpRequestLimiter, validate(forgotPasswordSchema
  * /auth/verify-otp:
  *   post:
  *     summary: Verify OTP code and receive a signed resetToken
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -155,7 +155,7 @@ router.post('/verify-otp', otpVerifyLimiter, validate(verifyOtpSchema), AuthCont
  * /auth/reset-password:
  *   post:
  *     summary: Set a new password using verified resetToken
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     security: []
  *     requestBody:
  *       required: true
@@ -182,7 +182,7 @@ router.post('/reset-password', validate(resetPasswordSchema), AuthController.res
  * /auth/logout:
  *   post:
  *     summary: Logout and revoke active refresh token
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     responses:
  *       200:
  *         description: Logged out successfully
@@ -196,7 +196,7 @@ router.post('/logout', authenticate, AuthController.logout);
  * /auth/send-verification-email:
  *   post:
  *     summary: Send an email verification OTP
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     responses:
  *       200:
  *         description: Verification email dispatched
@@ -208,7 +208,7 @@ router.post('/send-verification-email', authenticate, otpRequestLimiter, AuthCon
  * /auth/verify-email:
  *   post:
  *     summary: Confirm email verification OTP
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     requestBody:
  *       required: true
  *       content:
@@ -231,7 +231,7 @@ router.post('/verify-email', authenticate, otpVerifyLimiter, validate(verifyEmai
  * /auth/update-password:
  *   put:
  *     summary: Change current password
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     requestBody:
  *       required: true
  *       content:
@@ -256,7 +256,7 @@ router.put('/update-password', authenticate, validate(updatePasswordSchema), Aut
  * /auth/me:
  *   get:
  *     summary: Get current authenticated user details
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     responses:
  *       200:
  *         description: User profile details
@@ -270,7 +270,7 @@ router.get('/me', authenticate, AuthController.getMe);
  * /auth/account:
  *   delete:
  *     summary: Delete authenticated user account and associated personal data
- *     tags: [1. Authentication & Verification]
+ *     tags: [01. Authentication & Verification]
  *     requestBody:
  *       content:
  *         application/json:

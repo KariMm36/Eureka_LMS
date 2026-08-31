@@ -16,7 +16,7 @@ router.use(authenticate, authorize('STUDENT', 'ADMIN'));
  * /exams:
  *   get:
  *     summary: Get student exams feed with status badges (available / upcoming / completed)
- *     tags: [7. Exams & Timed Quizzes]
+ *     tags: [07. Student - Exams & Timed Quizzes]
  *     parameters:
  *       - in: query
  *         name: tab
@@ -32,7 +32,7 @@ router.get('/', ExamController.getExamsFeed);
  * /exams/{examId}/instructions:
  *   get:
  *     summary: Get exam guidelines, duration, passing percentage, and 4-color palette legend
- *     tags: [7. Exams & Timed Quizzes]
+ *     tags: [07. Student - Exams & Timed Quizzes]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -49,7 +49,7 @@ router.get('/:examId/instructions', ExamController.getExamInstructions);
  * /exams/{examId}/start:
  *   post:
  *     summary: Start live exam session (Enforces server-time window before/after, returns sanitized questions)
- *     tags: [7. Exams & Timed Quizzes]
+ *     tags: [07. Student - Exams & Timed Quizzes]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -70,7 +70,7 @@ router.post('/:examId/start', ExamController.startExam);
  * /exams/{examId}/submit:
  *   post:
  *     summary: Submit live exam answers (Auto-grades MCQs, validates essay minWords, records palette analytics)
- *     tags: [7. Exams & Timed Quizzes]
+ *     tags: [07. Student - Exams & Timed Quizzes]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -109,7 +109,7 @@ router.post('/:examId/submit', validate(submitExamSchema), ExamController.submit
  * /exams/{examId}/result:
  *   get:
  *     summary: Get comprehensive exam report card, pass/fail status, and question review
- *     tags: [7. Exams & Timed Quizzes]
+ *     tags: [07. Student - Exams & Timed Quizzes]
  *     parameters:
  *       - in: path
  *         name: examId

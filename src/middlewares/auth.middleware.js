@@ -17,7 +17,6 @@ export const authenticate = async (req, res, next) => {
 
     const decoded = verifyToken(token);
     
-    // Direct database lookup for authenticated user session
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
@@ -28,6 +27,7 @@ export const authenticate = async (req, res, next) => {
         role: true,
         avatarUrl: true,
         isVerified: true,
+        isActive: true,
         studentProfile: {
           include: {
             stage: true,
@@ -39,6 +39,10 @@ export const authenticate = async (req, res, next) => {
 
     if (!user) {
       throw ApiError.unauthorized('المستخدم لم يعد موجوداً');
+    }
+
+    if (user.isActive === false) {
+      throw ApiError.forbidden('تم إيقاف هذا الحساب من قِبل إدارة المنصة');
     }
 
     req.user = user;

@@ -50,4 +50,22 @@ export class NotificationController {
       next(error);
     }
   }
+
+  static async sendGroupNotification(req, res, next) {
+    try {
+      const { groupId, title, message, body, type } = req.body;
+      const result = await NotificationService.sendTeacherGroupNotification({
+        teacherId: req.user.id,
+        groupId,
+        title,
+        message,
+        body,
+        type,
+      });
+      return ApiResponse.success(res, result, 'تم إرسال الإشعار بنجاح إلى طلاب المجموعة');
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

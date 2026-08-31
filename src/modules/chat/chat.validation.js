@@ -1,0 +1,21 @@
+import Joi from 'joi';
+
+export const createConversationSchema = Joi.object({
+  groupId: Joi.string().uuid().required().messages({
+    'string.guid': 'معرف المجموعة غير صالح',
+    'any.required': 'معرف المجموعة مطلوب لبدء المحادثة',
+  }),
+});
+
+export const sendMessageSchema = Joi.object({
+  content: Joi.string().trim().min(1).max(5000).required().messages({
+    'string.empty': 'محتوى الرسالة لا يمكن أن يكون فارغاً',
+    'string.max': 'محتوى الرسالة لا يمكن أن يتجاوز 5000 حرف',
+    'any.required': 'محتوى الرسالة مطلوب',
+  }),
+  attachmentUrl: Joi.string().allow('', null).optional(),
+});
+
+export const markReadSchema = Joi.object({
+  conversationId: Joi.string().uuid().optional(),
+});

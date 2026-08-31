@@ -71,11 +71,16 @@ export const initSocket = async (httpServer) => {
           role: true,
           avatarUrl: true,
           isVerified: true,
+          isActive: true,
         },
       });
 
       if (!user) {
         return next(new Error('Authentication failed: User no longer exists'));
+      }
+
+      if (user.isActive === false) {
+        return next(new Error('Authentication failed: Account has been suspended'));
       }
 
       // Attach authenticated user identity to socket instance

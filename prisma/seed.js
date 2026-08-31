@@ -8,6 +8,67 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding for Eureka LMS...');
 
+  // 0. Seed Bootstrap Super-Admin (Environment-configured, idempotent, safe against collisions)
+  console.log('👑 Seeding Bootstrap Super-Admin...');
+  const adminEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'admin@eureka.com').toLowerCase().trim();
+  const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@SecurePass2026!';
+  const adminPhone = (process.env.DEFAULT_ADMIN_PHONE || '01000000000').trim();
+
+  // Find user by adminEmail first, or any existing ADMIN account
+  let admin = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (!admin) {
+    admin = await prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+    });
+  }
+
+  if (!admin) {
+    // Check if configured phone is taken by a different user
+    const phoneConflict = await prisma.user.findUnique({
+      where: { phone: adminPhone },
+    });
+    const safePhone = phoneConflict ? `010${Math.floor(10000000 + Math.random() * 90000000)}` : adminPhone;
+
+    const adminSalt = await bcrypt.genSalt(10);
+    const adminHash = await bcrypt.hash(adminPassword, adminSalt);
+
+    await prisma.user.create({
+      data: {
+        fullName: 'مدير النظام (Admin)',
+        email: adminEmail,
+        phone: safePhone,
+        password: adminHash,
+        role: 'ADMIN',
+        isVerified: true,
+        isActive: true,
+      },
+    });
+    console.log(`✅ Super-Admin created (${adminEmail})`);
+  } else {
+    // Idempotent update without overwriting password
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: { role: 'ADMIN', isVerified: true, isActive: true },
+    });
+    console.log(`ℹ️ Super-Admin verified (${admin.email})`);
+  }
+
+  // Seed SystemSettings singleton
+  await prisma.systemSetting.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      maintenanceMode: false,
+      registrationOpen: true,
+      supportEmail: 'support@eureka-lms.com',
+      supportPhone: '+201000000000',
+    },
+  });
+
   // 1. Seed Stages & Grades
   console.log('📚 Seeding Educational Stages and Grades...');
   for (const stageData of EGYPTIAN_STAGES) {

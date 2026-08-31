@@ -13,7 +13,7 @@ router.use(authenticate);
  * /academic/stages:
  *   get:
  *     summary: Get all academic stages with their grade levels (In-memory cached)
- *     tags: [2. Academic Catalogue]
+ *     tags: [03. Student - Academic Catalogue]
  *     responses:
  *       200:
  *         description: List of educational stages
@@ -25,7 +25,7 @@ router.get('/stages', AcademicController.getStages);
  * /academic/subjects:
  *   get:
  *     summary: Get all subjects or filter by stageId / gradeLevelId
- *     tags: [2. Academic Catalogue]
+ *     tags: [03. Student - Academic Catalogue]
  *     parameters:
  *       - in: query
  *         name: stageId
@@ -44,7 +44,7 @@ router.get('/subjects', AcademicController.getSubjects);
  * /academic/subjects/{subjectId}/units:
  *   get:
  *     summary: Get syllabus units and lessons for a specific subject
- *     tags: [2. Academic Catalogue]
+ *     tags: [03. Student - Academic Catalogue]
  *     parameters:
  *       - in: path
  *         name: subjectId
@@ -64,7 +64,7 @@ router.get('/subjects/:subjectId/units', AcademicController.getSubjectUnits);
  * /academic/lessons/{lessonId}:
  *   get:
  *     summary: Get detailed lesson content, video URLs, and study attachments
- *     tags: [2. Academic Catalogue]
+ *     tags: [03. Student - Academic Catalogue]
  *     parameters:
  *       - in: path
  *         name: lessonId

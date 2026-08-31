@@ -11,6 +11,16 @@ import { logger } from '../../config/logger.config.js';
 
 export class AuthService {
   static async register({ fullName, email, phone, password, role = 'STUDENT' }) {
+    // Check Platform Registration Setting
+    const systemSetting = await prisma.systemSetting.findUnique({
+      where: { id: 'default' },
+      select: { registrationOpen: true },
+    });
+
+    if (systemSetting && systemSetting.registrationOpen === false) {
+      throw ApiError.forbidden('التسجيل في المنصة مغلق حالياً من قِبل إدارة النظام');
+    }
+
     const existingEmail = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingEmail) {
       throw ApiError.conflict('البريد الإلكتروني مسجل بالفعل');
@@ -108,6 +118,10 @@ export class AuthService {
 
     if (!user) {
       throw ApiError.badRequest('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+    }
+
+    if (user.isActive === false) {
+      throw ApiError.forbidden('تم إيقاف هذا الحساب من قِبل إدارة المنصة');
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -338,11 +352,11 @@ export class AuthService {
     // Fetch the user and their stored refresh token hash
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, role: true, email: true, refreshTokenHash: true },
+      select: { id: true, role: true, email: true, refreshTokenHash: true, isActive: true },
     });
 
-    if (!user || !user.refreshTokenHash) {
-      throw ApiError.unauthorized('الجلسة غير صالحة. يرجى تسجيل الدخول مجدداً');
+    if (!user || user.isActive === false || !user.refreshTokenHash) {
+      throw ApiError.unauthorized('الجلسة غير صالحة أو تم إيقاف الحساب. يرجى تسجيل الدخول مجدداً');
     }
 
     // Compare the incoming token against the stored hash

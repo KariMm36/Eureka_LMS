@@ -14,7 +14,7 @@ router.use(authenticate, authorize('STUDENT', 'ADMIN'));
  * /home/dashboard:
  *   get:
  *     summary: Get consolidated student home dashboard feed
- *     tags: [5. Home Dashboard]
+ *     tags: [05. Student - Home Dashboard]
 
  *     responses:
  *       200:

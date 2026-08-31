@@ -394,6 +394,21 @@ export class TeacherService {
       },
     });
 
+    // Automatic notification if schedule days or time were updated
+    if (data.scheduleTime !== undefined || data.scheduleDays !== undefined) {
+      try {
+        await NotificationService.notifyGroupStudents({
+          groupId: updated.id,
+          title: '⏰ تغيير مواعيد المحاضرات',
+          body: `تم تحديث جدول مواعيد مجموعة "${updated.name}" إلى: ${parseScheduleDays(updated.scheduleDays).join('، ')} الساعة ${updated.scheduleTime}.`,
+          type: 'ANNOUNCEMENT',
+          referenceId: updated.id,
+        });
+      } catch (err) {
+        console.error('[Schedule Notification Error]:', err.message);
+      }
+    }
+
     return {
       id: updated.id,
       name: updated.name,

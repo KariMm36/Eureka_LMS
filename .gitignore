@@ -1,5 +1,4 @@
 # 1. Environment & Sensitive Credentials
-.env
 .env.local
 .env.*.local
 firebase-service-account.json

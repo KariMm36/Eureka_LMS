@@ -406,9 +406,11 @@ export class TestSetupHelper {
         });
       }
 
-      // 3. Delete Payments, Class Sessions, Group Enrollments & Groups
+      // 3. Delete Payments, Class Sessions, Conversations, Chat Messages, Group Enrollments & Groups
       if (this.createdGroupIds.size > 0) {
         const groupIds = Array.from(this.createdGroupIds);
+        await prisma.chatMessage.deleteMany({ where: { conversation: { groupId: { in: groupIds } } } });
+        await prisma.conversation.deleteMany({ where: { groupId: { in: groupIds } } });
         await prisma.studentPayment.deleteMany({ where: { groupId: { in: groupIds } } });
         await prisma.attendance.deleteMany({ where: { session: { groupId: { in: groupIds } } } });
         await prisma.classSession.deleteMany({ where: { groupId: { in: groupIds } } });

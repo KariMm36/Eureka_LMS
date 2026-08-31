@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { NotificationController } from './notification.controller.js';
 import { authenticate } from '../../middlewares/auth.middleware.js';
+import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { registerFcmTokenSchema } from './notification.validation.js';
+import { registerFcmTokenSchema, sendGroupNotificationSchema } from './notification.validation.js';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.use(authenticate);
  * /notifications:
  *   get:
  *     summary: Get student notification feed with unread count and pagination
- *     tags: [8. Notifications & Push]
+ *     tags: [21. Notifications & FCM Push]
  *     parameters:
  *       - in: query
  *         name: filter
@@ -40,7 +41,7 @@ router.get('/', NotificationController.getNotifications);
  * /notifications/{id}:
  *   get:
  *     summary: Get notification details and automatically mark as read
- *     tags: [8. Notifications & Push]
+ *     tags: [21. Notifications & FCM Push]
  *     parameters:
  *       - in: path
  *         name: id
@@ -59,7 +60,7 @@ router.get('/:id', NotificationController.getNotificationDetails);
  * /notifications/{id}/read:
  *   patch:
  *     summary: Mark a single notification as read
- *     tags: [8. Notifications & Push]
+ *     tags: [21. Notifications & FCM Push]
  *     parameters:
  *       - in: path
  *         name: id
@@ -76,7 +77,7 @@ router.patch('/:id/read', NotificationController.markAsRead);
  * /notifications/read-all:
  *   patch:
  *     summary: Mark all notifications as read
- *     tags: [8. Notifications & Push]
+ *     tags: [21. Notifications & FCM Push]
  *     responses:
  *       200:
  *         description: All notifications marked as read
@@ -88,7 +89,7 @@ router.patch('/read-all', NotificationController.markAllAsRead);
  * /notifications/fcm-token:
  *   post:
  *     summary: Register Firebase Cloud Messaging device token for push notifications
- *     tags: [8. Notifications & Push]
+ *     tags: [21. Notifications & FCM Push]
  *     requestBody:
  *       required: true
  *       content:
@@ -104,4 +105,17 @@ router.patch('/read-all', NotificationController.markAllAsRead);
  */
 router.post('/fcm-token', validate(registerFcmTokenSchema), NotificationController.registerFCMToken);
 
+/**
+ * @swagger
+ * /notifications/group:
+ *   post:
+ *     summary: Send group notification (Teacher only)
+ *     tags: [21. Notifications & FCM Push]
+ *     responses:
+ *       200:
+ *         description: Group notification sent
+ */
+router.post('/group', authorize('TEACHER', 'ADMIN'), validate(sendGroupNotificationSchema), NotificationController.sendGroupNotification);
+
 export default router;
+

@@ -26,4 +26,7 @@ export const ENV = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@eureka-lms.com',
+  DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL || 'admin@eureka.com',
+  DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@SecurePass2026!',
+  DEFAULT_ADMIN_PHONE: process.env.DEFAULT_ADMIN_PHONE || '01000000000',
 };

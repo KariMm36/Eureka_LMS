@@ -43,7 +43,7 @@ router.use(authenticate, authorize('TEACHER', 'ADMIN'));
  * /teacher/dashboard:
  *   get:
  *     summary: Get teacher consolidated dashboard KPIs, today schedule, and active exams
- *     tags: [10. Teacher Dashboard]
+ *     tags: [09. Teacher - Dashboard]
  *     responses:
  *       200:
  *         description: Teacher dashboard data
@@ -59,7 +59,7 @@ router.get('/dashboard', TeacherController.getDashboard);
  * /teacher/groups:
  *   get:
  *     summary: List teacher groups with active student counts and schedules
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: query
  *         name: search
@@ -87,7 +87,7 @@ router.get('/groups', TeacherController.getGroups);
  * /teacher/groups:
  *   post:
  *     summary: Create a new study group with schedule, capacity, default price, and cover image
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     requestBody:
  *       required: true
  *       content:
@@ -118,7 +118,7 @@ router.post('/groups', uploadImage.single('cover'), validate(createGroupSchema),
  * /teacher/groups/{groupId}:
  *   get:
  *     summary: Get detailed group information and counts
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -137,7 +137,7 @@ router.get('/groups/:groupId', TeacherController.getGroupById);
  * /teacher/groups/{groupId}:
  *   put:
  *     summary: Update group details, schedule, capacity, or cover photo
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -168,7 +168,7 @@ router.put('/groups/:groupId', uploadImage.single('cover'), validate(updateGroup
  * /teacher/groups/{groupId}:
  *   delete:
  *     summary: Soft-delete / deactivate study group
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -185,7 +185,7 @@ router.delete('/groups/:groupId', TeacherController.deleteGroup);
  * /teacher/groups/{groupId}/qr-code:
  *   get:
  *     summary: Get group invitation QR code payload and share link
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -202,7 +202,7 @@ router.get('/groups/:groupId/qr-code', TeacherController.getGroupQrCode);
  * /teacher/groups/{groupId}/students:
  *   get:
  *     summary: Get group student roster with payment status, attendance rates, and scores
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -228,7 +228,7 @@ router.get('/groups/:groupId/students', TeacherController.getGroupStudents);
  * /teacher/groups/{groupId}/students:
  *   post:
  *     summary: Enroll student manually (Finds existing user or creates new student account with temp password)
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -258,7 +258,7 @@ router.post('/groups/:groupId/students', validate(addStudentToGroupSchema), Teac
  * /teacher/students/{studentId}:
  *   get:
  *     summary: Get complete student modal details with attendance stats, exam/hw history, and payments
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: studentId
@@ -275,7 +275,7 @@ router.get('/students/:studentId', TeacherController.getStudentDetails);
  * /teacher/students/{studentId}:
  *   put:
  *     summary: Update student custom price, status, or transfer between teacher's groups
- *     tags: [11. Teacher Groups & Student Roster]
+ *     tags: [10. Teacher - Groups & Student Roster]
  *     parameters:
  *       - in: path
  *         name: studentId
@@ -305,7 +305,7 @@ router.put('/students/:studentId', validate(updateStudentSchema), TeacherControl
  * /teacher/attendance/overview:
  *   get:
  *     summary: Get overall attendance KPIs, breakdown by group, and recent sessions
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     responses:
  *       200:
  *         description: Attendance dashboard summary
@@ -317,7 +317,7 @@ router.get('/attendance/overview', TeacherController.getAttendanceOverview);
  * /teacher/attendance/calendar:
  *   get:
  *     summary: Get calendar sessions history with attendance rates
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     parameters:
  *       - in: query
  *         name: month
@@ -336,7 +336,7 @@ router.get('/attendance/calendar', TeacherController.getAttendanceCalendar);
  * /teacher/attendance/sessions:
  *   post:
  *     summary: Create a class attendance session
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     requestBody:
  *       required: true
  *       content:
@@ -359,7 +359,7 @@ router.post('/attendance/sessions', validate(createSessionSchema), TeacherContro
  * /teacher/attendance/sessions/{sessionId}/qr:
  *   get:
  *     summary: Generate live dynamic QR token and 6-digit PIN code with 10-minute TTL countdown
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     parameters:
  *       - in: path
  *         name: sessionId
@@ -376,7 +376,7 @@ router.get('/attendance/sessions/:sessionId/qr', TeacherController.generateSessi
  * /teacher/attendance/sessions/{sessionId}/manual:
  *   post:
  *     summary: Batch record manual student roll-call (PRESENT / LATE / ABSENT)
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     parameters:
  *       - in: path
  *         name: sessionId
@@ -409,7 +409,7 @@ router.post('/attendance/sessions/:sessionId/manual', validate(manualAttendanceS
  * /teacher/attendance/sessions/{sessionId}:
  *   get:
  *     summary: Get session attendance summary, present/late/absent counts, and student roster
- *     tags: [12. Attendance & QR Roll-Call]
+ *     tags: [11. Teacher - Attendance & QR Roll-Call]
  *     parameters:
  *       - in: path
  *         name: sessionId
@@ -430,7 +430,7 @@ router.get('/attendance/sessions/:sessionId', TeacherController.getSessionDetail
  * /teacher/subjects:
  *   post:
  *     summary: Create private teacher subject with optional icon upload
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     requestBody:
  *       required: true
  *       content:
@@ -453,7 +453,7 @@ router.post('/subjects', uploadImage.single('icon'), validate(createSubjectSchem
  * /teacher/subjects:
  *   get:
  *     summary: List all subjects taught by teacher (Global & Private)
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     responses:
  *       200:
  *         description: List of teacher subjects
@@ -465,7 +465,7 @@ router.get('/subjects', TeacherController.getTeacherSubjects);
  * /teacher/units:
  *   post:
  *     summary: Create curriculum unit under a subject and grade level
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     requestBody:
  *       required: true
  *       content:
@@ -489,7 +489,7 @@ router.post('/units', validate(createUnitSchema), TeacherController.createUnit);
  * /teacher/units/{unitId}:
  *   put:
  *     summary: Update unit title and ordering
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: unitId
@@ -514,7 +514,7 @@ router.put('/units/:unitId', validate(updateUnitSchema), TeacherController.updat
  * /teacher/units/{unitId}:
  *   delete:
  *     summary: Delete curriculum unit and all its lessons
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: unitId
@@ -531,7 +531,7 @@ router.delete('/units/:unitId', TeacherController.deleteUnit);
  * /teacher/lessons:
  *   post:
  *     summary: Create lesson under a unit
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     requestBody:
  *       required: true
  *       content:
@@ -555,7 +555,7 @@ router.post('/lessons', validate(createLessonSchema), TeacherController.createLe
  * /teacher/lessons/{lessonId}:
  *   put:
  *     summary: Update lesson title and description
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: lessonId
@@ -581,7 +581,7 @@ router.put('/lessons/:lessonId', validate(updateLessonSchema), TeacherController
  * /teacher/lessons/{lessonId}:
  *   delete:
  *     summary: Delete lesson and its attached media
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: lessonId
@@ -598,7 +598,7 @@ router.delete('/lessons/:lessonId', TeacherController.deleteLesson);
  * /teacher/lessons/{lessonId}/videos:
  *   post:
  *     summary: Upload lesson video (Max 500MB) with optional group audience restriction
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: lessonId
@@ -628,7 +628,7 @@ router.post('/lessons/:lessonId/videos', uploadVideo.single('video'), validate(u
  * /teacher/lessons/{lessonId}/materials:
  *   post:
  *     summary: Upload lesson study PDF / Word material (Max 10MB)
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: lessonId
@@ -657,7 +657,7 @@ router.post('/lessons/:lessonId/materials', uploadDocument.single('document'), v
  * /teacher/lessons/{lessonId}/media/{mediaType}/{mediaId}:
  *   delete:
  *     summary: Delete lesson media attachment (video or material)
- *     tags: [13. Curriculum Content CRUD]
+ *     tags: [12. Teacher - Curriculum Content CRUD]
  *     parameters:
  *       - in: path
  *         name: lessonId
@@ -686,7 +686,7 @@ router.delete('/lessons/:lessonId/media/:mediaType/:mediaId', TeacherController.
  * /teacher/homework:
  *   post:
  *     summary: Create homework with MCQ and Essay questions (Add Homework Screen)
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     requestBody:
  *       required: true
  *       content:
@@ -725,7 +725,7 @@ router.post('/homework', validate(createHomeworkSchema), TeacherController.creat
  * /teacher/homework:
  *   get:
  *     summary: List teacher's homeworks with submission progress
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     parameters:
  *       - in: query
  *         name: groupId
@@ -747,7 +747,7 @@ router.get('/homework', TeacherController.getTeacherHomeworks);
  * /teacher/homework/{homeworkId}:
  *   get:
  *     summary: Get homework details with full question breakdown
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -764,7 +764,7 @@ router.get('/homework/:homeworkId', TeacherController.getHomeworkDetails);
  * /teacher/homework/{homeworkId}:
  *   put:
  *     summary: Update homework details and questions
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -792,7 +792,7 @@ router.put('/homework/:homeworkId', validate(updateHomeworkSchema), TeacherContr
  * /teacher/homework/{homeworkId}:
  *   delete:
  *     summary: Delete homework assignment
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -809,7 +809,7 @@ router.delete('/homework/:homeworkId', TeacherController.deleteHomework);
  * /teacher/homework/{homeworkId}/submissions:
  *   get:
  *     summary: Get student homework submissions roster
- *     tags: [14. Homework Authoring Wizard]
+ *     tags: [13. Teacher - Homework Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: homeworkId
@@ -830,7 +830,7 @@ router.get('/homework/:homeworkId/submissions', TeacherController.getHomeworkSub
  * /teacher/exams:
  *   post:
  *     summary: Create timed exam with MCQ and Essay questions (Add Exam Screen)
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     requestBody:
  *       required: true
  *       content:
@@ -870,7 +870,7 @@ router.post('/exams', validate(createExamSchema), TeacherController.createExam);
  * /teacher/exams:
  *   get:
  *     summary: List teacher's exams with attempt statistics
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     parameters:
  *       - in: query
  *         name: groupId
@@ -892,7 +892,7 @@ router.get('/exams', TeacherController.getTeacherExams);
  * /teacher/exams/{examId}:
  *   get:
  *     summary: Get exam details with question list
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -909,7 +909,7 @@ router.get('/exams/:examId', TeacherController.getExamDetails);
  * /teacher/exams/{examId}:
  *   put:
  *     summary: Update exam details and questions
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -938,7 +938,7 @@ router.put('/exams/:examId', validate(updateExamSchema), TeacherController.updat
  * /teacher/exams/{examId}:
  *   delete:
  *     summary: Delete exam
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -955,7 +955,7 @@ router.delete('/exams/:examId', TeacherController.deleteExam);
  * /teacher/exams/{examId}/attempts:
  *   get:
  *     summary: Get exam student attempts with scores and pass/fail rankings
- *     tags: [15. Exam Authoring Wizard]
+ *     tags: [14. Teacher - Exam Authoring Wizard]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -976,7 +976,7 @@ router.get('/exams/:examId/attempts', TeacherController.getExamAttempts);
  * /teacher/grading/pending:
  *   get:
  *     summary: Get pending essay answers queue waiting for teacher scoring (Grading Screen)
- *     tags: [16. Manual Essay Grading Queue]
+ *     tags: [15. Teacher - Manual Essay Grading Queue]
  *     responses:
  *       200:
  *         description: Pending essay questions queue
@@ -988,7 +988,7 @@ router.get('/grading/pending', TeacherController.getPendingEssayGrading);
  * /teacher/grading/essay:
  *   post:
  *     summary: Score student essay question, add feedback note, and trigger instant FCM push notification
- *     tags: [16. Manual Essay Grading Queue]
+ *     tags: [15. Teacher - Manual Essay Grading Queue]
  *     requestBody:
  *       required: true
  *       content:
@@ -1017,7 +1017,7 @@ router.post('/grading/essay', validate(gradeEssaySchema), TeacherController.grad
  * /teacher/exams/{examId}/grade-sheet:
  *   get:
  *     summary: Get tabular grade sheet leaderboard for all enrolled students (Grade Sheet Screen)
- *     tags: [17. Comprehensive Grade Sheet]
+ *     tags: [16. Teacher - Comprehensive Grade Sheet]
  *     parameters:
  *       - in: path
  *         name: examId
@@ -1038,7 +1038,7 @@ router.get('/exams/:examId/grade-sheet', TeacherController.getExamGradeSheet);
  * /teacher/finance/summary:
  *   get:
  *     summary: Get revenue overview, collection rate %, and recent payments
- *     tags: [18. Income & Payment Ledger]
+ *     tags: [17. Teacher - Income & Payment Ledger]
  *     parameters:
  *       - in: query
  *         name: monthLabel
@@ -1054,7 +1054,7 @@ router.get('/finance/summary', TeacherController.getFinanceSummary);
  * /teacher/finance/groups/{groupId}:
  *   get:
  *     summary: Get group financial roster with paid/unpaid status for current month
- *     tags: [18. Income & Payment Ledger]
+ *     tags: [17. Teacher - Income & Payment Ledger]
  *     parameters:
  *       - in: path
  *         name: groupId
@@ -1074,7 +1074,7 @@ router.get('/finance/groups/:groupId', TeacherController.getGroupFinanceRoster);
  * /teacher/finance/payments:
  *   post:
  *     summary: Record student fee payment receipt
- *     tags: [18. Income & Payment Ledger]
+ *     tags: [17. Teacher - Income & Payment Ledger]
  *     requestBody:
  *       required: true
  *       content:
@@ -1101,7 +1101,7 @@ router.post('/finance/payments', uploadReceipt.single('receipt'), validate(recor
  * /teacher/finance/payments:
  *   get:
  *     summary: Get payment ledger history with filters
- *     tags: [18. Income & Payment Ledger]
+ *     tags: [17. Teacher - Income & Payment Ledger]
  *     parameters:
  *       - in: query
  *         name: groupId
@@ -1129,7 +1129,7 @@ router.get('/finance/payments', TeacherController.getPaymentLedger);
  * /teacher/finance/payments/{paymentId}:
  *   delete:
  *     summary: Cancel and delete payment receipt
- *     tags: [18. Income & Payment Ledger]
+ *     tags: [17. Teacher - Income & Payment Ledger]
  *     parameters:
  *       - in: path
  *         name: paymentId
@@ -1150,7 +1150,7 @@ router.delete('/finance/payments/:paymentId', TeacherController.deletePaymentRec
  * /teacher/broadcast:
  *   post:
  *     summary: Dispatch announcement to whole group, stage, or grade with FCM Push
- *     tags: [19. Teacher Broadcast Notifications]
+ *     tags: [18. Teacher - Broadcast Notifications]
  *     requestBody:
  *       required: true
  *       content:
@@ -1181,7 +1181,7 @@ router.post('/broadcast', validate(broadcastNotificationSchema), TeacherControll
  * /teacher/profile:
  *   get:
  *     summary: Get teacher profile with assigned groups and stats
- *     tags: [20. Teacher Profile & Settings]
+ *     tags: [19. Teacher - Profile & Settings]
  *     responses:
  *       200:
  *         description: Teacher profile
@@ -1193,7 +1193,7 @@ router.get('/profile', TeacherController.getProfile);
  * /teacher/profile:
  *   put:
  *     summary: Update teacher personal info and avatar photo
- *     tags: [20. Teacher Profile & Settings]
+ *     tags: [19. Teacher - Profile & Settings]
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -1214,7 +1214,7 @@ router.put('/profile', uploadImage.single('avatar'), validate(updateTeacherProfi
  * /teacher/settings:
  *   put:
  *     summary: Update teacher preferences (Language, Dark mode, Notification toggles)
- *     tags: [20. Teacher Profile & Settings]
+ *     tags: [19. Teacher - Profile & Settings]
  *     requestBody:
  *       content:
  *         application/json:
@@ -1231,7 +1231,49 @@ router.put('/profile', uploadImage.single('avatar'), validate(updateTeacherProfi
  *       200:
  *         description: Settings saved
  */
+import { ChatController } from '../chat/chat.controller.js';
+import { NotificationController } from '../notifications/notification.controller.js';
+import { sendGroupNotificationSchema } from '../notifications/notification.validation.js';
+
 router.put('/settings', validate(updateTeacherSettingsSchema), TeacherController.updateSettings);
+
+/**
+ * @swagger
+ * /teacher/chat/conversations:
+ *   get:
+ *     summary: Get teacher inbox conversations list
+ *     tags: [20. Student & Teacher 1-on-1 Chat]
+ *     responses:
+ *       200:
+ *         description: Teacher conversations list
+ */
+router.get('/chat/conversations', ChatController.getTeacherConversations);
+
+/**
+ * @swagger
+ * /teacher/notifications/group:
+ *   post:
+ *     summary: Send group announcement notification to all active students in a teacher group
+ *     tags: [21. Notifications & FCM Push]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [groupId, title]
+ *             properties:
+ *               groupId: { type: string, format: uuid }
+ *               title: { type: string }
+ *               message: { type: string }
+ *               type: { type: string, enum: [ANNOUNCEMENT, GROUP_ANNOUNCEMENT, HOMEWORK, EXAM] }
+ *     responses:
+ *       200:
+ *         description: Notification dispatched
+ *       403:
+ *         description: Not authorized (teacher does not own group)
+ */
+router.post('/notifications/group', validate(sendGroupNotificationSchema), NotificationController.sendGroupNotification);
 
 export default router;
 
