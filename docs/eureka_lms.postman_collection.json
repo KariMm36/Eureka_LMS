@@ -408,9 +408,13 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
                   "if (res.data && res.data.token) {",
                   "    pm.collectionVariables.set('token', res.data.token);",
+                  "}",
+                  "if (res.data && res.data.refreshToken) {",
+                  "    pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -663,7 +667,13 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "// Clear stored tokens — server incremented tokenVersion so the old",
+                  "// access token is already dead. Future requests must re-login.",
+                  "pm.collectionVariables.set('token', '');",
+                  "pm.collectionVariables.set('refreshToken', '');",
+                  "pm.collectionVariables.set('teacherToken', '');",
+                  "console.log('[Logout] Tokens cleared from collection variables.');"
                 ],
                 "type": "text/javascript"
               }
@@ -710,7 +720,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "// Account is gone — clear all identity tokens",
+                  "pm.collectionVariables.set('token', '');",
+                  "pm.collectionVariables.set('refreshToken', '');",
+                  "pm.collectionVariables.set('teacherToken', '');",
+                  "console.log('[DeleteAccount] All tokens cleared.');"
                 ],
                 "type": "text/javascript"
               }
