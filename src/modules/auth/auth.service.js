@@ -52,8 +52,8 @@ export class AuthService {
       },
     });
 
-    // Generate tokens
-    const token = signToken({ id: user.id, role: user.role, email: user.email });
+    // Generate tokens — embed tokenVersion (tv) so logout can instantly invalidate
+    const token = signToken({ id: user.id, role: user.role, email: user.email, tv: user.tokenVersion });
     const refreshToken = signRefreshToken({ id: user.id });
 
     // Store hashed refresh token (SHA256 pre-hashed to prevent bcrypt 72-byte truncation)
@@ -129,7 +129,7 @@ export class AuthService {
       throw ApiError.badRequest('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
 
-    const token = signToken({ id: user.id, role: user.role, email: user.email });
+    const token = signToken({ id: user.id, role: user.role, email: user.email, tv: user.tokenVersion });
     const refreshToken = signRefreshToken({ id: user.id });
 
     // Hash & store refresh token in DB (SHA256 pre-hashed to prevent bcrypt 72-byte truncation)
@@ -352,7 +352,7 @@ export class AuthService {
     // Fetch the user and their stored refresh token hash
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, role: true, email: true, refreshTokenHash: true, isActive: true },
+      select: { id: true, role: true, email: true, refreshTokenHash: true, isActive: true, tokenVersion: true },
     });
 
     if (!user || user.isActive === false || !user.refreshTokenHash) {
@@ -366,7 +366,8 @@ export class AuthService {
     }
 
     // Issue a new short-lived access token + new refresh token (Rotation)
-    const newAccessToken = signToken({ id: user.id, role: user.role, email: user.email });
+    // Embed latest tokenVersion so middleware can verify it
+    const newAccessToken = signToken({ id: user.id, role: user.role, email: user.email, tv: user.tokenVersion });
     const newRefreshToken = signRefreshToken({ id: user.id });
 
     // Store new hashed refresh token in DB, immediately revoking the old token
@@ -387,9 +388,14 @@ export class AuthService {
    * Logout — invalidate refresh token by clearing it from DB
    */
   static async logout(userId) {
+    // Increment tokenVersion to instantly invalidate ALL existing access tokens
+    // (even those still within their TTL window)
     await prisma.user.update({
       where: { id: userId },
-      data: { refreshTokenHash: null },
+      data: {
+        refreshTokenHash: null,
+        tokenVersion: { increment: 1 },
+      },
     });
 
     return { message: 'تم تسجيل الخروج بنجاح' };

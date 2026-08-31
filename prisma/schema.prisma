@@ -50,6 +50,7 @@ model User {
   notifyAnnouncements Boolean  @default(true)
   fcmToken            String?  @db.Text
   refreshTokenHash    String?  @db.VarChar(255)
+  tokenVersion        Int      @default(0)
   isVerified          Boolean  @default(false)
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())

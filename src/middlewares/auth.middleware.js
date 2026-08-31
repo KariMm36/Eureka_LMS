@@ -28,6 +28,7 @@ export const authenticate = async (req, res, next) => {
         avatarUrl: true,
         isVerified: true,
         isActive: true,
+        tokenVersion: true,
         studentProfile: {
           include: {
             stage: true,
@@ -43,6 +44,11 @@ export const authenticate = async (req, res, next) => {
 
     if (user.isActive === false) {
       throw ApiError.forbidden('تم إيقاف هذا الحساب من قِبل إدارة المنصة');
+    }
+
+    // Token version check — invalidates tokens issued before last logout
+    if (decoded.tv !== undefined && decoded.tv !== user.tokenVersion) {
+      throw ApiError.unauthorized('انتهت صلاحية جلسة الدخول، يرجى تسجيل الدخول مرة أخرى');
     }
 
     req.user = user;
