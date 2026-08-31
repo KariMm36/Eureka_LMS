@@ -144,6 +144,51 @@
       "key": "conversationId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "unitId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "homeworkIdTeacher",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "examIdTeacher",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "essaySubmissionIdNew",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationIdNew",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminStudentId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -255,7 +300,18 @@
                 "send-verification-email"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.3 Verify Email OTP",
@@ -291,7 +347,18 @@
                 "verify-email"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.4 Login",
@@ -398,7 +465,19 @@
                 "me"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data; pm.expect(d.email).to.be.a('string');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.7 Forgot Password (Request OTP)",
@@ -424,7 +503,18 @@
                 "forgot-password"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.8 Verify Forgot Password OTP",
@@ -490,7 +580,18 @@
                 "reset-password"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.10 Register Teacher (Capture Teacher Token)",
@@ -556,7 +657,18 @@
                 "logout"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "1.12 Delete Account",
@@ -592,7 +704,18 @@
                 "account"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -765,7 +888,19 @@
                 "{{lessonId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data; pm.expect(d.id).to.be.a('string');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -807,7 +942,18 @@
                 "onboarding"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "3.2 Get Student Full Profile",
@@ -833,7 +979,19 @@
                 "profile"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "3.3 Update App Settings",
@@ -869,7 +1027,18 @@
                 "settings"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -957,7 +1126,19 @@
                 "{{groupCode}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data.groupCode).to.be.a('string');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "4.3 Join Group by Code",
@@ -993,7 +1174,18 @@
                 "join-by-code"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "4.4 Get My Enrolled Groups",
@@ -1019,7 +1211,19 @@
                 "my-groups"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "4.5 Get Group Details",
@@ -1045,7 +1249,19 @@
                 "{{groupId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data.id).to.be.a('string');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1077,7 +1293,19 @@
                 "dashboard"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1154,7 +1382,19 @@
                 "{{homeworkId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data.questions).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "6.3 Submit Homework (MCQ Auto-Grading & Essay minWords)",
@@ -1191,7 +1431,18 @@
                 "submit"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "6.4 Get Homework Result Scorecard & Peer Percentile",
@@ -1218,7 +1469,19 @@
                 "result"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data.score).to.be.a('number');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1296,7 +1559,18 @@
                 "instructions"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "7.3 Start Live Exam Session (Server-Time Window Enforced)",
@@ -1323,7 +1597,19 @@
                 "start"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data.questions).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "7.4 Submit Live Exam Answers",
@@ -1360,7 +1646,18 @@
                 "submit"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "7.5 Get Exam Comprehensive Report Card",
@@ -1387,7 +1684,19 @@
                 "result"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1429,7 +1738,18 @@
                 "fcm-token"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "8.2 Get Notifications Feed (with Unread Count)",
@@ -1500,7 +1820,18 @@
                 "{{notificationId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "8.4 Mark All Notifications as Read",
@@ -1526,7 +1857,18 @@
                 "read-all"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1558,7 +1900,19 @@
                 "analytics"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1590,7 +1944,19 @@
                 "dashboard"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1713,7 +2079,18 @@
                 "{{teacherGroupId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "11.4 Update Group Details",
@@ -1750,7 +2127,18 @@
                 "{{teacherGroupId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "11.5 Get Group QR Invite Code",
@@ -1778,7 +2166,18 @@
                 "qr-code"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "11.6 Add Student to Group (Find-or-Create)",
@@ -1858,7 +2257,19 @@
                 "students"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "11.8 Get Student Details Modal",
@@ -1885,7 +2296,18 @@
                 "{{teacherStudentId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "11.9 Update Student Price / Status",
@@ -1922,7 +2344,18 @@
                 "{{teacherStudentId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1937,10 +2370,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.data && res.data.id) {",
-                  "    pm.collectionVariables.set('sessionId', res.data.id);",
-                  "}"
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json().data;",
+                  "if (d && d.id) pm.collectionVariables.set('sessionId', d.id);"
                 ],
                 "type": "text/javascript"
               }
@@ -2060,7 +2492,18 @@
                 "record"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "12.4 Manual Roll-Call Batching",
@@ -2099,7 +2542,18 @@
                 "manual"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "12.5 Get Session Attendance Details & Roster",
@@ -2127,7 +2581,18 @@
                 "{{sessionId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "12.6 Get Attendance Dashboard Overview",
@@ -2154,7 +2619,19 @@
                 "overview"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "12.7 Get Attendance Calendar",
@@ -2191,7 +2668,19 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2273,7 +2762,19 @@
                 "subjects"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "13.3 Create Curriculum Unit",
@@ -2282,10 +2783,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.data && res.data.id) {",
-                  "    pm.collectionVariables.set('unitId', res.data.id);",
-                  "}"
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json().data;",
+                  "if (d && d.id) pm.collectionVariables.set('unitId', d.id);"
                 ],
                 "type": "text/javascript"
               }
@@ -2360,7 +2860,18 @@
                 "{{unitId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "13.5 Create Lesson",
@@ -2447,7 +2958,18 @@
                 "{{lessonId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2529,7 +3051,19 @@
                 "homework"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "14.3 Get Homework Details",
@@ -2556,7 +3090,18 @@
                 "{{teacherHomeworkId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "14.4 Update Homework",
@@ -2593,7 +3138,18 @@
                 "{{teacherHomeworkId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "14.5 Get Homework Submissions Roster",
@@ -2621,7 +3177,19 @@
                 "submissions"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2703,7 +3271,19 @@
                 "exams"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "15.3 Get Exam Details",
@@ -2730,7 +3310,18 @@
                 "{{teacherExamId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "15.4 Update Exam",
@@ -2767,7 +3358,18 @@
                 "{{teacherExamId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "15.5 Get Exam Attempts Roster",
@@ -2795,7 +3397,19 @@
                 "attempts"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2880,7 +3494,18 @@
                 "essay"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2914,7 +3539,19 @@
                 "grade-sheet"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -2947,7 +3584,19 @@
                 "summary"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "18.2 Get Group Financial Roster",
@@ -2975,7 +3624,18 @@
                 "{{teacherGroupId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "18.3 Record Student Payment Receipt",
@@ -3059,7 +3719,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "18.5 Delete / Revert Payment Receipt",
@@ -3087,7 +3758,18 @@
                 "{{paymentId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -3129,7 +3811,18 @@
                 "broadcast"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "19.2 Dispatch Broadcast to All My Students",
@@ -3165,7 +3858,18 @@
                 "broadcast"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -3197,7 +3901,19 @@
                 "profile"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.expect(pm.response.json().data).to.be.an('object');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "20.2 Update Teacher Settings",
@@ -3233,7 +3949,18 @@
                 "settings"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
