@@ -6,7 +6,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 // 1. General Auth Rate Limiter (Login & Register)
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 15 : 10000, // 15 in prod, 10,000 in dev/test
+  max: isProduction ? (parseInt(process.env.RATE_LIMIT_AUTH_MAX) || 100) : 10000, // 100 in prod, 10,000 in dev/test
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -17,7 +17,7 @@ export const authLimiter = rateLimit({
 // 2. Forgot Password Request Limiter (Prevents OTP/Email spam)
 export const otpRequestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 3 : 5000, // 3 in prod, 5,000 in dev/test
+  max: isProduction ? (parseInt(process.env.RATE_LIMIT_OTP_REQ_MAX) || 10) : 5000, // 10 in prod, 5,000 in dev/test
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -28,7 +28,7 @@ export const otpRequestLimiter = rateLimit({
 // 3. OTP Verification Limiter (Prevents OTP brute force)
 export const otpVerifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isProduction ? 5 : 5000, // 5 in prod, 5,000 in dev/test
+  max: isProduction ? (parseInt(process.env.RATE_LIMIT_OTP_VERIFY_MAX) || 20) : 5000, // 20 in prod, 5,000 in dev/test
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -39,7 +39,7 @@ export const otpVerifyLimiter = rateLimit({
 // 4. Group Code Joining Limiter (Prevents invite code scanning)
 export const groupJoinLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: isProduction ? 10 : 5000, // 10 in prod, 5,000 in dev/test
+  max: isProduction ? (parseInt(process.env.RATE_LIMIT_GROUP_JOIN_MAX) || 60) : 5000, // 60 in prod, 5,000 in dev/test
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res, next) => {
