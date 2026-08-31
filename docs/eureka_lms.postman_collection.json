@@ -262,7 +262,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"أحمد محمود علي\",\n  \"email\": \"student.journey@eureka-test.com\",\n  \"phone\": \"01012345678\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"STUDENT\"\n}"
+              "raw": "{\n  \"fullName\": \"أحمد محمود علي\",\n  \"email\": \"student.journey@eureka-test.com\",\n  \"phone\": \"01012345678\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"STUDENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -335,7 +340,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"otpCode\": \"123456\"\n}"
+              "raw": "{\n  \"otpCode\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/verify-email",
@@ -387,7 +397,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -431,7 +446,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/refresh",
@@ -495,7 +515,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\"\n}"
+              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/forgot-password",
@@ -546,7 +571,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"otpCode\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"otpCode\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/verify-otp",
@@ -572,7 +602,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
+              "raw": "{\n  \"email\": \"student.journey@eureka-test.com\",\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/reset-password",
@@ -623,7 +658,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"الأستاذ طارق منصور\",\n  \"email\": \"teacher.journey@eureka-test.com\",\n  \"phone\": \"01098765432\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"TEACHER\"\n}"
+              "raw": "{\n  \"fullName\": \"الأستاذ طارق منصور\",\n  \"email\": \"teacher.journey@eureka-test.com\",\n  \"phone\": \"01098765432\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"role\": \"TEACHER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -702,7 +742,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/account",
@@ -945,7 +990,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"subjectIds\": [\"{{subjectId}}\"]\n}"
+              "raw": "{\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"subjectIds\": [\"{{subjectId}}\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/students/onboarding",
@@ -1030,7 +1080,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"appLanguage\": \"AR\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true,\n  \"notifyMessages\": true\n}"
+              "raw": "{\n  \"appLanguage\": \"AR\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true,\n  \"notifyMessages\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/students/settings",
@@ -1177,7 +1232,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"groupCode\": \"{{groupCode}}\"\n}"
+              "raw": "{\n  \"groupCode\": \"{{groupCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/groups/join-by-code",
@@ -1433,7 +1493,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"timeSpentSeconds\": 20\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"ينص قانون نيوتن الأول على أن الجسم الساكن يبقى ساكنا والمتحرك يستمر في حركته ما لم تؤثر عليه قوة خارجية\",\n      \"timeSpentSeconds\": 45\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 32,\n    \"fastestQuestionSec\": 20,\n    \"slowestQuestionSec\": 45\n  }\n}"
+              "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"timeSpentSeconds\": 20\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"ينص قانون نيوتن الأول على أن الجسم الساكن يبقى ساكنا والمتحرك يستمر في حركته ما لم تؤثر عليه قوة خارجية\",\n      \"timeSpentSeconds\": 45\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 32,\n    \"fastestQuestionSec\": 20,\n    \"slowestQuestionSec\": 45\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/homework/{{homeworkId}}/submit",
@@ -1648,7 +1713,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 25\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"تسقط جميع الأجسام في الفراغ بنفس التسارع الثابت لعدم وجود أي مقاومة للهواء تؤثر على حركتها\",\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 50\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 37,\n    \"fastestQuestionSec\": 25,\n    \"slowestQuestionSec\": 50\n  }\n}"
+              "raw": "{\n  \"answers\": [\n    {\n      \"questionOrder\": 1,\n      \"selectedOption\": 0,\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 25\n    },\n    {\n      \"questionOrder\": 2,\n      \"essayText\": \"تسقط جميع الأجسام في الفراغ بنفس التسارع الثابت لعدم وجود أي مقاومة للهواء تؤثر على حركتها\",\n      \"paletteStatus\": \"ANSWERED\",\n      \"timeSpentSeconds\": 50\n    }\n  ],\n  \"timeAnalytics\": {\n    \"averageTimePerQuestionSec\": 37,\n    \"fastestQuestionSec\": 25,\n    \"slowestQuestionSec\": 50\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/exams/{{examId}}/submit",
@@ -1741,7 +1811,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fcmToken\": \"fcm_device_sample_token_mobile_client_123456\"\n}"
+              "raw": "{\n  \"fcmToken\": \"fcm_device_sample_token_mobile_client_123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/notifications/fcm-token",
@@ -2055,7 +2130,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة - الصف الأول الثانوي\",\n  \"subjectId\": \"{{subjectId}}\",\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"scheduleDays\": \"الأحد,الثلاثاء\",\n  \"scheduleTime\": \"05:30 PM\",\n  \"maxCapacity\": 45,\n  \"defaultPrice\": 300,\n  \"description\": \"مجموعة الشرح النظري وحل المسائل الشاملة\"\n}"
+              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة - الصف الأول الثانوي\",\n  \"subjectId\": \"{{subjectId}}\",\n  \"stageId\": \"{{stageId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"scheduleDays\": \"الأحد,الثلاثاء\",\n  \"scheduleTime\": \"05:30 PM\",\n  \"maxCapacity\": 45,\n  \"defaultPrice\": 300,\n  \"description\": \"مجموعة الشرح النظري وحل المسائل الشاملة\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/groups",
@@ -2129,7 +2209,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة (معدلة)\",\n  \"defaultPrice\": 350,\n  \"maxCapacity\": 50\n}"
+              "raw": "{\n  \"name\": \"مجموعة الفيزياء المتقدمة (معدلة)\",\n  \"defaultPrice\": 350,\n  \"maxCapacity\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}",
@@ -2230,7 +2315,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"كريم مصطفى محمود\",\n  \"phone\": \"01020924779\",\n  \"email\": \"karim.mustafa@eureka-test.com\",\n  \"parentPhone\": \"01011223344\",\n  \"enrollmentPrice\": 300\n}"
+              "raw": "{\n  \"fullName\": \"كريم مصطفى محمود\",\n  \"phone\": \"01020924779\",\n  \"email\": \"karim.mustafa@eureka-test.com\",\n  \"parentPhone\": \"01011223344\",\n  \"enrollmentPrice\": 300\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students",
@@ -2346,7 +2436,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"enrollmentPrice\": 250\n}"
+              "raw": "{\n  \"enrollmentPrice\": 250\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}",
@@ -2413,7 +2508,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"حصة الفيزياء - الحركة التوافقية البسيطة\",\n  \"sessionDate\": \"2026-08-26T10:00:00.000Z\"\n}"
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"حصة الفيزياء - الحركة التوافقية البسيطة\",\n  \"sessionDate\": \"2026-08-26T10:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/attendance/sessions",
@@ -2494,7 +2594,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"qrToken\": \"{{sessionQrToken}}\",\n  \"sessionCode\": \"{{sessionCode}}\"\n}"
+              "raw": "{\n  \"qrToken\": \"{{sessionQrToken}}\",\n  \"sessionCode\": \"{{sessionCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/students/attendance/record",
@@ -2542,7 +2647,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"attendances\": [\n    {\n      \"studentId\": \"{{teacherStudentId}}\",\n      \"status\": \"PRESENT\"\n    }\n  ]\n}"
+              "raw": "{\n  \"attendances\": [\n    {\n      \"studentId\": \"{{teacherStudentId}}\",\n      \"status\": \"PRESENT\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/manual",
@@ -2739,7 +2849,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nameAr\": \"الكيمياء الحيوية المتقدمة\",\n  \"nameEn\": \"Advanced Biochemistry\"\n}"
+              "raw": "{\n  \"nameAr\": \"الكيمياء الحيوية المتقدمة\",\n  \"nameEn\": \"Advanced Biochemistry\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/subjects",
@@ -2826,7 +2941,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"title\": \"الوحدة الأولى: التركيب الذري والروابط الكيميائية\",\n  \"order\": 1\n}"
+              "raw": "{\n  \"subjectId\": \"{{subjectId}}\",\n  \"gradeLevelId\": \"{{gradeLevelId}}\",\n  \"title\": \"الوحدة الأولى: التركيب الذري والروابط الكيميائية\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/units",
@@ -2862,7 +2982,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"الوحدة الأولى: التركيب الذري (محدثة)\",\n  \"order\": 1\n}"
+              "raw": "{\n  \"title\": \"الوحدة الأولى: التركيب الذري (محدثة)\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/units/{{unitId}}",
@@ -2924,7 +3049,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم\",\n  \"description\": \"شرح مفصل لمستويات الطاقة الرئيسية والفرعية\",\n  \"order\": 1\n}"
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم\",\n  \"description\": \"شرح مفصل لمستويات الطاقة الرئيسية والفرعية\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/lessons",
@@ -2960,7 +3090,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم الأربعة\"\n}"
+              "raw": "{\n  \"title\": \"الدرس الأول: مستويات الطاقة وأعداد الكم الأربعة\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/lessons/{{lessonId}}",
@@ -3028,7 +3163,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"واجب الكيمياء - أعداد الكم\",\n  \"unitName\": \"الوحدة الأولى\",\n  \"durationMinutes\": 30,\n  \"dueDate\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"ما هو عدد الكم الذي يحدد شكل السحابة الإلكترونية؟\",\n      \"options\": [\"الرئيسي\", \"الثانوي\", \"المغناطيسي\", \"المغزلي\"],\n      \"correctOptionIndex\": 1,\n      \"score\": 2,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"اشرح قاعدة هوند في توزيع الإلكترونات داخل الأوربيتالات بالتفصيل\",\n      \"modelAnswer\": \"لا يحدث ازدواج بين إلكترونين في مستوى فرعي معين إلا بعد أن تشغل أوربيتالاته فرادى أولاً\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"واجب الكيمياء - أعداد الكم\",\n  \"unitName\": \"الوحدة الأولى\",\n  \"durationMinutes\": 30,\n  \"dueDate\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"ما هو عدد الكم الذي يحدد شكل السحابة الإلكترونية؟\",\n      \"options\": [\"الرئيسي\", \"الثانوي\", \"المغناطيسي\", \"المغزلي\"],\n      \"correctOptionIndex\": 1,\n      \"score\": 2,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"اشرح قاعدة هوند في توزيع الإلكترونات داخل الأوربيتالات بالتفصيل\",\n      \"modelAnswer\": \"لا يحدث ازدواج بين إلكترونين في مستوى فرعي معين إلا بعد أن تشغل أوربيتالاته فرادى أولاً\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/homework",
@@ -3140,7 +3280,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"واجب الكيمياء المحدث - أعداد الكم وقاعدة هوند\",\n  \"durationMinutes\": 45\n}"
+              "raw": "{\n  \"title\": \"واجب الكيمياء المحدث - أعداد الكم وقاعدة هوند\",\n  \"durationMinutes\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}",
@@ -3248,7 +3393,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"امتحان الكيمياء الشامل الشهري\",\n  \"durationMinutes\": 45,\n  \"passingScorePercentage\": 50,\n  \"startTime\": \"2026-01-01T00:00:00.000Z\",\n  \"endTime\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"عدد أوربيتالات المستوى الفرعي d يساوي:\",\n      \"options\": [\"1\", \"3\", \"5\", \"7\"],\n      \"correctOptionIndex\": 2,\n      \"score\": 5,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"قارن بين طيف الانبعاث الخطي وطيف الامتصاص مع ذكر مثال\",\n      \"modelAnswer\": \"طيف الانبعاث خطوط ملونة مضيئة تفصل بينها مسافات معتمة، أما طيف الامتصاص خطوط سوداء معتمة في خلفية مضيئة\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}"
+              "raw": "{\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"امتحان الكيمياء الشامل الشهري\",\n  \"durationMinutes\": 45,\n  \"passingScorePercentage\": 50,\n  \"startTime\": \"2026-01-01T00:00:00.000Z\",\n  \"endTime\": \"2026-12-31T23:59:59.000Z\",\n  \"questions\": [\n    {\n      \"type\": \"MCQ\",\n      \"questionText\": \"عدد أوربيتالات المستوى الفرعي d يساوي:\",\n      \"options\": [\"1\", \"3\", \"5\", \"7\"],\n      \"correctOptionIndex\": 2,\n      \"score\": 5,\n      \"order\": 1\n    },\n    {\n      \"type\": \"ESSAY\",\n      \"questionText\": \"قارن بين طيف الانبعاث الخطي وطيف الامتصاص مع ذكر مثال\",\n      \"modelAnswer\": \"طيف الانبعاث خطوط ملونة مضيئة تفصل بينها مسافات معتمة، أما طيف الامتصاص خطوط سوداء معتمة في خلفية مضيئة\",\n      \"score\": 5,\n      \"order\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/exams",
@@ -3360,7 +3510,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"امتحان الكيمياء الشامل المعدل\",\n  \"durationMinutes\": 60\n}"
+              "raw": "{\n  \"title\": \"امتحان الكيمياء الشامل المعدل\",\n  \"durationMinutes\": 60\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}",
@@ -3496,7 +3651,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"submissionType\": \"EXAM\",\n  \"submissionId\": \"{{essaySubmissionId}}\",\n  \"questionId\": \"{{essayQuestionId}}\",\n  \"scoreAwarded\": 5,\n  \"feedback\": \"إجابة نموذجية وممتازة!\"\n}"
+              "raw": "{\n  \"submissionType\": \"EXAM\",\n  \"submissionId\": \"{{essaySubmissionId}}\",\n  \"questionId\": \"{{essayQuestionId}}\",\n  \"scoreAwarded\": 5,\n  \"feedback\": \"إجابة نموذجية وممتازة!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/grading/essay",
@@ -3688,7 +3848,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": \"{{teacherStudentId}}\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"amount\": 350,\n  \"paymentMethod\": \"INSTAPAY\",\n  \"notes\": \"تم التحويل بنجاح\"\n}"
+              "raw": "{\n  \"studentId\": \"{{teacherStudentId}}\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"amount\": 350,\n  \"paymentMethod\": \"INSTAPAY\",\n  \"notes\": \"تم التحويل بنجاح\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/finance/payments",
@@ -3814,7 +3979,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"targetType\": \"GROUP\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"تنبيه هام بخصوص موعد الحصة القادمة\",\n  \"body\": \"يرجى العلم بأنه تم تأجيل موعد حصة المراجعة نصف ساعة.\"\n}"
+              "raw": "{\n  \"targetType\": \"GROUP\",\n  \"groupId\": \"{{teacherGroupId}}\",\n  \"title\": \"تنبيه هام بخصوص موعد الحصة القادمة\",\n  \"body\": \"يرجى العلم بأنه تم تأجيل موعد حصة المراجعة نصف ساعة.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/broadcast",
@@ -3861,7 +4031,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"targetType\": \"ALL_MY_STUDENTS\",\n  \"title\": \"تهنئة بالعام الدراسي الجديد\",\n  \"body\": \"نتمنى لجميع طلابنا الأعزاء عاماً دراسياً مليئاً بالتفوق والنجاح!\"\n}"
+              "raw": "{\n  \"targetType\": \"ALL_MY_STUDENTS\",\n  \"title\": \"تهنئة بالعام الدراسي الجديد\",\n  \"body\": \"نتمنى لجميع طلابنا الأعزاء عاماً دراسياً مليئاً بالتفوق والنجاح!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/broadcast",
@@ -3952,7 +4127,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"appLanguage\": \"ar\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true\n}"
+              "raw": "{\n  \"appLanguage\": \"ar\",\n  \"darkMode\": true,\n  \"notifyExams\": true,\n  \"notifyHomework\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/teacher/settings",
@@ -4051,7 +4231,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"groupId\": \"{{groupId}}\"\n}"
+              "raw": "{\n  \"groupId\": \"{{groupId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/chat/conversations",
@@ -4137,7 +4322,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"message\": \"Hello teacher, I have a question regarding homework #1.\"\n}"
+              "raw": "{\n  \"message\": \"Hello teacher, I have a question regarding homework #1.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages",
@@ -4220,7 +4410,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"admin@eureka.com\",\n  \"password\": \"Admin@123456\"\n}"
+              "raw": "{\n  \"identifier\": \"admin@eureka.com\",\n  \"password\": \"Admin@123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -4416,7 +4611,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin account verification\"\n}"
+              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin account verification\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/status",
@@ -4459,7 +4659,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"role\": \"STUDENT\",\n  \"reason\": \"Role confirmation\"\n}"
+              "raw": "{\n  \"role\": \"STUDENT\",\n  \"reason\": \"Role confirmation\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/role",
@@ -4537,7 +4742,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"newPassword\": \"NewAdminSetPassword@123\",\n  \"reason\": \"User requested manual reset\"\n}"
+              "raw": "{\n  \"newPassword\": \"NewAdminSetPassword@123\",\n  \"reason\": \"User requested manual reset\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/reset-password",
@@ -4724,7 +4934,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin group toggle\"\n}"
+              "raw": "{\n  \"isActive\": true,\n  \"reason\": \"Admin group toggle\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/groups/{{adminGroupId}}/toggle",
@@ -5011,7 +5226,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"targetAudience\": \"ALL\",\n  \"title\": \"إعلان هام من إدارة المنصة\",\n  \"message\": \"تم تحديث المنصة وتحسين سرعة استجابة الخوادم.\",\n  \"type\": \"ANNOUNCEMENT\"\n}"
+              "raw": "{\n  \"targetAudience\": \"ALL\",\n  \"title\": \"إعلان هام من إدارة المنصة\",\n  \"message\": \"تم تحديث المنصة وتحسين سرعة استجابة الخوادم.\",\n  \"type\": \"ANNOUNCEMENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/broadcast",
@@ -5085,7 +5305,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"maintenanceMode\": false,\n  \"registrationOpen\": true,\n  \"supportEmail\": \"support@eureka-lms.com\",\n  \"supportPhone\": \"+201000000000\"\n}"
+              "raw": "{\n  \"maintenanceMode\": false,\n  \"registrationOpen\": true,\n  \"supportEmail\": \"support@eureka-lms.com\",\n  \"supportPhone\": \"+201000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/admin/settings",
