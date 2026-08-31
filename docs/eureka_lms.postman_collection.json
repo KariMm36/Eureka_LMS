@@ -6,6 +6,16 @@
   },
   "variable": [
     {
+      "key": "liveUrl",
+      "value": "https://eureka.growfet.com",
+      "type": "string"
+    },
+    {
+      "key": "liveBaseUrl",
+      "value": "https://eureka.growfet.com/api/v1",
+      "type": "string"
+    },
+    {
       "key": "baseUrl",
       "value": "http://localhost:3000/api/v1",
       "type": "string"
@@ -188,6 +198,11 @@
     {
       "key": "adminStudentId",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "localBaseUrl",
+      "value": "http://localhost:3000/api/v1",
       "type": "string"
     }
   ],

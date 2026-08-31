@@ -13,6 +13,10 @@ const swaggerOptions = {
     },
     servers: [
       {
+        url: 'https://eureka.growfet.com/api/v1',
+        description: 'Production Live Server (eureka.growfet.com)',
+      },
+      {
         url: 'http://localhost:3000/api/v1',
         description: 'Local Development Server',
       },
