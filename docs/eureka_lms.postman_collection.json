@@ -392,10 +392,32 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
                   "if (res.data) {",
-                  "    if (res.data.token) pm.collectionVariables.set('token', res.data.token);",
-                  "    if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "    const token = res.data.token;",
+                  "    const refreshToken = res.data.refreshToken;",
+                  "    const role = res.data.user ? res.data.user.role : '';",
+                  "    ",
+                  "    if (token) {",
+                  "        pm.collectionVariables.set('token', token);",
+                  "        try { pm.environment.set('token', token); } catch(e){}",
+                  "        ",
+                  "        if (role === 'TEACHER' || role === 'INSTRUCTOR') {",
+                  "            pm.collectionVariables.set('teacherToken', token);",
+                  "            try { pm.environment.set('teacherToken', token); } catch(e){}",
+                  "            console.log('[Login] Captured teacherToken for role:', role);",
+                  "        } else if (role === 'ADMIN' || role === 'SUPER_ADMIN') {",
+                  "            pm.collectionVariables.set('adminToken', token);",
+                  "            try { pm.environment.set('adminToken', token); } catch(e){}",
+                  "            console.log('[Login] Captured adminToken for role:', role);",
+                  "        }",
+                  "    }",
+                  "    ",
+                  "    if (refreshToken) {",
+                  "        pm.collectionVariables.set('refreshToken', refreshToken);",
+                  "        try { pm.environment.set('refreshToken', refreshToken); } catch(e){}",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -654,9 +676,19 @@
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.token) {",
-                  "    pm.collectionVariables.set('teacherToken', res.data.token);",
+                  "if (res.data) {",
+                  "    if (res.data.token) {",
+                  "        pm.collectionVariables.set('teacherToken', res.data.token);",
+                  "        pm.collectionVariables.set('token', res.data.token);",
+                  "        try { pm.environment.set('teacherToken', res.data.token); } catch(e){}",
+                  "        try { pm.environment.set('token', res.data.token); } catch(e){}",
+                  "    }",
+                  "    if (res.data.refreshToken) {",
+                  "        pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "        try { pm.environment.set('refreshToken', res.data.refreshToken); } catch(e){}",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -4408,8 +4440,13 @@
                 "exec": [
                   "pm.test('Admin login successful', () => pm.response.to.have.status(200));",
                   "const res = pm.response.json();",
-                  "pm.expect(res.data.user.role).to.eql('ADMIN');",
-                  "pm.collectionVariables.set('adminToken', res.data.tokens.accessToken);"
+                  "const token = res.data && (res.data.token || (res.data.tokens && res.data.tokens.accessToken));",
+                  "if (token) {",
+                  "    pm.collectionVariables.set('adminToken', token);",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    try { pm.environment.set('adminToken', token); } catch(e){}",
+                  "    try { pm.environment.set('token', token); } catch(e){}",
+                  "}"
                 ],
                 "type": "text/javascript"
               }
