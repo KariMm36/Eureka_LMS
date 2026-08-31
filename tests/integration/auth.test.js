@@ -265,6 +265,9 @@ describe('Auth Module Integration Tests', () => {
 
       expect(loginRes.status).toBe(200);
       expect(loginRes.body.data.token).toBeDefined();
+      // Capture the fresh token — accessToken was issued before password reset
+      accessToken = loginRes.body.data.token;
+      refreshToken = loginRes.body.data.refreshToken;
     });
   });
 
@@ -283,21 +286,8 @@ describe('Auth Module Integration Tests', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should logout and invalidate refresh token', async () => {
-      const logoutRes = await request(app)
-        .post('/api/v1/auth/logout')
-        .set('Authorization', `Bearer ${accessToken}`);
-
-      expect(logoutRes.status).toBe(200);
-
-      // Refresh token is now rejected
-      const refreshRes = await request(app)
-        .post('/api/v1/auth/refresh')
-        .send({ refreshToken });
-
-      expect(refreshRes.status).toBe(401);
-    });
-
+    // Delete account BEFORE logout — after logout the tokenVersion is incremented
+    // and the same access token would be rejected with 401.
     it('should delete authenticated user account (DELETE /api/v1/auth/account)', async () => {
       const deleteRes = await request(app)
         .delete('/api/v1/auth/account')
@@ -312,6 +302,46 @@ describe('Auth Module Integration Tests', () => {
         where: { id: studentUserId },
       });
       expect(userInDb).toBeNull();
+    });
+
+    it('should logout and invalidate refresh token', async () => {
+      // Re-register a fresh user just for this logout test since the previous
+      // account was deleted above.
+      const freshTimestamp = Date.now();
+      const freshData = {
+        fullName: 'طالب اختبار الخروج',
+        email: `auth.logout.${freshTimestamp}@eureka-test.com`,
+        phone: `011${Math.floor(10000000 + Math.random() * 90000000)}`,
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+        role: 'STUDENT',
+      };
+
+      const regRes = await request(app).post('/api/v1/auth/register').send(freshData);
+      expect(regRes.status).toBe(201);
+
+      const freshToken = regRes.body.data.token;
+      const freshRefreshToken = regRes.body.data.refreshToken;
+      const freshUserId = regRes.body.data.user.id;
+      helper.createdUserIds.add(freshUserId);
+
+      // Logout
+      const logoutRes = await request(app)
+        .post('/api/v1/auth/logout')
+        .set('Authorization', `Bearer ${freshToken}`);
+      expect(logoutRes.status).toBe(200);
+
+      // Refresh token must now be rejected (tokenVersion incremented)
+      const refreshRes = await request(app)
+        .post('/api/v1/auth/refresh')
+        .send({ refreshToken: freshRefreshToken });
+      expect(refreshRes.status).toBe(401);
+
+      // Old access token must also be rejected
+      const meRes = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${freshToken}`);
+      expect(meRes.status).toBe(401);
     });
   });
 });
