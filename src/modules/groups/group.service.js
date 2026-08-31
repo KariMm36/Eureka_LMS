@@ -151,7 +151,7 @@ export class GroupService {
       }
 
       // Lock group row for update to serialize concurrent seat allocations
-      await tx.$queryRaw`SELECT id FROM groups WHERE id = ${group.id} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM \`groups\` WHERE id = ${group.id} FOR UPDATE`;
 
       // 1. Check existing enrollment first
       const existingEnrollment = await tx.groupEnrollment.findUnique({
@@ -170,7 +170,7 @@ export class GroupService {
       // 2. Perform a locking read on active enrollments to get the latest committed count
       const activeCountRaw = await tx.$queryRaw`
         SELECT COUNT(*) AS activeCount 
-        FROM group_enrollments 
+        FROM \`group_enrollments\` 
         WHERE groupId = ${group.id} AND status = 'ACTIVE' 
         FOR UPDATE
       `;
@@ -254,7 +254,7 @@ export class GroupService {
       }
 
       // Lock group row for update to serialize concurrent seat allocations
-      await tx.$queryRaw`SELECT id FROM groups WHERE id = ${group.id} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM \`groups\` WHERE id = ${group.id} FOR UPDATE`;
 
       // 1. Check existing enrollment first
       const existingEnrollment = await tx.groupEnrollment.findUnique({
@@ -273,7 +273,7 @@ export class GroupService {
       // 2. Perform a locking read on active enrollments to get the latest committed count
       const activeCountRaw = await tx.$queryRaw`
         SELECT COUNT(*) AS activeCount 
-        FROM group_enrollments 
+        FROM \`group_enrollments\` 
         WHERE groupId = ${group.id} AND status = 'ACTIVE' 
         FOR UPDATE
       `;

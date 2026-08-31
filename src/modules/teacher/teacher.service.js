@@ -87,8 +87,8 @@ export class TeacherService {
       groupIds.length > 0
         ? prisma.$queryRaw`
             SELECT COALESCE(SUM(CASE WHEN ge.enrollmentPrice > 0 THEN ge.enrollmentPrice ELSE g.defaultPrice END), 0) AS totalExpected
-            FROM group_enrollments ge
-            JOIN groups g ON ge.groupId = g.id
+            FROM \`group_enrollments\` ge
+            JOIN \`groups\` g ON ge.groupId = g.id
             WHERE ge.groupId IN (${Prisma.join(groupIds)}) AND ge.status = 'ACTIVE'
           `
         : Promise.resolve([{ totalExpected: 0 }]),
