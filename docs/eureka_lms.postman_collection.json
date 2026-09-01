@@ -697,7 +697,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/subjects?gradeLevelId={{gradeLevelId}}",
+                  "raw": "{{baseUrl}}/academic/subjects?gradeLevelId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -708,7 +708,9 @@
                   "query": [
                     {
                       "key": "gradeLevelId",
-                      "value": "{{gradeLevelId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Grade Level UUID identifier"
                     }
                   ]
                 }
@@ -746,20 +748,29 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/subjects/{{subjectId}}/units?gradeLevelId={{gradeLevelId}}",
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId/units?gradeLevelId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "academic",
                     "subjects",
-                    "{{subjectId}}",
+                    ":subjectId",
                     "units"
+                  ],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": "",
+                      "description": "Subject UUID identifier"
+                    }
                   ],
                   "query": [
                     {
                       "key": "gradeLevelId",
-                      "value": "{{gradeLevelId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Grade Level UUID identifier"
                     }
                   ]
                 }
@@ -780,14 +791,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/lessons/{{lessonId}}",
+                  "raw": "{{baseUrl}}/academic/lessons/:lessonId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "academic",
                     "lessons",
-                    "{{lessonId}}"
+                    ":lessonId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "lessonId",
+                      "value": "",
+                      "description": "Lesson UUID identifier"
+                    }
                   ]
                 }
               },
@@ -919,24 +937,35 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages?page=1&limit=20",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/messages?page=1&limit=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ],
                   "query": [
                     {
                       "key": "page",
-                      "value": "1"
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
                     },
                     {
                       "key": "limit",
-                      "value": "20"
+                      "value": "20",
+                      "disabled": false,
+                      "description": "Number of items per page"
                     }
                   ]
                 }
@@ -977,15 +1006,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/messages",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ]
                 }
               }
@@ -1012,15 +1048,22 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/read",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "read"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ]
                 }
               }
@@ -1209,7 +1252,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/groups/search?page=1&limit=10&subjectId={{subjectId}}",
+                  "raw": "{{baseUrl}}/groups/search?page=1&limit=10&subjectId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -1220,15 +1263,21 @@
                   "query": [
                     {
                       "key": "page",
-                      "value": "1"
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
                     },
                     {
                       "key": "limit",
-                      "value": "10"
+                      "value": "10",
+                      "disabled": false,
+                      "description": "Number of items per page"
                     },
                     {
                       "key": "subjectId",
-                      "value": "{{subjectId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Subject UUID identifier"
                     }
                   ]
                 }
@@ -1249,14 +1298,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/groups/preview/{{groupCode}}",
+                  "raw": "{{baseUrl}}/groups/preview/:groupCode",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "groups",
                     "preview",
-                    "{{groupCode}}"
+                    ":groupCode"
+                  ],
+                  "variable": [
+                    {
+                      "key": "groupCode",
+                      "value": "",
+                      "description": "6-character alphanumeric Group Invite Code"
+                    }
                   ]
                 }
               },
@@ -1378,13 +1434,20 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/groups/{{groupId}}",
+                  "raw": "{{baseUrl}}/groups/:groupId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "groups",
-                    "{{groupId}}"
+                    ":groupId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "groupId",
+                      "value": "",
+                      "description": "Study Group UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1490,7 +1553,9 @@
                   "query": [
                     {
                       "key": "status",
-                      "value": "pending"
+                      "value": "pending",
+                      "disabled": false,
+                      "description": "Status filter (e.g. ACTIVE, PENDING, SUSPENDED, COMPLETED)"
                     }
                   ]
                 }
@@ -1511,13 +1576,20 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/homework/{{homeworkId}}",
+                  "raw": "{{baseUrl}}/homework/:homeworkId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "homework",
-                    "{{homeworkId}}"
+                    ":homeworkId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "homeworkId",
+                      "value": "",
+                      "description": "Homework Assignment UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1564,14 +1636,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/homework/{{homeworkId}}/submit",
+                  "raw": "{{baseUrl}}/homework/:homeworkId/submit",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "homework",
-                    "{{homeworkId}}",
+                    ":homeworkId",
                     "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "homeworkId",
+                      "value": "",
+                      "description": "Homework Assignment UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1602,14 +1681,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/homework/{{homeworkId}}/result",
+                  "raw": "{{baseUrl}}/homework/:homeworkId/result",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "homework",
-                    "{{homeworkId}}",
+                    ":homeworkId",
                     "result"
+                  ],
+                  "variable": [
+                    {
+                      "key": "homeworkId",
+                      "value": "",
+                      "description": "Homework Assignment UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1671,7 +1757,9 @@
                   "query": [
                     {
                       "key": "tab",
-                      "value": "all"
+                      "value": "all",
+                      "disabled": false,
+                      "description": "tab filter"
                     }
                   ]
                 }
@@ -1692,14 +1780,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/exams/{{examId}}/instructions",
+                  "raw": "{{baseUrl}}/exams/:examId/instructions",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "exams",
-                    "{{examId}}",
+                    ":examId",
                     "instructions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "examId",
+                      "value": "",
+                      "description": "Exam UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1730,14 +1825,21 @@
                 },
                 "method": "POST",
                 "url": {
-                  "raw": "{{baseUrl}}/exams/{{examId}}/start",
+                  "raw": "{{baseUrl}}/exams/:examId/start",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "exams",
-                    "{{examId}}",
+                    ":examId",
                     "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "examId",
+                      "value": "",
+                      "description": "Exam UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1784,14 +1886,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/exams/{{examId}}/submit",
+                  "raw": "{{baseUrl}}/exams/:examId/submit",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "exams",
-                    "{{examId}}",
+                    ":examId",
                     "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "examId",
+                      "value": "",
+                      "description": "Exam UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1822,14 +1931,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/exams/{{examId}}/result",
+                  "raw": "{{baseUrl}}/exams/:examId/result",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "exams",
-                    "{{examId}}",
+                    ":examId",
                     "result"
+                  ],
+                  "variable": [
+                    {
+                      "key": "examId",
+                      "value": "",
+                      "description": "Exam UUID identifier"
+                    }
                   ]
                 }
               },
@@ -1943,7 +2059,9 @@
                   "query": [
                     {
                       "key": "filter",
-                      "value": "all"
+                      "value": "all",
+                      "disabled": false,
+                      "description": "filter filter"
                     }
                   ]
                 }
@@ -1964,13 +2082,20 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/notifications/{{notificationId}}",
+                  "raw": "{{baseUrl}}/notifications/:notificationId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "notifications",
-                    "{{notificationId}}"
+                    ":notificationId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notificationId",
+                      "value": "",
+                      "description": "Notification UUID identifier"
+                    }
                   ]
                 }
               },
@@ -2731,7 +2856,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/subjects?gradeLevelId={{gradeLevelId}}",
+                  "raw": "{{baseUrl}}/academic/subjects?gradeLevelId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -2742,7 +2867,9 @@
                   "query": [
                     {
                       "key": "gradeLevelId",
-                      "value": "{{gradeLevelId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Grade Level UUID identifier"
                     }
                   ]
                 }
@@ -2780,20 +2907,29 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/subjects/{{subjectId}}/units?gradeLevelId={{gradeLevelId}}",
+                  "raw": "{{baseUrl}}/academic/subjects/:subjectId/units?gradeLevelId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "academic",
                     "subjects",
-                    "{{subjectId}}",
+                    ":subjectId",
                     "units"
+                  ],
+                  "variable": [
+                    {
+                      "key": "subjectId",
+                      "value": "",
+                      "description": "Subject UUID identifier"
+                    }
                   ],
                   "query": [
                     {
                       "key": "gradeLevelId",
-                      "value": "{{gradeLevelId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Grade Level UUID identifier"
                     }
                   ]
                 }
@@ -2814,14 +2950,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/academic/lessons/{{lessonId}}",
+                  "raw": "{{baseUrl}}/academic/lessons/:lessonId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "academic",
                     "lessons",
-                    "{{lessonId}}"
+                    ":lessonId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "lessonId",
+                      "value": "",
+                      "description": "Lesson UUID identifier"
+                    }
                   ]
                 }
               },
@@ -2953,24 +3096,35 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages?page=1&limit=20",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/messages?page=1&limit=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ],
                   "query": [
                     {
                       "key": "page",
-                      "value": "1"
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
                     },
                     {
                       "key": "limit",
-                      "value": "20"
+                      "value": "20",
+                      "disabled": false,
+                      "description": "Number of items per page"
                     }
                   ]
                 }
@@ -3011,15 +3165,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/messages",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "messages"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ]
                 }
               }
@@ -3046,15 +3207,22 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/chat/conversations/{{conversationId}}/read",
+                  "raw": "{{baseUrl}}/chat/conversations/:conversationId/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "chat",
                     "conversations",
-                    "{{conversationId}}",
+                    ":conversationId",
                     "read"
+                  ],
+                  "variable": [
+                    {
+                      "key": "conversationId",
+                      "value": "",
+                      "description": "Chat Conversation UUID identifier"
+                    }
                   ]
                 }
               }
@@ -3219,14 +3387,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}",
+                  "raw": "{{baseUrl}}/teacher/groups/:teacherGroupId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "groups",
-                    "{{teacherGroupId}}"
+                    ":teacherGroupId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               },
@@ -3272,14 +3447,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}",
+                  "raw": "{{baseUrl}}/teacher/groups/:teacherGroupId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "groups",
-                    "{{teacherGroupId}}"
+                    ":teacherGroupId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               },
@@ -3310,15 +3492,22 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/qr-code",
+                  "raw": "{{baseUrl}}/teacher/groups/:teacherGroupId/qr-code",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "groups",
-                    "{{teacherGroupId}}",
+                    ":teacherGroupId",
                     "qr-code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               },
@@ -3378,15 +3567,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students",
+                  "raw": "{{baseUrl}}/teacher/groups/:teacherGroupId/students",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "groups",
-                    "{{teacherGroupId}}",
+                    ":teacherGroupId",
                     "students"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               }
@@ -3406,15 +3602,22 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/groups/{{teacherGroupId}}/students",
+                  "raw": "{{baseUrl}}/teacher/groups/:teacherGroupId/students",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "groups",
-                    "{{teacherGroupId}}",
+                    ":teacherGroupId",
                     "students"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               },
@@ -3446,14 +3649,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}",
+                  "raw": "{{baseUrl}}/teacher/students/:teacherStudentId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "students",
-                    "{{teacherStudentId}}"
+                    ":teacherStudentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherStudentId",
+                      "value": "",
+                      "description": "teacherStudentId parameter"
+                    }
                   ]
                 }
               },
@@ -3499,14 +3709,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/students/{{teacherStudentId}}",
+                  "raw": "{{baseUrl}}/teacher/students/:teacherStudentId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "students",
-                    "{{teacherStudentId}}"
+                    ":teacherStudentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherStudentId",
+                      "value": "",
+                      "description": "teacherStudentId parameter"
+                    }
                   ]
                 }
               },
@@ -3613,7 +3830,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/qr",
+                  "raw": "{{baseUrl}}/teacher/attendance/sessions/:sessionId/qr",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -3621,8 +3838,15 @@
                     "teacher",
                     "attendance",
                     "sessions",
-                    "{{sessionId}}",
+                    ":sessionId",
                     "qr"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "",
+                      "description": "Attendance Class Session UUID identifier"
+                    }
                   ]
                 }
               }
@@ -3710,7 +3934,7 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}/manual",
+                  "raw": "{{baseUrl}}/teacher/attendance/sessions/:sessionId/manual",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -3718,8 +3942,15 @@
                     "teacher",
                     "attendance",
                     "sessions",
-                    "{{sessionId}}",
+                    ":sessionId",
                     "manual"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "",
+                      "description": "Attendance Class Session UUID identifier"
+                    }
                   ]
                 }
               },
@@ -3750,7 +3981,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/attendance/sessions/{{sessionId}}",
+                  "raw": "{{baseUrl}}/teacher/attendance/sessions/:sessionId",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -3758,7 +3989,14 @@
                     "teacher",
                     "attendance",
                     "sessions",
-                    "{{sessionId}}"
+                    ":sessionId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "sessionId",
+                      "value": "",
+                      "description": "Attendance Class Session UUID identifier"
+                    }
                   ]
                 }
               },
@@ -3840,11 +4078,15 @@
                   "query": [
                     {
                       "key": "month",
-                      "value": "8"
+                      "value": "8",
+                      "disabled": false,
+                      "description": "month filter"
                     },
                     {
                       "key": "year",
-                      "value": "2026"
+                      "value": "2026",
+                      "disabled": false,
+                      "description": "year filter"
                     }
                   ]
                 }
@@ -4045,14 +4287,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/units/{{unitId}}",
+                  "raw": "{{baseUrl}}/teacher/units/:unitId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "units",
-                    "{{unitId}}"
+                    ":unitId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "unitId",
+                      "value": "",
+                      "description": "Curriculum Unit UUID identifier"
+                    }
                   ]
                 }
               },
@@ -4153,14 +4402,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/lessons/{{lessonId}}",
+                  "raw": "{{baseUrl}}/teacher/lessons/:lessonId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "lessons",
-                    "{{lessonId}}"
+                    ":lessonId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "lessonId",
+                      "value": "",
+                      "description": "Lesson UUID identifier"
+                    }
                   ]
                 }
               },
@@ -4290,14 +4546,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}",
+                  "raw": "{{baseUrl}}/teacher/homework/:teacherHomeworkId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "homework",
-                    "{{teacherHomeworkId}}"
+                    ":teacherHomeworkId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherHomeworkId",
+                      "value": "",
+                      "description": "teacherHomeworkId parameter"
+                    }
                   ]
                 }
               },
@@ -4343,14 +4606,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}",
+                  "raw": "{{baseUrl}}/teacher/homework/:teacherHomeworkId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "homework",
-                    "{{teacherHomeworkId}}"
+                    ":teacherHomeworkId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherHomeworkId",
+                      "value": "",
+                      "description": "teacherHomeworkId parameter"
+                    }
                   ]
                 }
               },
@@ -4381,15 +4651,22 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/homework/{{teacherHomeworkId}}/submissions",
+                  "raw": "{{baseUrl}}/teacher/homework/:teacherHomeworkId/submissions",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "homework",
-                    "{{teacherHomeworkId}}",
+                    ":teacherHomeworkId",
                     "submissions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherHomeworkId",
+                      "value": "",
+                      "description": "teacherHomeworkId parameter"
+                    }
                   ]
                 }
               },
@@ -4520,14 +4797,21 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}",
+                  "raw": "{{baseUrl}}/teacher/exams/:teacherExamId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "exams",
-                    "{{teacherExamId}}"
+                    ":teacherExamId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherExamId",
+                      "value": "",
+                      "description": "teacherExamId parameter"
+                    }
                   ]
                 }
               },
@@ -4573,14 +4857,21 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}",
+                  "raw": "{{baseUrl}}/teacher/exams/:teacherExamId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "exams",
-                    "{{teacherExamId}}"
+                    ":teacherExamId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherExamId",
+                      "value": "",
+                      "description": "teacherExamId parameter"
+                    }
                   ]
                 }
               },
@@ -4611,15 +4902,22 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/attempts",
+                  "raw": "{{baseUrl}}/teacher/exams/:teacherExamId/attempts",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "exams",
-                    "{{teacherExamId}}",
+                    ":teacherExamId",
                     "attempts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherExamId",
+                      "value": "",
+                      "description": "teacherExamId parameter"
+                    }
                   ]
                 }
               },
@@ -4758,15 +5056,22 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/exams/{{teacherExamId}}/grade-sheet",
+                  "raw": "{{baseUrl}}/teacher/exams/:teacherExamId/grade-sheet",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "teacher",
                     "exams",
-                    "{{teacherExamId}}",
+                    ":teacherExamId",
                     "grade-sheet"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherExamId",
+                      "value": "",
+                      "description": "teacherExamId parameter"
+                    }
                   ]
                 }
               },
@@ -4843,7 +5148,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/finance/groups/{{teacherGroupId}}",
+                  "raw": "{{baseUrl}}/teacher/finance/groups/:teacherGroupId",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -4851,7 +5156,14 @@
                     "teacher",
                     "finance",
                     "groups",
-                    "{{teacherGroupId}}"
+                    ":teacherGroupId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "teacherGroupId",
+                      "value": "",
+                      "description": "teacherGroupId parameter"
+                    }
                   ]
                 }
               },
@@ -4938,7 +5250,7 @@
                 },
                 "method": "GET",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/finance/payments?groupId={{teacherGroupId}}",
+                  "raw": "{{baseUrl}}/teacher/finance/payments?groupId=",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -4950,7 +5262,9 @@
                   "query": [
                     {
                       "key": "groupId",
-                      "value": "{{teacherGroupId}}"
+                      "value": "",
+                      "disabled": false,
+                      "description": "Study Group UUID identifier"
                     }
                   ]
                 }
@@ -4982,7 +5296,7 @@
                 },
                 "method": "DELETE",
                 "url": {
-                  "raw": "{{baseUrl}}/teacher/finance/payments/{{paymentId}}",
+                  "raw": "{{baseUrl}}/teacher/finance/payments/:paymentId",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -4990,7 +5304,14 @@
                     "teacher",
                     "finance",
                     "payments",
-                    "{{paymentId}}"
+                    ":paymentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "paymentId",
+                      "value": "",
+                      "description": "Payment Record UUID identifier"
+                    }
                   ]
                 }
               },
@@ -5398,15 +5719,21 @@
                   "query": [
                     {
                       "key": "role",
-                      "value": "STUDENT"
+                      "value": "STUDENT",
+                      "disabled": false,
+                      "description": "User role filter (STUDENT, TEACHER, ADMIN)"
                     },
                     {
                       "key": "page",
-                      "value": "1"
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
                     },
                     {
                       "key": "limit",
-                      "value": "20"
+                      "value": "20",
+                      "disabled": false,
+                      "description": "Number of items per page"
                     }
                   ]
                 }
@@ -5468,14 +5795,21 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/admin/users/{{adminUserId}}",
+                  "raw": "{{baseUrl}}/admin/users/:adminUserId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "users",
-                    "{{adminUserId}}"
+                    ":adminUserId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminUserId",
+                      "value": "",
+                      "description": "adminUserId parameter"
+                    }
                   ]
                 }
               }
@@ -5515,15 +5849,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/status",
+                  "raw": "{{baseUrl}}/admin/users/:adminUserId/status",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "users",
-                    "{{adminUserId}}",
+                    ":adminUserId",
                     "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminUserId",
+                      "value": "",
+                      "description": "adminUserId parameter"
+                    }
                   ]
                 }
               }
@@ -5563,15 +5904,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/role",
+                  "raw": "{{baseUrl}}/admin/users/:adminUserId/role",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "users",
-                    "{{adminUserId}}",
+                    ":adminUserId",
                     "role"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminUserId",
+                      "value": "",
+                      "description": "adminUserId parameter"
+                    }
                   ]
                 }
               }
@@ -5598,15 +5946,22 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/force-logout",
+                  "raw": "{{baseUrl}}/admin/users/:adminUserId/force-logout",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "users",
-                    "{{adminUserId}}",
+                    ":adminUserId",
                     "force-logout"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminUserId",
+                      "value": "",
+                      "description": "adminUserId parameter"
+                    }
                   ]
                 }
               }
@@ -5646,15 +6001,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/admin/users/{{adminUserId}}/reset-password",
+                  "raw": "{{baseUrl}}/admin/users/:adminUserId/reset-password",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "users",
-                    "{{adminUserId}}",
+                    ":adminUserId",
                     "reset-password"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminUserId",
+                      "value": "",
+                      "description": "adminUserId parameter"
+                    }
                   ]
                 }
               }
@@ -5725,15 +6087,22 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/admin/teachers/{{adminTeacherId}}/stats",
+                  "raw": "{{baseUrl}}/admin/teachers/:adminTeacherId/stats",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "teachers",
-                    "{{adminTeacherId}}",
+                    ":adminTeacherId",
                     "stats"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminTeacherId",
+                      "value": "",
+                      "description": "adminTeacherId parameter"
+                    }
                   ]
                 }
               }
@@ -5803,14 +6172,21 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/admin/groups/{{adminGroupId}}",
+                  "raw": "{{baseUrl}}/admin/groups/:adminGroupId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "groups",
-                    "{{adminGroupId}}"
+                    ":adminGroupId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminGroupId",
+                      "value": "",
+                      "description": "adminGroupId parameter"
+                    }
                   ]
                 }
               }
@@ -5850,15 +6226,22 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/admin/groups/{{adminGroupId}}/toggle",
+                  "raw": "{{baseUrl}}/admin/groups/:adminGroupId/toggle",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "admin",
                     "groups",
-                    "{{adminGroupId}}",
+                    ":adminGroupId",
                     "toggle"
+                  ],
+                  "variable": [
+                    {
+                      "key": "adminGroupId",
+                      "value": "",
+                      "description": "adminGroupId parameter"
+                    }
                   ]
                 }
               }
@@ -5937,7 +6320,9 @@
                   "query": [
                     {
                       "key": "threshold",
-                      "value": "75"
+                      "value": "75",
+                      "disabled": false,
+                      "description": "threshold filter"
                     }
                   ]
                 }
@@ -6047,6 +6432,20 @@
                     "admin",
                     "finance",
                     "payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "disabled": false,
+                      "description": "Number of items per page"
+                    }
                   ]
                 }
               }
@@ -6297,11 +6696,15 @@
                   "query": [
                     {
                       "key": "page",
-                      "value": "1"
+                      "value": "1",
+                      "disabled": false,
+                      "description": "Page number for pagination"
                     },
                     {
                       "key": "limit",
-                      "value": "20"
+                      "value": "20",
+                      "disabled": false,
+                      "description": "Number of items per page"
                     }
                   ]
                 }
