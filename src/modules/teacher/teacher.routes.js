@@ -740,7 +740,7 @@ router.post('/homework', validate(createHomeworkSchema), TeacherController.creat
  *       200:
  *         description: Homework list
  */
-router.get('/homework', TeacherController.getTeacherHomeworks);
+router.get(['/homework', '/homeworks'], TeacherController.getTeacherHomeworks);
 
 /**
  * @swagger
@@ -981,7 +981,7 @@ router.get('/exams/:examId/attempts', TeacherController.getExamAttempts);
  *       200:
  *         description: Pending essay questions queue
  */
-router.get('/grading/pending', TeacherController.getPendingEssayGrading);
+router.get(['/grading/pending', '/grading/queue', '/grading'], TeacherController.getPendingEssayGrading);
 
 /**
  * @swagger

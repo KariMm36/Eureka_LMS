@@ -20,6 +20,6 @@ router.use(authenticate, authorize('STUDENT', 'ADMIN'));
  *       200:
  *         description: Next class banner, today's schedule, homework deadlines, upcoming exams, and unread notifications
  */
-router.get('/dashboard', HomeController.getHomeFeed);
+router.get(['/', '/dashboard'], HomeController.getHomeFeed);
 
 export default router;
