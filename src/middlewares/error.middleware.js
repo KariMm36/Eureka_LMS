@@ -11,6 +11,11 @@ export const errorHandler = (err, req, res, next) => {
     } else {
       error = ApiError.badRequest(`خطأ في رفع الملف: ${err.message}`);
     }
+  } else if (err.code === 'P2003') {
+    error = ApiError.badRequest('أحد المعرفات المدخلة (المرحلة أو الصف أو المادة) غير موجود أو غير مرتبط بشكل صحيح');
+  } else if (err.code === 'P2002') {
+    const target = Array.isArray(err.meta?.target) ? err.meta.target.join(', ') : (err.meta?.target || '');
+    error = ApiError.conflict(`القيمة المدخلة مستخدمة بالفعل ${target ? `(${target})` : ''}`);
   } else if (!(error instanceof ApiError)) {
     const statusCode = error.statusCode || 500;
     const rawMessage = error.message || 'حدث خطأ غير متوقع في الخادم';

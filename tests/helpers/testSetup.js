@@ -111,7 +111,7 @@ export class TestSetupHelper {
       await this.createAcademicHierarchy();
     }
 
-    const timestamp = Date.now() + Math.floor(Math.random() * 100000);
+    const timestamp = `${Date.now()}_${Math.floor(100000 + Math.random() * 900000)}`;
     const userEmail = (email || `${this.prefix}_${role.toLowerCase()}_${timestamp}@eureka-test.com`).toLowerCase();
     const userPhone = phone || `010${Math.floor(10000000 + Math.random() * 90000000)}`;
     const userFullName = fullName || `مستخدم تجريبي ${role} ${this.prefix}`;

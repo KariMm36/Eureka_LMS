@@ -330,6 +330,26 @@ export class TeacherService {
       description,
     } = data;
 
+    // 1. Verify referenced stage, gradeLevel, and subject exist
+    const [stage, gradeLevel, subject] = await Promise.all([
+      prisma.stage.findUnique({ where: { id: stageId } }),
+      prisma.gradeLevel.findUnique({ where: { id: gradeLevelId } }),
+      prisma.subject.findUnique({ where: { id: subjectId } }),
+    ]);
+
+    if (!stage) {
+      throw ApiError.badRequest('معرف المرحلة التعليمية المحدد غير موجود');
+    }
+    if (!gradeLevel) {
+      throw ApiError.badRequest('معرف الصف الدراسي المحدد غير موجود');
+    }
+    if (gradeLevel.stageId !== stage.id) {
+      throw ApiError.badRequest(`الصف الدراسي "${gradeLevel.nameAr}" لا ينتمي إلى المرحلة التعليمية "${stage.nameAr}"`);
+    }
+    if (!subject) {
+      throw ApiError.badRequest('معرف المادة الدراسية المحدد غير موجود');
+    }
+
     // Format scheduleDays to comma-separated string
     const normalizedDays = Array.isArray(scheduleDays)
       ? scheduleDays.join(',')
