@@ -8,12 +8,17 @@ export const createConversationSchema = Joi.object({
 });
 
 export const sendMessageSchema = Joi.object({
-  content: Joi.string().trim().min(1).max(5000).required().messages({
+  content: Joi.string().trim().min(1).max(5000).optional().messages({
     'string.empty': 'محتوى الرسالة لا يمكن أن يكون فارغاً',
     'string.max': 'محتوى الرسالة لا يمكن أن يتجاوز 5000 حرف',
-    'any.required': 'محتوى الرسالة مطلوب',
+  }),
+  message: Joi.string().trim().min(1).max(5000).optional().messages({
+    'string.empty': 'محتوى الرسالة لا يمكن أن يكون فارغاً',
+    'string.max': 'محتوى الرسالة لا يمكن أن يتجاوز 5000 حرف',
   }),
   attachmentUrl: Joi.string().allow('', null).optional(),
+}).or('content', 'message').messages({
+  'object.missing': 'محتوى الرسالة مطلوب (content أو message)',
 });
 
 export const markReadSchema = Joi.object({

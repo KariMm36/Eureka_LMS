@@ -63,7 +63,7 @@ export class ChatController {
       const result = await ChatService.sendMessage({
         senderUser: req.user,
         conversationId: req.params.conversationId,
-        content: req.body.content,
+        content: req.body.content || req.body.message,
         attachmentUrl: req.body.attachmentUrl,
       });
 

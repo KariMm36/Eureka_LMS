@@ -19,9 +19,10 @@ export const registerRealtimeEvents = (io, socket) => {
         return socket.emit('error', errorPayload);
       }
 
-      const { conversationId, groupId, content, attachmentUrl } = data || {};
+      const { conversationId, groupId, content, message, attachmentUrl } = data || {};
+      const messageContent = content || message;
 
-      if (!content || typeof content !== 'string' || !content.trim()) {
+      if (!messageContent || typeof messageContent !== 'string' || !messageContent.trim()) {
         const errorPayload = { success: false, message: 'محتوى الرسالة مطلوب' };
         if (typeof callback === 'function') callback(errorPayload);
         return socket.emit('error', errorPayload);
@@ -123,9 +124,10 @@ export const registerRealtimeEvents = (io, socket) => {
         return socket.emit('error', errorPayload);
       }
 
-      const { conversationId, content, attachmentUrl } = data || {};
+      const { conversationId, content, message, attachmentUrl } = data || {};
+      const messageContent = content || message;
 
-      if (!conversationId || !content || typeof content !== 'string' || !content.trim()) {
+      if (!conversationId || !messageContent || typeof messageContent !== 'string' || !messageContent.trim()) {
         const errorPayload = { success: false, message: 'معرف المحادثة ومحتوى الرسالة مطلوبان' };
         if (typeof callback === 'function') callback(errorPayload);
         return socket.emit('error', errorPayload);
@@ -135,7 +137,7 @@ export const registerRealtimeEvents = (io, socket) => {
       const result = await ChatService.sendMessage({
         senderUser: socket.user,
         conversationId,
-        content,
+        content: messageContent,
         attachmentUrl,
       });
 
