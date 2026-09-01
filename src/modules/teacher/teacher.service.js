@@ -17,9 +17,12 @@ export class TeacherService {
   static async getDashboard(teacherId) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-      // 1. Fetch teacher groups
-      const teacherGroups = await prisma.group.findMany({
+    // 1. Fetch teacher groups
+    const teacherGroups = await prisma.group.findMany({
       where: { teacherId, isActive: true },
       include: {
         subject: true,
@@ -34,11 +37,17 @@ export class TeacherService {
 
     const groupIds = teacherGroups.map((g) => g.id);
 
-    // 2. Parallel queries for dashboard metrics
+    // 2. Parallel queries for dashboard metrics & real growth comparisons
     const [
       uniqueStudentsCount,
+      currentWeekNewStudents,
+      prevWeekNewStudents,
       activeExams,
+      thisMonthExamsCount,
+      lastMonthExamsCount,
       monthlyPayments,
+      lastMonthPayments,
+      prevMonthGroupsCount,
       expectedRevenueResult,
     ] = await Promise.all([
       // Distinct active students across all teacher's groups
@@ -52,6 +61,28 @@ export class TeacherService {
             select: { studentId: true },
           })
         : Promise.resolve([]),
+
+      // Real new student enrollments in the last 7 days
+      groupIds.length > 0
+        ? prisma.groupEnrollment.count({
+            where: {
+              groupId: { in: groupIds },
+              status: 'ACTIVE',
+              joinedAt: { gte: sevenDaysAgo },
+            },
+          })
+        : Promise.resolve(0),
+
+      // Real student enrollments in the previous 7 days (7 to 14 days ago)
+      groupIds.length > 0
+        ? prisma.groupEnrollment.count({
+            where: {
+              groupId: { in: groupIds },
+              status: 'ACTIVE',
+              joinedAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+            },
+          })
+        : Promise.resolve(0),
 
       // Active exams in teacher's groups (still ongoing or upcoming today)
       groupIds.length > 0
@@ -73,6 +104,26 @@ export class TeacherService {
           })
         : Promise.resolve([]),
 
+      // Real exams created this month
+      groupIds.length > 0
+        ? prisma.exam.count({
+            where: {
+              groupId: { in: groupIds },
+              createdAt: { gte: startOfMonth },
+            },
+          })
+        : Promise.resolve(0),
+
+      // Real exams created last month
+      groupIds.length > 0
+        ? prisma.exam.count({
+            where: {
+              groupId: { in: groupIds },
+              createdAt: { gte: startOfLastMonth, lt: startOfMonth },
+            },
+          })
+        : Promise.resolve(0),
+
       // Monthly payments received this month
       prisma.studentPayment.aggregate({
         where: {
@@ -81,6 +132,23 @@ export class TeacherService {
         },
         _sum: { amount: true },
         _count: { id: true },
+      }),
+
+      // Real payments received last month
+      prisma.studentPayment.aggregate({
+        where: {
+          teacherId,
+          paidAt: { gte: startOfLastMonth, lt: startOfMonth },
+        },
+        _sum: { amount: true },
+      }),
+
+      // Real groups created last month
+      prisma.group.count({
+        where: {
+          teacherId,
+          createdAt: { gte: startOfLastMonth, lt: startOfMonth },
+        },
       }),
 
       // Database-side expected revenue aggregation across all teacher groups
@@ -96,11 +164,30 @@ export class TeacherService {
 
     // Compute expected monthly revenue and collection rate %
     const totalExpectedRevenue = Number(expectedRevenueResult[0]?.totalExpected || 0);
-
     const actualCollectedRevenue = Number(monthlyPayments._sum.amount || 0);
+    const lastMonthCollectedRevenue = Number(lastMonthPayments._sum.amount || 0);
+
     const collectionRatePercentage = totalExpectedRevenue > 0
       ? Math.min(100, Math.round((actualCollectedRevenue / totalExpectedRevenue) * 100))
       : 0;
+
+    // Real dynamic growth computations
+    const totalStudentsGrowthPercent = prevWeekNewStudents > 0
+      ? Math.round(((currentWeekNewStudents - prevWeekNewStudents) / prevWeekNewStudents) * 100)
+      : (currentWeekNewStudents > 0 ? 100 : 0);
+
+    const currentMonthGroupsCount = teacherGroups.filter((g) => g.createdAt >= startOfMonth).length;
+    const activeGroupsGrowthPercent = prevMonthGroupsCount > 0
+      ? Math.round(((currentMonthGroupsCount - prevMonthGroupsCount) / prevMonthGroupsCount) * 100)
+      : (currentMonthGroupsCount > 0 ? 100 : 0);
+
+    const activeExamsGrowthPercent = lastMonthExamsCount > 0
+      ? Math.round(((thisMonthExamsCount - lastMonthExamsCount) / lastMonthExamsCount) * 100)
+      : (thisMonthExamsCount > 0 ? 100 : 0);
+
+    const collectionGrowthPercent = lastMonthCollectedRevenue > 0
+      ? Math.round(((actualCollectedRevenue - lastMonthCollectedRevenue) / lastMonthCollectedRevenue) * 100)
+      : (actualCollectedRevenue > 0 ? 100 : 0);
 
     // 3. Today's classes schedule
     const todayClasses = [];
@@ -121,14 +208,14 @@ export class TeacherService {
     return {
       kpis: {
         totalStudents: uniqueStudentsCount.length,
-        totalStudentsGrowthPercent: 12, // +12% from last week matching mockup
+        totalStudentsGrowthPercent,
         activeGroupsCount: teacherGroups.length,
-        activeGroupsGrowthPercent: 3,
+        activeGroupsGrowthPercent,
         activeExamsCount: activeExams.length,
-        activeExamsGrowthPercent: 8,
+        activeExamsGrowthPercent,
         monthlyCollectedRevenue: actualCollectedRevenue,
         collectionRatePercentage,
-        collectionGrowthPercent: 4,
+        collectionGrowthPercent,
       },
       todaySchedule: todayClasses,
       activeExams: activeExams.map((ex) => ({
