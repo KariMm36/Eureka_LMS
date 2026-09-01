@@ -92,22 +92,27 @@ export class AdminFinanceService {
     const pageSize = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
     const skip = (pageNum - 1) * pageSize;
 
-    // Current month label (e.g. "2026-08")
+    // Current month label (e.g. "2026-09")
     const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const currentMonthLabel = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
+    const where = {
+      status: 'ACTIVE',
+      group: { isActive: true },
+      student: {
+        payments: {
+          none: {
+            paidAt: { gte: startOfMonth },
+          },
+        },
+      },
+    };
+
     const [totalCount, enrollments] = await prisma.$transaction([
-      prisma.groupEnrollment.count({
-        where: {
-          status: 'ACTIVE',
-          group: { isActive: true },
-        },
-      }),
+      prisma.groupEnrollment.count({ where }),
       prisma.groupEnrollment.findMany({
-        where: {
-          status: 'ACTIVE',
-          group: { isActive: true },
-        },
+        where,
         skip,
         take: pageSize,
         include: {
@@ -122,6 +127,7 @@ export class AdminFinanceService {
             },
           },
         },
+        orderBy: { joinedAt: 'desc' },
       }),
     ]);
 
@@ -134,16 +140,19 @@ export class AdminFinanceService {
         totalPages: Math.ceil(totalCount / pageSize),
         hasNextPage: pageNum * pageSize < totalCount,
       },
-      unpaidRoster: enrollments.map((e) => ({
-        enrollmentId: e.id,
-        studentId: e.student.user.id,
-        studentName: e.student.user.fullName,
-        studentPhone: e.student.user.phone,
-        parentPhone: e.student.parentPhone,
-        groupName: e.group.name,
-        teacherName: e.group.teacher?.fullName,
-        monthlyFee: Number(e.customPrice || e.group.defaultPrice),
-      })),
+      unpaidRoster: enrollments.map((e) => {
+        const fee = Number(e.enrollmentPrice) > 0 ? Number(e.enrollmentPrice) : Number(e.group.defaultPrice);
+        return {
+          enrollmentId: e.id,
+          studentId: e.student.user.id,
+          studentName: e.student.user.fullName,
+          studentPhone: e.student.user.phone,
+          parentPhone: e.student.parentPhone,
+          groupName: e.group.name,
+          teacherName: e.group.teacher?.fullName,
+          monthlyFee: fee,
+        };
+      }),
     };
   }
 
