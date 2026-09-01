@@ -16,7 +16,24 @@ export class ChatController {
   }
 
   /**
-   * 2. Get Teacher Inbox Conversations
+   * 2. Get User Inbox Conversations (Auto-detects Teacher or Student from JWT)
+   */
+  static async getUserConversations(req, res, next) {
+    try {
+      let data;
+      if (req.user.role === 'TEACHER' || req.user.role === 'ADMIN') {
+        data = await ChatService.getTeacherConversations(req.user.id, req.query);
+      } else {
+        data = await ChatService.getStudentConversations(req.user.id, req.query);
+      }
+      return ApiResponse.success(res, data, 'تم جلب قائمة المحادثات بنجاح');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 3. Get Teacher Inbox Conversations
    */
   static async getTeacherConversations(req, res, next) {
     try {
@@ -28,7 +45,7 @@ export class ChatController {
   }
 
   /**
-   * 3. Get Student Inbox Conversations
+   * 4. Get Student Inbox Conversations
    */
   static async getStudentConversations(req, res, next) {
     try {

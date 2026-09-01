@@ -40,6 +40,31 @@ router.post(
 
 /**
  * @swagger
+ * /chat/conversations:
+ *   get:
+ *     summary: Get user inbox conversations list (Auto-detects Teacher or Student)
+ *     tags: [20. Student & Teacher 1-on-1 Chat]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: groupId
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Paginated inbox conversations
+ */
+router.get(
+  '/conversations',
+  ChatController.getUserConversations
+);
+
+/**
+ * @swagger
  * /chat/teacher/conversations:
  *   get:
  *     summary: Get teacher inbox conversations list
