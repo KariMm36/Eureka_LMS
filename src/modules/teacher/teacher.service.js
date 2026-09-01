@@ -198,7 +198,7 @@ export class TeacherService {
           name: group.name,
           subjectName: group.subject.nameAr,
           gradeLevelName: group.gradeLevel.nameAr,
-          scheduleTime: group.scheduleTime || '05:00 PM',
+          scheduleTime: group.scheduleTime || null,
           studentCount: group._count.enrollments,
           coverImageUrl: group.coverImageUrl,
         });
@@ -366,7 +366,7 @@ export class TeacherService {
         gradeLevelId,
         groupCode,
         scheduleDays: normalizedDays,
-        scheduleTime: scheduleTime || '05:00 PM',
+        scheduleTime: scheduleTime || null,
         maxCapacity: maxCapacity ? parseInt(maxCapacity, 10) : 50,
         defaultPrice: defaultPrice ? parseFloat(defaultPrice) : 0,
         description: description || null,

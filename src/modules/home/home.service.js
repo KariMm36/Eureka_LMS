@@ -97,7 +97,7 @@ export class HomeService {
           subjectName: g.subject.nameAr,
           teacherName: g.teacher.fullName,
           teacherAvatar: g.teacher.avatarUrl,
-          time: g.scheduleTime || '05:00 PM',
+          time: g.scheduleTime || null,
         });
       }
 
@@ -109,7 +109,7 @@ export class HomeService {
           teacherName: g.teacher.fullName,
           teacherAvatar: g.teacher.avatarUrl,
           day: days[0],
-          time: g.scheduleTime || '05:00 PM',
+          time: g.scheduleTime || null,
         };
       }
     }

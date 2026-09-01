@@ -27,7 +27,7 @@ export const createGroupSchema = Joi.object({
   ).messages({
     'any.required': 'مواعيد أيام الحصص مطلوبة',
   }),
-  scheduleTime: Joi.string().trim().max(50).optional().default('05:00 PM'),
+  scheduleTime: Joi.string().trim().max(50).allow(null, '').optional(),
   maxCapacity: Joi.number().integer().min(1).max(500).default(50),
   defaultPrice: Joi.number().min(0).max(100000).default(0),
   description: Joi.string().allow('', null).optional(),
